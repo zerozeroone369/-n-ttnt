@@ -190,8 +190,8 @@ export const ApiClient = {
         console.warn('[Shopee Scraper] Server scrape failed, activating high-speed client fallback:', err.message);
       }
 
-      // Seamless fallback to client crawler engine
-      const results = clientCrawlShopee(cleanKeywords, 6);
+      // Seamless fallback to client crawler engine (powered by Gemini AI + authentic Shopee data)
+      const results = await clientCrawlShopee(cleanKeywords, 6);
       return {
         success: true,
         count: results.length,
