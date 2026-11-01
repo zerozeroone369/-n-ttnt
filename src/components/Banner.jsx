@@ -72,25 +72,17 @@ export default function Banner({ onOpenChat, onExplore }) {
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
           
           {/* Main Hero Text */}
-          <div className="lg:col-span-7 space-y-5 text-center lg:text-left">
-            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100/80 text-amber-900 text-xs font-semibold border border-amber-200">
-              <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse"></span>
-              Mua sắm thông minh — Hàng chính hãng, giao nhanh toàn quốc
+          <div className="lg:col-span-7 space-y-4 sm:space-y-5 text-left">
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-amber-100/80 text-amber-900 text-[11px] sm:text-xs font-semibold border border-amber-200 max-w-full">
+              <span className="w-2 h-2 rounded-full bg-amber-600 animate-pulse shrink-0"></span>
+              <span className="truncate">Mua sắm thông minh — Hàng chính hãng, giao nhanh</span>
             </div>
             
-            <h1
-              className="text-left text-3xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 tracking-normal break-normal whitespace-normal font-serif leading-tight"
-              style={{
-                textAlign: 'left',
-                wordSpacing: 'normal',
-                letterSpacing: 'normal',
-                wordBreak: 'normal',
-                overflowWrap: 'normal',
-                whiteSpace: 'normal'
-              }}
-            >Hàng ngàn sản phẩm chính hãng, giá tốt mỗi ngày.</h1>
+            <h1 className="text-left text-2xl sm:text-4xl lg:text-5xl font-extrabold text-stone-900 tracking-tight font-serif leading-tight break-words">
+              Hàng ngàn sản phẩm chính hãng, giá tốt mỗi ngày.
+            </h1>
             
-            <p className="text-stone-600 text-sm sm:text-base max-w-xl mx-auto lg:mx-0 leading-relaxed">
+            <p className="text-stone-600 text-xs sm:text-base max-w-xl leading-relaxed">
               Thời trang, điện tử, thể thao, đồ dùng du lịch và nhiều hơn nữa. Tất cả sản phẩm đều được kiểm duyệt chất lượng, giao hàng nhanh chóng và hỗ trợ đổi trả dễ dàng.
             </p>
 

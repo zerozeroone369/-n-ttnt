@@ -378,7 +378,7 @@ export default function App() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-stone-800 flex flex-col selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#faf8f5] text-stone-800 flex flex-col selection:bg-amber-100 selection:text-amber-900">
       
       {/* Toast Notification */}
       {toastMessage && (

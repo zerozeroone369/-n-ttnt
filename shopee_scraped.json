@@ -1,104 +1,104 @@
 [
   {
-    "shopee_id": "shp_1793515399980_1",
+    "shopee_id": "shp_1793519443715_1",
     "id": "sp-001",
-    "name": "Quần Jean Ống Rộng Baggy Phong Cách Hàn Quốc Hot Trend • [Quần nam]",
-    "price": 335000,
-    "orig": 663000,
-    "rating": 5,
-    "reviews": 2636,
-    "stock": 116,
+    "name": "Sản Phẩm Cao Cấp Phong Cách Tối Giản Shopee Mall • [Qu?n nam]",
+    "price": 230000,
+    "orig": 335000,
+    "rating": 4.9,
+    "reviews": 417,
+    "stock": 97,
     "images": [
-      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80"
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80"
     ],
-    "category": "fashion",
-    "keyword": "quần nam",
-    "scrapedAt": "2026-11-01T06:43:19.980Z"
+    "category": "decor",
+    "keyword": "qu?n nam",
+    "scrapedAt": "2026-11-01T07:50:43.715Z"
   },
   {
-    "shopee_id": "shp_1793515399980_2",
+    "shopee_id": "shp_1793519443715_2",
     "id": "sp-002",
-    "name": "Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shopee Mall • [Quần nam]",
-    "price": 375000,
-    "orig": 549000,
-    "rating": 4.9,
-    "reviews": 883,
-    "stock": 140,
-    "images": [
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80"
-    ],
-    "category": "fashion",
-    "keyword": "quần nam",
-    "scrapedAt": "2026-11-01T06:43:19.980Z"
-  },
-  {
-    "shopee_id": "shp_1793515399980_3",
-    "id": "sp-003",
-    "name": "Quần Kaki Túi Hộp Streetwear Cá Tính Vải Dày Dặn • [Quần nam]",
-    "price": 155000,
-    "orig": 209000,
+    "name": "Đồ Dùng Tiện Ích Đa Năng Thông Minh Cho Gia Đình • [Qu?n nam]",
+    "price": 285000,
+    "orig": 495000,
     "rating": 4.8,
-    "reviews": 2828,
-    "stock": 67,
+    "reviews": 2448,
+    "stock": 151,
     "images": [
-      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&auto=format&fit=crop&q=80"
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80"
     ],
-    "category": "fashion",
-    "keyword": "quần nam",
-    "scrapedAt": "2026-11-01T06:43:19.980Z"
+    "category": "decor",
+    "keyword": "qu?n nam",
+    "scrapedAt": "2026-11-01T07:50:43.715Z"
   },
   {
-    "shopee_id": "shp_1793515399980_4",
+    "shopee_id": "shp_1793519443715_3",
+    "id": "sp-003",
+    "name": "Vật Phẩm Trang Trí Không Gian Sống Tinh Tế • [Qu?n nam]",
+    "price": 220000,
+    "orig": 390000,
+    "rating": 4.8,
+    "reviews": 1699,
+    "stock": 38,
+    "images": [
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "decor",
+    "keyword": "qu?n nam",
+    "scrapedAt": "2026-11-01T07:50:43.715Z"
+  },
+  {
+    "shopee_id": "shp_1793519443715_4",
     "id": "sp-004",
-    "name": "Quần Jogger Thể Thao Bo Chun Co Giãn Thoáng Khí • [Quần nam]",
-    "price": 350000,
-    "orig": 581000,
-    "rating": 4.9,
-    "reviews": 3352,
-    "stock": 98,
-    "images": [
-      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=800&auto=format&fit=crop&q=80"
-    ],
-    "category": "fashion",
-    "keyword": "quần nam",
-    "scrapedAt": "2026-11-01T06:43:19.980Z"
-  },
-  {
-    "shopee_id": "shp_1793515399980_5",
-    "id": "sp-005",
-    "name": "Quần Short Đũi Xước Mềm Mát Đi Biển Dạo Phố • [Quần nam]",
-    "price": 200000,
-    "orig": 277000,
-    "rating": 4.9,
-    "reviews": 1664,
-    "stock": 42,
-    "images": [
-      "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80"
-    ],
-    "category": "fashion",
-    "keyword": "quần nam",
-    "scrapedAt": "2026-11-01T06:43:19.980Z"
-  },
-  {
-    "shopee_id": "shp_1793515399980_6",
-    "id": "sp-006",
-    "name": "Quần Jean Rách Gối Co Giãn 4 Chiều Form Đẹp Chuẩn Form • [Quần nam]",
+    "name": "Mẫu Hot Trend Bán Chạy Nhất Tuần Này Shopee Choice • [Qu?n nam]",
     "price": 275000,
-    "orig": 378000,
-    "rating": 4.9,
-    "reviews": 544,
-    "stock": 49,
+    "orig": 397000,
+    "rating": 5,
+    "reviews": 1549,
+    "stock": 75,
     "images": [
-      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80",
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80"
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80"
     ],
-    "category": "fashion",
-    "keyword": "quần nam",
-    "scrapedAt": "2026-11-01T06:43:19.980Z"
+    "category": "decor",
+    "keyword": "qu?n nam",
+    "scrapedAt": "2026-11-01T07:50:43.715Z"
+  },
+  {
+    "shopee_id": "shp_1793519443715_5",
+    "id": "sp-005",
+    "name": "Bộ Sản Phẩm Phong Cách Bắc Âu Minimalist • [Qu?n nam]",
+    "price": 100000,
+    "orig": 169000,
+    "rating": 4.7,
+    "reviews": 3826,
+    "stock": 151,
+    "images": [
+      "https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "decor",
+    "keyword": "qu?n nam",
+    "scrapedAt": "2026-11-01T07:50:43.715Z"
+  },
+  {
+    "shopee_id": "shp_1793519443715_6",
+    "id": "sp-006",
+    "name": "Sản Phẩm Cao Cấp Phong Cách Tối Giản Shopee Mall • [Qu?n nam]",
+    "price": 135000,
+    "orig": 224000,
+    "rating": 5,
+    "reviews": 2627,
+    "stock": 28,
+    "images": [
+      "https://images.unsplash.com/photo-1513519245088-0e12902e5a38?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "decor",
+    "keyword": "qu?n nam",
+    "scrapedAt": "2026-11-01T07:50:43.715Z"
   }
 ]

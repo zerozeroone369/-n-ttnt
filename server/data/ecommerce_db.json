@@ -39,6 +39,42 @@
   ],
   "products": [
     {
+      "id": "sp-1793519443789-0",
+      "createdAt": "2026-11-01T07:50:43.789Z",
+      "name": "S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall . [Qu?n nam]",
+      "category": "decor",
+      "price": 230000,
+      "originalPrice": 335000,
+      "stock": 97,
+      "rating": 4.9,
+      "reviewsCount": 417,
+      "isFeatured": true,
+      "isNew": true,
+      "isFlashSale": true,
+      "images": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=80 https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm Shopee - S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall .",
+      "desc": "S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall . [Qu?n nam]",
+      "specs": {
+        "Nguồn gốc": "Shopee Mall / Shopee Choice",
+        "Từ khóa": "qu?n nam"
+      },
+      "tags": [
+        "decor",
+        "shopee",
+        "qu?n",
+        "nam"
+      ],
+      "reviews": []
+    },
+    {
       "id": "sp-1793515399985-1",
       "createdAt": "2026-11-01T06:43:19.985Z",
       "name": "Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shopee Mall • [Quần nam]",
@@ -5482,6 +5518,36 @@
   ],
   "audit_logs": [
     {
+      "id": "log_1793519443794_dr49",
+      "timestamp": "2026-11-01T07:50:43.794Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "SHOPEE_IMPORT",
+      "targetId": "batch",
+      "details": "Nhập 1 sản phẩm từ Shopee (Phiên bản shop: 1793519443791)"
+    },
+    {
+      "id": "log_1793519443648_kfyu",
+      "timestamp": "2026-11-01T07:50:43.648Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793519435578_qd96",
+      "timestamp": "2026-11-01T07:50:35.578Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
       "id": "log_1793515399991_j9nv",
       "timestamp": "2026-11-01T06:43:19.991Z",
       "userId": "usr_admin",
@@ -6374,6 +6440,26 @@
   ],
   "shop_updates": [
     {
+      "id": "upd_1793519443791",
+      "createdAt": "2026-11-01T07:50:43.791Z",
+      "type": "SHOPEE_IMPORT",
+      "title": "Sản phẩm mới từ Shopee",
+      "message": "Cửa hàng vừa cập nhật thêm 1 sản phẩm mới từ Shopee!",
+      "count": 1,
+      "productsSample": [
+        {
+          "id": "sp-1793519443789-0",
+          "name": "S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall . [Qu?n nam]",
+          "price": 230000,
+          "originalPrice": 335000,
+          "image": "h",
+          "category": "decor"
+        }
+      ],
+      "shopVersion": 1793519443791,
+      "timestamp": "2026-11-01T07:50:43.791Z"
+    },
+    {
       "id": "upd_1793515399987",
       "createdAt": "2026-11-01T06:43:19.987Z",
       "type": "SHOPEE_IMPORT",
@@ -6440,6 +6526,6 @@
   ],
   "meta": {
     "app_version": "1.1.0",
-    "shop_version": 1793515399987
+    "shop_version": 1793519443791
   }
 }

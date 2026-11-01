@@ -29,7 +29,7 @@ export default function AppUpdateNotification({
     return (
       <aside 
         aria-label="Cập nhật ứng dụng"
-        className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-lg animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto"
+        className="fixed top-20 inset-x-3 sm:left-1/2 sm:-translate-x-1/2 z-50 sm:w-[94%] max-w-lg mx-auto animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto"
       >
         <div className="bg-stone-900/95 backdrop-blur-md text-white p-4 rounded-2xl shadow-2xl border border-amber-500/30 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -64,7 +64,7 @@ export default function AppUpdateNotification({
   return (
     <aside 
       aria-label="Thông báo cập nhật shop"
-      className="fixed top-20 left-1/2 -translate-x-1/2 z-50 w-[94%] max-w-lg animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto"
+      className="fixed top-20 inset-x-3 sm:left-1/2 sm:-translate-x-1/2 z-50 sm:w-[94%] max-w-lg mx-auto animate-in fade-in slide-in-from-top-4 duration-300 pointer-events-auto"
     >
       <div className="bg-white/95 backdrop-blur-md text-stone-900 p-4 rounded-2xl shadow-2xl border border-orange-500/30 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 relative overflow-hidden">
         {/* Glow accent */}

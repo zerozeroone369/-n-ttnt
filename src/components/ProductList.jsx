@@ -61,7 +61,7 @@ export default function ProductList({
   }, [products, activeCategory, searchQuery, priceFilter, sortBy, onlyFlashSale]);
 
   return (
-    <section id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+    <section id="products-section" className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 w-full max-w-full overflow-hidden">
       
       {/* Category Tabs */}
       <div className="flex items-center gap-2 overflow-x-auto pb-3 scrollbar-none sm:justify-start">
