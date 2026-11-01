@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: tiem-nha-nho-ecommerce-ai
+    env: node
+    plan: free
+    region: singapore
+    buildCommand: npm install && npm run build
+    startCommand: npm start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: GEMINI_API_KEY
+        sync: false
+

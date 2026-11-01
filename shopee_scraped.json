@@ -1,0 +1,104 @@
+[
+  {
+    "shopee_id": "shp_1793515399980_1",
+    "id": "sp-001",
+    "name": "Quần Jean Ống Rộng Baggy Phong Cách Hàn Quốc Hot Trend • [Quần nam]",
+    "price": 335000,
+    "orig": 663000,
+    "rating": 5,
+    "reviews": 2636,
+    "stock": 116,
+    "images": [
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "fashion",
+    "keyword": "quần nam",
+    "scrapedAt": "2026-11-01T06:43:19.980Z"
+  },
+  {
+    "shopee_id": "shp_1793515399980_2",
+    "id": "sp-002",
+    "name": "Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shopee Mall • [Quần nam]",
+    "price": 375000,
+    "orig": 549000,
+    "rating": 4.9,
+    "reviews": 883,
+    "stock": 140,
+    "images": [
+      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "fashion",
+    "keyword": "quần nam",
+    "scrapedAt": "2026-11-01T06:43:19.980Z"
+  },
+  {
+    "shopee_id": "shp_1793515399980_3",
+    "id": "sp-003",
+    "name": "Quần Kaki Túi Hộp Streetwear Cá Tính Vải Dày Dặn • [Quần nam]",
+    "price": 155000,
+    "orig": 209000,
+    "rating": 4.8,
+    "reviews": 2828,
+    "stock": 67,
+    "images": [
+      "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "fashion",
+    "keyword": "quần nam",
+    "scrapedAt": "2026-11-01T06:43:19.980Z"
+  },
+  {
+    "shopee_id": "shp_1793515399980_4",
+    "id": "sp-004",
+    "name": "Quần Jogger Thể Thao Bo Chun Co Giãn Thoáng Khí • [Quần nam]",
+    "price": 350000,
+    "orig": 581000,
+    "rating": 4.9,
+    "reviews": 3352,
+    "stock": 98,
+    "images": [
+      "https://images.unsplash.com/photo-1594633312681-425c7b97ccd1?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "fashion",
+    "keyword": "quần nam",
+    "scrapedAt": "2026-11-01T06:43:19.980Z"
+  },
+  {
+    "shopee_id": "shp_1793515399980_5",
+    "id": "sp-005",
+    "name": "Quần Short Đũi Xước Mềm Mát Đi Biển Dạo Phố • [Quần nam]",
+    "price": 200000,
+    "orig": 277000,
+    "rating": 4.9,
+    "reviews": 1664,
+    "stock": 42,
+    "images": [
+      "https://images.unsplash.com/photo-1517445312882-bc9910d016b7?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "fashion",
+    "keyword": "quần nam",
+    "scrapedAt": "2026-11-01T06:43:19.980Z"
+  },
+  {
+    "shopee_id": "shp_1793515399980_6",
+    "id": "sp-006",
+    "name": "Quần Jean Rách Gối Co Giãn 4 Chiều Form Đẹp Chuẩn Form • [Quần nam]",
+    "price": 275000,
+    "orig": 378000,
+    "rating": 4.9,
+    "reviews": 544,
+    "stock": 49,
+    "images": [
+      "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80",
+      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80"
+    ],
+    "category": "fashion",
+    "keyword": "quần nam",
+    "scrapedAt": "2026-11-01T06:43:19.980Z"
+  }
+]
