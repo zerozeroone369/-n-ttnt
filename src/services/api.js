@@ -69,35 +69,56 @@ export const ApiClient = {
     },
 
     async register(userData) {
-      const data = await request('/auth/register', {
-        method: 'POST',
-        body: JSON.stringify(userData)
-      });
-      if (data.token && data.user) {
-        localStorage.setItem(TOKEN_KEY, data.token);
-        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      try {
+        if (await ApiClient.isServerOnline()) {
+          const data = await request('/auth/register', {
+            method: 'POST',
+            body: JSON.stringify(userData)
+          });
+          if (data.token && data.user) {
+            localStorage.setItem(TOKEN_KEY, data.token);
+            localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+            return data;
+          }
+        }
+      } catch (err) {
+        console.warn('[API Auth] Server register unavailable/failed, using client registration fallback:', err.message);
       }
-      return data;
+      return StorageService.registerUser(userData);
     },
 
     async login(email, password) {
-      const data = await request('/auth/login', {
-        method: 'POST',
-        body: JSON.stringify({ email, password })
-      });
-      if (data.token && data.user) {
-        localStorage.setItem(TOKEN_KEY, data.token);
-        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      try {
+        if (await ApiClient.isServerOnline()) {
+          const data = await request('/auth/login', {
+            method: 'POST',
+            body: JSON.stringify({ email, password })
+          });
+          if (data.token && data.user) {
+            localStorage.setItem(TOKEN_KEY, data.token);
+            localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+            return data;
+          }
+        }
+      } catch (err) {
+        console.warn('[API Auth] Server login unavailable/failed, using client login fallback:', err.message);
       }
-      return data;
+      return StorageService.authenticateUser(email, password);
     },
 
     async me() {
-      const data = await request('/auth/me');
-      if (data.user) {
-        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      try {
+        if (await ApiClient.isServerOnline()) {
+          const data = await request('/auth/me');
+          if (data?.user) {
+            localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+            return data.user;
+          }
+        }
+      } catch (err) {
+        // Fallback to local user
       }
-      return data.user;
+      return ApiClient.auth.getCurrentUser();
     },
 
     async logout() {

@@ -307,5 +307,129 @@ export const StorageService = {
       wishlist: [],
       cart: []
     };
+  },
+
+  // Client-side authentication fallback (ideal for static deployments like Vercel)
+  getRegisteredUsers() {
+    try {
+      const data = localStorage.getItem('boutique_users_v2');
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveRegisteredUsers(users) {
+    try {
+      localStorage.setItem('boutique_users_v2', JSON.stringify(users));
+    } catch (e) {
+      console.error('Failed to save registered users', e);
+    }
+  },
+
+  authenticateUser(email, password) {
+    const cleanEmail = (email || '').trim().toLowerCase();
+    const cleanPass = (password || '').trim();
+
+    // Default built-in system accounts
+    const defaultAccounts = [
+      {
+        id: 'usr_admin',
+        email: 'admin@tiemnhanho.vn',
+        password: 'admin123',
+        name: 'Chủ Tiệm (Admin)',
+        phone: '0982 123 456',
+        address: '48 Ngõ 12 Đặng Thai Mai, Tây Hồ',
+        city: 'Hà Nội',
+        role: 'admin',
+        createdAt: '2025-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'usr_staff',
+        email: 'staff@tiemnhanho.vn',
+        password: 'staff123',
+        name: 'Lan Nguyễn (Kho & Đóng Gói)',
+        phone: '0978 889 990',
+        address: 'Kho Đóng Gói Bát Tràng',
+        city: 'Hà Nội',
+        role: 'staff',
+        createdAt: '2025-01-01T00:00:00.000Z'
+      },
+      {
+        id: 'usr_cust_01',
+        email: 'khachhang@gmail.com',
+        password: 'khach123',
+        name: 'Nguyễn Thu Hà',
+        phone: '0912 345 678',
+        address: 'Tòa S2.05 Vinhomes Ocean Park, Gia Lâm',
+        city: 'Hà Nội',
+        role: 'customer',
+        createdAt: '2025-01-01T00:00:00.000Z'
+      }
+    ];
+
+    const registeredUsers = this.getRegisteredUsers();
+    const allUsers = [...defaultAccounts, ...registeredUsers];
+
+    const user = allUsers.find(u => (u.email || '').toLowerCase() === cleanEmail);
+
+    if (!user) {
+      throw new Error('Email không tồn tại trong hệ thống.');
+    }
+
+    if (user.password !== cleanPass) {
+      throw new Error('Mật khẩu không chính xác.');
+    }
+
+    const { password: _, ...safeUser } = user;
+    const token = `token_local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    localStorage.setItem('boutique_auth_token', token);
+    localStorage.setItem('boutique_auth_user', JSON.stringify(safeUser));
+
+    return { token, user: safeUser };
+  },
+
+  registerUser(userData) {
+    const cleanEmail = (userData.email || '').trim().toLowerCase();
+    const cleanPass = (userData.password || '').trim();
+
+    if (!cleanEmail || !cleanPass) {
+      throw new Error('Vui lòng nhập email và mật khẩu.');
+    }
+
+    const defaultAccounts = [
+      { email: 'admin@tiemnhanho.vn' },
+      { email: 'staff@tiemnhanho.vn' },
+      { email: 'khachhang@gmail.com' }
+    ];
+
+    const registeredUsers = this.getRegisteredUsers();
+    if (defaultAccounts.some(u => u.email === cleanEmail) || registeredUsers.some(u => (u.email || '').toLowerCase() === cleanEmail)) {
+      throw new Error('Email này đã được đăng ký. Vui lòng đăng nhập.');
+    }
+
+    const newUser = {
+      id: `usr_${Date.now()}`,
+      email: cleanEmail,
+      password: cleanPass,
+      name: userData.name || cleanEmail.split('@')[0],
+      phone: userData.phone || '',
+      address: userData.address || '',
+      city: userData.city || 'Hà Nội',
+      role: 'customer',
+      createdAt: new Date().toISOString()
+    };
+
+    registeredUsers.push(newUser);
+    this.saveRegisteredUsers(registeredUsers);
+
+    const { password: _, ...safeUser } = newUser;
+    const token = `token_local_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
+    localStorage.setItem('boutique_auth_token', token);
+    localStorage.setItem('boutique_auth_user', JSON.stringify(safeUser));
+
+    return { token, user: safeUser };
   }
 };
