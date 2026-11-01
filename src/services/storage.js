@@ -7,7 +7,8 @@ const KEYS = {
   CART: 'boutique_cart_v2',
   WISHLIST: 'boutique_wishlist_v2',
   CHAT: 'boutique_chat_v2',
-  SETTINGS: 'boutique_settings_v2'
+  SETTINGS: 'boutique_settings_v2',
+  UPDATES: 'boutique_updates_v2'
 };
 
 export const StorageService = {
@@ -221,6 +222,75 @@ export const StorageService = {
     }
   },
 
+  getShopUpdates() {
+    try {
+      const data = localStorage.getItem(KEYS.UPDATES);
+      return data ? JSON.parse(data) : [];
+    } catch {
+      return [];
+    }
+  },
+
+  saveShopUpdates(updates) {
+    try {
+      localStorage.setItem(KEYS.UPDATES, JSON.stringify(updates));
+    } catch (e) {
+      console.error("Failed to save shop updates", e);
+    }
+  },
+
+  saveShopUpdate(update) {
+    const updates = this.getShopUpdates();
+    const updated = [update, ...updates.filter(u => u.id !== update.id)].slice(0, 50);
+    this.saveShopUpdates(updated);
+    return updated;
+  },
+
+  importShopeeProducts(newProducts) {
+    if (!Array.isArray(newProducts) || newProducts.length === 0) return 0;
+    const existing = this.getProducts();
+    const existingNames = new Set(existing.map(p => (p.name || '').trim().toLowerCase()));
+
+    const formatted = [];
+    newProducts.forEach((item, index) => {
+      const cleanName = (item.name || '').trim();
+      if (!cleanName || existingNames.has(cleanName.toLowerCase())) return;
+
+      const mapped = {
+        id: item.id || `sp-shp-${Date.now()}-${index}`,
+        name: cleanName,
+        category: item.category || 'fashion',
+        price: Number(item.price) || 99000,
+        originalPrice: Number(item.orig || item.originalPrice) || Math.round((Number(item.price) || 99000) * 1.3),
+        rating: Number(item.rating) || 4.8,
+        reviewsCount: Number(item.reviews || item.reviewsCount) || 120,
+        stock: Number(item.stock) || 50,
+        isFeatured: index < 3,
+        isNew: true,
+        isFlashSale: index % 4 === 0,
+        images: Array.isArray(item.images) && item.images.length > 0
+          ? item.images
+          : ['https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80'],
+        variants: item.variants || { colors: ['Mặc định'], sizes: ['Tiêu chuẩn'] },
+        shortDesc: item.shortDesc || `Sản phẩm Shopee - ${cleanName.substring(0, 60)}`,
+        desc: item.desc || cleanName,
+        specs: item.specs || { 'Nguồn gốc': 'Shopee Mall / Shopee Choice', 'Từ khóa': item.keyword || '' },
+        tags: Array.isArray(item.tags) ? item.tags : [item.category || 'shopee', 'shopee', ...(item.keyword || '').split(' ').filter(w => w.length > 2)],
+        reviews: []
+      };
+
+      formatted.push(mapped);
+      existingNames.add(cleanName.toLowerCase());
+    });
+
+    if (formatted.length > 0) {
+      const merged = [...formatted, ...existing];
+      this.saveProducts(merged);
+    }
+
+    return formatted.length;
+  },
+
   resetAllData() {
     localStorage.removeItem(KEYS.PRODUCTS);
     localStorage.removeItem(KEYS.ORDERS);
@@ -228,6 +298,7 @@ export const StorageService = {
     localStorage.removeItem(KEYS.CART);
     localStorage.removeItem(KEYS.WISHLIST);
     localStorage.removeItem(KEYS.CHAT);
+    localStorage.removeItem(KEYS.UPDATES);
     return {
       products: INITIAL_PRODUCTS,
       orders: INITIAL_ORDERS,

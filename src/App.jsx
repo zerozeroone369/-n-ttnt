@@ -83,9 +83,14 @@ export default function App() {
     const unsubscribe = ApiClient.events.subscribe(async (event) => {
       if (event.type === 'SHOP_UPDATE') {
         try {
-          const freshProducts = await ApiClient.products.getAll();
-          setProducts(freshProducts);
-          StorageService.saveProducts(freshProducts);
+          if (await ApiClient.isServerOnline()) {
+            const freshProducts = await ApiClient.products.getAll();
+            setProducts(freshProducts);
+            StorageService.saveProducts(freshProducts);
+          } else {
+            const freshProducts = StorageService.getProducts();
+            setProducts(freshProducts);
+          }
         } catch (e) {}
 
         setLatestShopUpdate(event.data);
@@ -93,9 +98,14 @@ export default function App() {
         showToast(`🛍️ ${event.data.message || 'Cửa hàng vừa cập nhật sản phẩm mới từ Shopee!'}`);
       } else if (event.type === 'PRODUCT_UPDATE') {
         try {
-          const freshProducts = await ApiClient.products.getAll();
-          setProducts(freshProducts);
-          StorageService.saveProducts(freshProducts);
+          if (await ApiClient.isServerOnline()) {
+            const freshProducts = await ApiClient.products.getAll();
+            setProducts(freshProducts);
+            StorageService.saveProducts(freshProducts);
+          } else {
+            const freshProducts = StorageService.getProducts();
+            setProducts(freshProducts);
+          }
         } catch (e) {}
       }
     });

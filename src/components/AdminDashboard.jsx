@@ -391,6 +391,9 @@ export default function AdminDashboard({
         const freshProducts = await ApiClient.products.getAll();
         setProducts(freshProducts);
         StorageService.saveProducts(freshProducts);
+      } else {
+        const freshProducts = StorageService.getProducts();
+        setProducts(freshProducts);
       }
       
       setShopeeSuccess(`✅ Đã nhập thành công ${data.imported || selectedProducts.length} sản phẩm vào kho hàng! AI Chatbot sẽ tự động sử dụng dữ liệu mới.`);
