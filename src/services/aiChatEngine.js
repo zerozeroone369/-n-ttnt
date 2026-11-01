@@ -89,70 +89,20 @@ export function removeVietnameseTones(str) {
 }
 
 /**
- * Strict Guardrail: Check if a query is outside store business and product commerce
+ * Safety Guardrail: Only filter truly harmful or illegal content
  */
 function isOutOfDomain(text, lower, normalized) {
-  // 1. Explicit out-of-domain patterns (Refuse unconditionally)
-  const outOfDomainPatterns = [
-    // Programming, Coding, Software Development
-    /\b(?:code|python|javascript|java|c\+\+|html|css|sql|react|vite|git|bug|lap trinh|thuat toan|function|viet ham|debug|database|backend|frontend)\b/i,
-    // Math, School homework, Academics
-    /\b(?:giai phuong trinh|dao ham|tich phan|hinh hoc|dai so|hoa hoc|vat ly|lam van|nghi luan|bai tap ve nha|toan lop|tinh giup)\b/i,
-    // Politics, History, World Geography, Wikipedia trivia
-    /\b(?:tong thong|thu tuong|chu tich nuoc|chinh tri|chien tranh|the chien|dang cong san|dan so|dien tich|thu do cua|dia ly|nuoc my|nuoc phap|nga|ukraine|trung quoc|lich su the gioi)\b/i,
-    // News, Weather, Finance, Stocks, Crypto, Lottery
-    /\b(?:thoi tiet|du bao thoi tiet|nhiet do|troi mua|gia vang|chung khoan|bitcoin|crypto|tien ao|xo so|vietlott|ket qua xo so|bong da|ngoai hang anh|c1|world cup|showbiz|dien vien)\b/i,
-    // Medical diagnosis & Prescription drugs
-    /\b(?:uong thuoc gi|chua benh|kham benh|trieu chung benh|ung thu|covid|bac si ke don|khang sinh|benh vien)\b/i,
-    // Romance advice, Fortune telling, Astrology
-    /\b(?:boi toan|xem boi|tu vi|cung hoang dao|tan gai|cach to tinh|bi quyet lam giau|y nghia cuoc song|tu van tinh yeu)\b/i,
-    // General non-commerce translations
-    /\b(?:dich sang tieng|dich cau nay|translate to)\b/i
+  const harmfulPatterns = [
+    /\b(?:che tao vu khi|bom tu che|thuoc no|ma tuy|chat gay nghien|tu tu|xam hai|khung bo)\b/i
   ];
 
-  for (const regex of outOfDomainPatterns) {
+  for (const regex of harmfulPatterns) {
     if (regex.test(normalized)) {
       return true;
     }
   }
 
-  // 2. Comprehensive Store Commerce & Product Vocabulary
-  const inDomainKeywords = [
-    // Products & Crafts
-    "ao", "so mi", "linen", "quan", "thoi trang", "tui", "tote", "canvas",
-    "nen", "sap", "tinh dau", "ly", "coc", "gom", "bat trang", "men", "men lam",
-    "ca phe", "coffee", "arabica", "phin", "cau dat", "vi", "bop", "da bo", "crazy horse",
-    "den", "den ban", "chong can", "ban phim", "keyboard", "switch", "loa", "bluetooth",
-    "khay", "khay go", "hat dieu", "an vat", "so", "so tay", "kraft",
-    "hang", "san pham", "mon do", "gia", "bao nhieu", "size", "kich co",
-    "chieu cao", "can nang", "chat lieu", "mau", "ton kho", "con khong", "combo", "set",
-    "bao quan", "cach dung", "cach giat", "cach thap", "an toan",
-    // Business, Wholesale & Commerce Operations
-    "kinh doanh", "ban si", "mua si", "si", "dai ly", "so luong lon", "chiet khau",
-    "doanh nghiep", "cong ty", "hoa don", "vat", "hop dong", "xuat hoa don",
-    "nguon goc", "xuat xu", "lang nghe", "hop tac", "ky gui", "phan phoi", "nhap hang",
-    // Orders & Shipping
-    "don", "order", "ord", "dat hang", "tra cuu", "kiem tra", "van don",
-    "giao hang", "van chuyen", "ship", "shipper", "ghtk", "viettel",
-    "phi ship", "freeship", "dong kiem", "xem hang", "huy don", "doi dia chi", "doi so dien thoai",
-    "thanh toan", "chuyen khoan", "vietqr", "cod", "momo", "zalopay",
-    // Policies & Store identity
-    "tiem", "shop", "cua hang", "dia chi", "gio mo cua", "hotline", "zalo",
-    "lien he", "tu van", "doi tra", "bao hanh", "voucher", "coupon", "ma giam",
-    "khuyen mai", "uu dai", "flash sale", "qua", "tang", "sinh nhat", "ky niem", "tan gia",
-    // Conversational greetings & Bot identity
-    "chao", "hello", "hi", "alo", "em la ai", "ban la ai", "tro ly", "cam on",
-    "thank", "tam biet", "giup", "co the lam gi", "hoi"
-  ];
-
-  const hasInDomainWord = inDomainKeywords.some(kw => normalized.includes(kw));
-
-  // If query is 3 words or more and has NO connection to store commerce, reject strictly
-  const words = normalized.split(/\s+/).filter(Boolean);
-  if (words.length >= 3 && !hasInDomainWord) {
-    return true;
-  }
-
+  // Allow all open conversation, lifestyle advice, styling, gifting, decor, general topics!
   return false;
 }
 
@@ -616,38 +566,30 @@ export const AIChatEngine = {
     }
 
     // =========================================================================
-    // 1. STRICT GUARDRAIL CHECK (Câu hỏi không liên quan thì KHÔNG trả lời)
+    // 1. SAFETY FILTER (Chỉ từ chối nội dung độc hại / vi phạm an toàn)
     // =========================================================================
     if (isOutOfDomain(text, lower, normalized)) {
       return {
-        text: `Dạ xin lỗi bạn, câu hỏi này **nằm ngoài phạm vi hỗ trợ của em** ạ! 🌿\n\n` +
-              `Em là **Trợ lý AI Cao Cấp chuyên trách Tư Vấn Kinh Doanh & Sản Phẩm** của Tiệm Nhà Nhỏ. Em chỉ được lập trình để hỗ trợ giải quyết các nội dung liên quan đến thương mại và dịch vụ của cửa hàng:\n\n` +
-              `• 🛍️ **Tư vấn sản phẩm chuyên sâu:** Chất liệu, nguồn gốc xưởng thủ công, thông số kỹ thuật, tư vấn size áo (chiều cao/cân nặng), cách sử dụng và hướng dẫn bảo quản đồ thủ công.\n` +
-              `• 💼 **Chính sách kinh doanh & Bán sỉ:** Mua số lượng lớn, chiết khấu quà tặng doanh nghiệp, xuất hóa đơn VAT, hợp tác cung ứng hàng thủ công.\n` +
-              `• 📦 **Vận hành đơn hàng:** Tra cứu hành trình giao hàng, kiểm tra tiền thu hộ COD, tiếp nhận hủy đơn hoặc thay đổi địa chỉ nhận.\n` +
-              `• 🚚 **Chính sách mua sắm:** Đổi trả 1 đổi 1 trong 7 ngày, miễn phí vận chuyển Freeship từ 450k và áp dụng mã khuyến mãi.\n\n` +
-              `Nếu bạn có bất kỳ câu hỏi nào về sản phẩm hoặc hoạt động kinh doanh của Tiệm, em luôn sẵn lòng hỗ trợ bạn ngay ạ! ✨`,
+        text: `Dạ em xin phép không thể hỗ trợ nội dung này để đảm bảo tiêu chuẩn an toàn ạ! 🌿\n\n` +
+              `Em luôn sẵn lòng trò chuyện, tư vấn phong cách sống, thời trang, mẹo vặt, decor và mua sắm cùng bạn nhé! ✨`,
         products: [],
         vouchers: []
       };
     }
 
-    // 2. Gọi backend /api/chat (Gemini key ẩn hoàn toàn trên server)
-    if (settings?.aiProvider === 'gemini') {
+    // 2. ƯU TIÊN GỌI GEMINI AI TOÀN DIỆN (Trò chuyện đa năng, tư vấn cuộc sống & kết nối sản phẩm)
+    if (settings?.aiProvider !== 'local') {
       try {
         const result = await this.callBackendChat(text, currentProducts, accessibleOrders);
-        // Kiểm tra result có text hợp lệ không (không phải system prompt bị lộ)
-        if (result?.text && !result.text.includes('Persona maintained') && !result.text.includes('NHIỆM VỤ') && !result.text.includes('systemInstruction')) {
+        if (result?.text && !result.text.includes('Persona maintained') && !result.text.includes('systemInstruction')) {
           return result;
         }
-        console.warn('[AI] Gemini trả về nội dung không hợp lệ, dùng local engine');
       } catch (err) {
-        console.warn('[AI] Backend /api/chat thất bại, dùng local engine:', err.message);
-        // Server 503 quá tải → fallback im lặng
+        console.warn('[AI] Backend /api/chat chưa sẵn sàng, dùng Universal Local Engine:', err.message);
       }
     }
 
-    // 3. Default: Local Semantic Engine
+    // 3. Fallback: Universal Local Semantic Engine (Hoạt động thông minh cả khi offline)
     return this.processLocally(text, lower, normalized, currentProducts, accessibleOrders);
   },
 
@@ -1209,16 +1151,91 @@ export const AIChatEngine = {
       };
     }
 
-    // Default fallback
-    const fallbackProducts = getInStockProducts(products).filter(p => p.isFeatured || p.isNew).slice(0, 4);
+    // =========================================================================
+    // UNIVERSAL LIFESTYLE, ADVISORY & OPEN CONVERSATION ENGINE
+    // Trò chuyện, tư vấn đa năng ngoài phạm vi cửa hàng nhưng khéo léo kết nối sản phẩm
+    // =========================================================================
+
+    // 1. Tư vấn Phối đồ & Phong cách (Fashion Styling / Mix & Match / OOTD)
+    if (/phoi do|mac gi|outfit|phong cach|di lam|di choi|di hen ho|di tiec|hen ho|streetwear|vintage|minimalist|layering|tone mau|quan jean|ao thun|ao polo|so mi/.test(normalized)) {
+      const fashionItems = getInStockProducts(products).filter(p => p.category === 'fashion' || (p.tags && p.tags.includes('fashion'))).slice(0, 3);
+      return {
+        text: `✨ **Gợi ý phối đồ chuẩn gu & tinh tế cho bạn nè:**\n\n` +
+              `• 👔 **Đi làm / Công sở thanh lịch:** Kết hợp áo polo hoặc sơ mi dáng suông cùng quần tây hoặc kaki tông màu trung tính (kem, be, đen, navy). Vừa chỉn chu, chuyên nghiệp mà lại cực kỳ thoải mái cả ngày dài.\n` +
+              `• 🌿 **Đi chơi / Dạo phố cuối tuần:** Áo thun cotton form rộng mix cùng quần jean ống suông hoặc quần short, mang kèm sneaker trắng. Đơn giản, trẻ trung và tôn dáng!\n` +
+              `• 💡 **Quy tắc phối màu:** Luôn giữ tổng thể trang phục không quá 3 màu chính. Sử dụng quy tắc tương phản sáng - tối (áo sáng + quần tối hoặc ngược lại) sẽ giúp bạn trông thon gọn và có gu hơn rất nhiều.\n\n` +
+              `Tại Tiệm Nhà Nhỏ đang có sẵn những mẫu trang phục chất lượng cao rất hợp với phong cách trên, em gửi bạn tham khảo nha! 👇`,
+        products: fashionItems.length > 0 ? fashionItems : getInStockProducts(products).slice(0, 3),
+        vouchers: []
+      };
+    }
+
+    // 2. Không gian sống, Decor & Thư giãn (Home Decor / Aromatherapy / Sleep)
+    if (/decor|trang tri|phong ngu|ban lam viec|goc lam viec|khong gian|thu gian|nen thom|tinh dau|ngu ngon|mui huong|phong thuy|am cung/.test(normalized)) {
+      const decorItems = getInStockProducts(products).filter(p => p.category === 'decor' || (p.tags && p.tags.includes('decor'))).slice(0, 3);
+      return {
+        text: `🏡 **Mẹo bài trí không gian & thư giãn tâm hồn cực chill:**\n\n` +
+              `• 🕯️ **Ánh sáng & Liệu pháp hương thơm (Aromatherapy):** Sử dụng đèn ánh sáng vàng dịu mắt và thắp một hũ nến thơm (hương gỗ tuyết tùng, hoa oải hương hoặc cam ngọt). Mùi hương tự nhiên sẽ giúp xoa dịu thần kinh, giảm stress sau ngày dài và giúp bạn dễ dàng chìm vào giấc ngủ sâu.\n` +
+              `• 🌿 **Góc bàn làm việc tạo cảm hứng:** Giữ mặt bàn tối giản theo quy tắc "Less is more". Đặt thêm một chiếc đèn bàn thẩm mỹ và một vật phẩm decor nhỏ xinh sẽ kích thích tối đa năng lượng sáng tạo.\n` +
+              `• 🛋️ **Màu sắc chữa lành:** Sử dụng các tông màu ấm áp như màu be, nâu gỗ, trắng kem để không gian luôn mang lại cảm giác bình yên mỗi khi trở về nhà.\n\n` +
+              `Em gợi ý cho bạn những món đồ decor và nến thơm tinh tuyển tại Tiệm giúp góc nhỏ thêm ấm áp nè: 👇`,
+        products: decorItems.length > 0 ? decorItems : getInStockProducts(products).slice(0, 3),
+        vouchers: []
+      };
+    }
+
+    // 3. Cà phê, Trà & Nghệ thuật Thưởng thức (Coffee & Tea Art)
+    if (/ca phe|coffee|phin|pour over|cold brew|pha ca phe|uong gi|buoi sang|tinh tao|tra|am tra/.test(normalized)) {
+      const coffeeItems = getInStockProducts(products).filter(p => p.category === 'coffee' || (p.tags && p.tags.includes('coffee'))).slice(0, 3);
+      return {
+        text: `☕ **Bí quyết pha và thưởng thức đồ uống chuẩn gu:**\n\n` +
+              `• 💧 **Pha phin truyền thống:** Dùng nước sôi tầm 90–94°C (không nên dùng nước vừa sôi 100°C sẽ làm cháy bột cà phê). Rót 20ml nước ủ trong 1-2 phút cho bột nở đều rồi mới châm tiếp 45ml nước để chiết xuất trọn vẹn hương vị.\n` +
+              `• 🧊 **Cold Brew sảng khoái:** Ngâm bột cà phê rang mộc xay thô với nước lạnh theo tỉ lệ 1:10 trong ngăn mát tủ lạnh từ 16–24 tiếng. Vị cà phê êm mượt, ít chua, ngọt hậu và cực kỳ thanh mát.\n` +
+              `• ✨ **Bảo quản:** Giữ hạt/bột trong hũ kín khí, để nơi khô ráo, tránh ánh nắng trực tiếp để hạt luôn giữ được lớp dầu thơm tự nhiên.\n\n` +
+              `Nếu bạn đang tìm hạt cà phê rang mộc nguyên chất hoặc ly cốc thưởng trà, em gợi ý ngay những món ngon nhất tiệm nè: 👇`,
+        products: coffeeItems.length > 0 ? coffeeItems : getInStockProducts(products).slice(0, 3),
+        vouchers: []
+      };
+    }
+
+    // 4. Tư vấn Quà tặng & Lời chúc ý nghĩa (Gifting & Celebrations)
+    if (/tang qua|qua tang|sinh nhat|ky niem|tan gia|ban gai|ban trai|nguoi yeu|me|bo|dong nghiep|loi chuc|y nghia/.test(normalized)) {
+      const giftItems = getInStockProducts(products).filter(p => p.isFeatured || p.rating >= 4.8).slice(0, 3);
+      return {
+        text: `🎁 **Gợi ý quà tặng tinh tế & trọn vẹn yêu thương:**\n\n` +
+              `• 🎀 **Tặng người yêu / bạn gái:** Những món quà mang tính cảm xúc và chăm sóc như nến thơm cao cấp, túi xách thời trang hoặc phụ kiện tinh tế luôn chiếm trọn cảm tình.\n` +
+              `• 👔 **Tặng bạn nam / đồng nghiệp:** Áo polo form chuẩn, ví da hoặc phụ kiện công nghệ thanh lịch là lựa chọn vừa thiết thực vừa sang trọng.\n` +
+              `• 🏡 **Quà mừng tân gia / người thân:** Đồ gốm thủ công, đèn decor hoặc hộp quà trà - cà phê thượng hạng mang lời chúc ấm no, bình an.\n` +
+              `• 💌 **Mẹo nhỏ:** Một tấm thiệp viết tay chân thành sẽ biến món quà trở nên vô giá và ghi dấu ấn sâu đậm trong lòng người nhận.\n\n` +
+              `Em gửi bạn vài set quà bán chạy và được yêu thích nhất của Tiệm để bạn tham khảo nhé: 👇`,
+        products: giftItems,
+        vouchers: []
+      };
+    }
+
+    // 5. Đời sống, Cảm xúc, Mẹo vặt & Thời tiết (Lifestyle, Wellness & Everyday Wisdom)
+    if (/stress|met moi|ap luc|buon|vui|tam su|lam viec|hoc tap|troi mua|troi lanh|thoi tiet|cuoc song|suc khoe|tho|ke chuyen|cau do/.test(normalized)) {
+      const comfortingItems = getInStockProducts(products).slice(0, 3);
+      return {
+        text: `🌿 **Một chút năng lượng tích cực và ấm áp gửi đến bạn:**\n\n` +
+              `Cuộc sống đôi khi bận rộn và nhiều áp lực, nhưng bạn nhớ dành chút thời gian để chăm sóc bản thân nhé! Đôi khi chỉ cần:\n` +
+              `• Tạm gác màn hình điện thoại 15 phút, hít thở thật sâu.\n` +
+              `• Uống một ngụm nước ấm hoặc ly trà thơm dịu.\n` +
+              `• Bật một bản nhạc không lời nhẹ nhàng và thả lỏng đôi vai.\n\n` +
+              `*"Sau cơn mưa trời lại sáng, và mỗi ngày mới đều là một cơ hội để bắt đầu những điều tốt đẹp."*\n\n` +
+              `Tiệm Nhà Nhỏ luôn ở đây đồng hành cùng bạn mỗi ngày. Bạn có cần em hỗ trợ thêm điều gì về không gian sống hay sản phẩm để thư giãn không nè? 😊`,
+        products: comfortingItems,
+        vouchers: []
+      };
+    }
+
+    // 6. Câu hỏi kiến thức chung hoặc trò chuyện mở rộng (General Open Conversation)
+    const generalProducts = getInStockProducts(products).filter(p => p.isFeatured || p.isNew).slice(0, 3);
     return {
-      text: `Dạ em chưa tìm thấy sản phẩm chính xác theo từ khóa **"${text}"**.\n\n` +
-            `Tiệm hiện đang có **${getInStockProducts(products).length} sản phẩm** thuộc 3 danh mục:\n` +
-            `• 👕 **Thời trang nam** — áo thun, quần, tất, đồ lót, thắt lưng\n` +
-            `• 🎧 **Phụ kiện công nghệ** — tai nghe, remote TV, găng tay gaming\n` +
-            `• 🎒 **Đồ dùng & Du lịch** — băng keo thể thao, ô dù, chai lọ, túi đựng giày\n\n` +
-            `Bạn có thể cho em biết cụ thể hơn về **sản phẩm cần tìm** hoặc **ngân sách dự kiến** để em gợi ý chính xác nhé!`,
-      products: fallbackProducts,
+      text: `Dạ chào bạn! Em là **Trợ lý AI Toàn Diện của Tiệm Nhà Nhỏ** nè! ✨\n\n` +
+            `Em rất vui được trò chuyện và chia sẻ cùng bạn. Dù là câu hỏi về **phong cách sống, mẹo phối đồ, trang trí phòng ốc, cách chọn quà tặng** hay bất kỳ thắc mắc nào trong cuộc sống và mua sắm, em đều luôn sẵn lòng giải đáp và đồng hành cùng bạn.\n\n` +
+            `Bạn có thể chia sẻ cụ thể hơn điều bạn đang quan tâm hoặc tham khảo ngay những sản phẩm nổi bật đang được yêu thích nhất tại Tiệm bên dưới nha! 👇`,
+      products: generalProducts,
       vouchers: []
     };
   },
@@ -1314,54 +1331,55 @@ export const AIChatEngine = {
       }
     };
 
-    const res = await fetch('/api/chat', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
+    // 1. Thử gọi backend /api/chat trước (nếu đang chạy có server Node.js)
+    try {
+      const res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `Server error ${res.status}`);
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json();
+        const { text, recommendedIds = [] } = data;
+
+        const productIndex = {};
+        getInStockProducts(products).forEach(p => { productIndex[p.id] = p; });
+        const matchedProducts = recommendedIds
+          .map(id => productIndex[id])
+          .filter(Boolean)
+          .slice(0, 4);
+
+        const finalProducts = matchedProducts.length > 0
+          ? matchedProducts
+          : getInStockProducts(products)
+              .filter(p => removeVietnameseTones(text).includes(removeVietnameseTones(p.name.substring(0, 12))))
+              .slice(0, 3);
+
+        return { text, products: finalProducts, vouchers: [] };
+      }
+    } catch (err) {
+      console.warn('[AI] Backend /api/chat không phản hồi, kích hoạt gọi Gemini trực tiếp:', err.message);
     }
 
-    const data = await res.json();
-    const { text, recommendedIds = [] } = data;
+    // 2. Dự phòng gọi Gemini trực tiếp từ trình duyệt (nếu người dùng cấu hình key trong cài đặt hoặc env)
+    const effectiveKey = StorageService.getSettings()?.apiKey || import.meta.env?.VITE_GEMINI_API_KEY || '';
+    if (effectiveKey) {
+      return await this.callGeminiAPI(message, effectiveKey, products, orders);
+    }
 
-    // Map recommended IDs → product objects để frontend render card
-    const productIndex = {};
-    getInStockProducts(products).forEach(p => { productIndex[p.id] = p; });
-    const matchedProducts = recommendedIds
-      .map(id => productIndex[id])
-      .filter(Boolean)
-      .slice(0, 4);
-
-    // Fallback nếu server quên gắn ID nhưng Gemini đề cập tên sp
-    const finalProducts = matchedProducts.length > 0
-      ? matchedProducts
-      : getInStockProducts(products)
-          .filter(p => removeVietnameseTones(text).includes(removeVietnameseTones(p.name.substring(0, 12))))
-          .slice(0, 3);
-
-    return { text, products: finalProducts, vouchers: [] };
+    throw new Error('Không có kết nối Gemini');
   },
 
   /**
-   * Gemini 2.0 Flash API Integration
-   * - Model: gemini-2.0-flash (tốt nhất hiện tại, miễn phí quota cao)
-   * - Context tối ưu: nhóm sản phẩm theo danh mục thay vì liệt kê toàn bộ
-   * - System instruction tách riêng (Gemini 2.0 hỗ trợ systemInstruction field)
-   * - Trả về recommended product IDs để frontend render card
+   * Gemini 3.5 Flash Lite API Integration (Toàn diện, đa năng, hiểu biết sâu rộng)
    */
   async callGeminiAPI(prompt, apiKey, products, orders) {
-    // ── 1. Build compact catalog (tối đa 200 sản phẩm, nhóm theo category) ──
     const inStock = getInStockProducts(products);
-    
-    // Tạo index nhanh cho lookup sau này
     const productIndex = {};
     inStock.forEach(p => { productIndex[p.id] = p; });
 
-    // Tóm tắt catalog theo nhóm để tiết kiệm token
     const byCategory = {};
     inStock.forEach(p => {
       if (!byCategory[p.category]) byCategory[p.category] = [];
@@ -1383,7 +1401,6 @@ export const AIChatEngine = {
       return `${label} (${items.length} sản phẩm):\n${rows}`;
     }).join('\n\n');
 
-    // ── 2. Orders summary (tối đa 5 đơn gần nhất) ──
     const recentOrders = orders.slice(0, 5);
     const ordersSummary = recentOrders.length > 0
       ? recentOrders.map(o =>
@@ -1391,22 +1408,15 @@ export const AIChatEngine = {
         ).join('\n')
       : '  (Chưa có đơn hàng)';
 
-    // ── 3. System instruction ──
-    const systemInstruction = `Bạn là **Nhân Viên Tư Vấn AI Cao Cấp** của **"${STORE_INFO.name}"** — một boutique thủ công tối giản tại Hà Nội.
+    const systemInstruction = `Bạn là **Trợ Lý AI Toàn Diện & Cố Vấn Phong Cách Sống** của **"${STORE_INFO.name}"** — boutique thủ công tinh tế tại Hà Nội.
 
-🎯 NHIỆM VỤ DUY NHẤT: Hỗ trợ khách hàng trong phạm vi hoạt động thương mại của Tiệm Nhà Nhỏ gồm:
-  (1) Tư vấn & gợi ý sản phẩm phù hợp ngân sách / nhu cầu / phong cách của khách
-  (2) Tư vấn chọn size quần áo dựa trên chiều cao / cân nặng
-  (3) Chính sách bán sỉ, quà tặng doanh nghiệp, xuất hóa đơn VAT
-  (4) Tra cứu và cập nhật tiến độ đơn hàng
-  (5) Chính sách đổi trả, vận chuyển, thanh toán
-  (6) Hướng dẫn sử dụng và bảo quản sản phẩm thủ công
+🌟 NĂNG LỰC TOÀN DIỆN & PHONG CÁCH:
+1. 💡 **Trò chuyện & Tư vấn Đa Lĩnh Vực:** Bạn sẵn lòng trò chuyện, tư vấn về mọi chủ đề cuộc sống: phong cách sống, nghệ thuật phối đồ (mix & match), trang trí không gian sống, kiến thức phong thủy, mẹo vặt gia đình, thưởng thức cà phê, văn hóa, công việc, tâm lý chọn quà, thơ ca, hoặc tâm sự chia sẻ như một người bạn tri kỷ.
+2. 🛍️ **Cố vấn Sản phẩm & Bán hàng:** Luôn am hiểu kho hàng của Tiệm: chất liệu, kích thước/bảng size, xuất xứ, tính năng và cách bảo quản.
+3. 🔗 **Khéo léo Kết nối:** Đưa ra lời khuyên hữu ích, sâu sắc và chân thành trước, sau đó KHÉO LÉO gợi ý 1-2 món đồ liên quan tại Tiệm Nhà Nhỏ để khách tham khảo.
+4. 💬 **Giọng điệu:** Lịch thiệp, ấm áp, thông thái, xưng "em" và gọi khách là "bạn" hoặc "anh/chị". Dùng emoji nhẹ nhàng.
 
-❌ TUYỆT ĐỐI KHÔNG TRẢ LỜI: Lập trình, toán học, thời tiết, tin tức, chính trị, y tế, soi bói, cryptocurrency, hay bất kỳ chủ đề nào ngoài hoạt động thương mại của tiệm. Khi gặp câu hỏi ngoài phạm vi, từ chối lịch sự và dẫn khách quay lại tư vấn sản phẩm.
-
-💬 PHONG CÁCH: Lịch thiệp, thân thiện, thông thái, xưng "em" / "bạn". Dùng emoji nhẹ nhàng. Câu trả lời ngắn gọn súc tích, tránh dài dòng.
-
-📦 DANH MỤC SẢN PHẨM HIỆN TẠI (${inStock.length} sản phẩm còn hàng):
+📦 DANH MỤC SẢN PHẨM HIỆN CÓ CỦA TIỆM (${inStock.length} sản phẩm):
 ${catalogLines}
 
 📋 ĐƠN HÀNG GẦN ĐÂY:
@@ -1421,19 +1431,17 @@ ${ordersSummary}
   • Ship hỏa tốc: ${formatCurrency(STORE_INFO.expressShippingFee)} (2-4h nội thành)
   • Đổi trả: 1 đổi 1 trong 7 ngày, đồng kiểm trước khi nhận
 
-📐 BẢNG SIZE ÁO LINEN:
-  • S: dưới 1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg
+📐 BẢNG SIZE ÁO & QUẦN:
+  • S: dưới 1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg | XXL: >1m80, >83kg
 
-💼 CHÍNH SÁCH BÁN SỈ:
+💼 CHÍNH SÁCH BÁN SỈ & DOANH NGHIỆP:
   • 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25% + freeship | ≥100 món: giảm 30–35% + hợp đồng
   • Hỗ trợ xuất hóa đơn VAT, khắc logo, đóng hộp quà doanh nghiệp
 
-📌 QUY TẮC GỢI Ý SẢN PHẨM QUAN TRỌNG:
-Khi gợi ý sản phẩm, LUÔN đặt tag [RECOMMENDED_IDS: sp-xx, sp-yy, ...] ở CUỐI câu trả lời (tối đa 4 ID, lấy từ danh mục trên). Không bịa ID không có trong danh mục.`;
+📌 KHI GỢI Ý SẢN PHẨM: Đặt tag [RECOMMENDED_IDS: sp-xx, sp-yy, ...] ở CUỐI câu trả lời (tối đa 4 ID từ danh mục trên). Nếu câu hỏi hoàn toàn thuần túy kiến thức không có sản phẩm liên quan, không cần đặt tag này.`;
 
-    // ── 4. Call Gemini 2.0 Flash API ──
-    const GEMINI_MODEL = 'gemini-2.0-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
+    const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(apiKey)}`;
     
     const requestBody = {
       system_instruction: {
@@ -1446,11 +1454,8 @@ Khi gợi ý sản phẩm, LUÔN đặt tag [RECOMMENDED_IDS: sp-xx, sp-yy, ...]
         }
       ],
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-        responseMimeType: "text/plain"
+        temperature: 0.75,
+        maxOutputTokens: 1200
       },
       safetySettings: [
         { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },

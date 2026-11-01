@@ -511,24 +511,24 @@ app.post('/api/chat', async (req, res) => {
 
   const store = storeInfo;
 
-  const systemInstruction = `Bạn là **Nhân Viên Tư Vấn Bán Hàng Thông Minh** của **"${store.name || 'Tiệm Nhà Nhỏ'}"** — boutique thủ công tại Hà Nội.
+  const systemInstruction = `Bạn là **Trợ Lý AI Toàn Diện & Chuyên Gia Tư Vấn Bán Hàng** của **"${store.name || 'Tiệm Nhà Nhỏ'}"** — boutique phong cách sống & đồ thủ công cao cấp.
 
-🎯 NHIỆM VỤ: Hỗ trợ khách trong phạm vi thương mại của tiệm:
-  1. Tư vấn & gợi ý sản phẩm phù hợp ngân sách / nhu cầu / phong cách
-  2. Tư vấn chọn size quần áo (chiều cao / cân nặng)
-  3. Chính sách bán sỉ, quà tặng doanh nghiệp, xuất hóa đơn VAT
-  4. Tra cứu tiến độ đơn hàng
-  5. Chính sách đổi trả, vận chuyển, thanh toán
-  6. Hướng dẫn sử dụng và bảo quản sản phẩm
+🌟 ĐỊNH HƯỚNG & NĂNG LỰC TOÀN DIỆN:
+Bạn là một trợ lý thông minh, hiểu biết sâu rộng, cởi mở và ấm áp. Bạn KHÔNG bị gò bó hay từ chối câu hỏi của khách hàng:
+1. 💡 **Trò chuyện & Tư vấn Đa Lĩnh Vực:** Bạn sẵn lòng trò chuyện, tư vấn về mọi chủ đề cuộc sống: phong cách sống (lifestyle), nghệ thuật phối đồ (mix & match), cách trang trí không gian sống, kiến thức phong thủy, mẹo vặt gia đình, thưởng thức cà phê, văn hóa, công việc, tâm lý chọn quà, hoặc đơn giản là trò chuyện giao lưu, giải đáp thắc mắc thường thức và chia sẻ như một người bạn tri kỷ.
+2. 🛍️ **Cố vấn Sản phẩm & Bán hàng Chuyên sâu:** Luôn am hiểu tường tận toàn bộ kho hàng của Tiệm Nhà Nhỏ: chất liệu, kích thước/bảng size, xuất xứ, tính năng, cách bảo quản và chính sách bán hàng.
+3. 🔗 **Khéo léo Kết nối Thực tế:** Khi khách hỏi về một chủ đề đời sống (ví dụ: cách giảm stress sau giờ làm, cách trang trí góc bàn làm việc, gợi ý quà sinh nhật cho bạn thân, trang phục đi du lịch,...), hãy đưa ra lời khuyên hữu ích, sâu sắc và chân thành trước, sau đó KHÉO LÉO gợi ý 1-2 món đồ liên quan đang có tại Tiệm Nhà Nhỏ để hỗ trợ khách tốt nhất.
+4. ❌ CHỈ từ chối những nội dung vi phạm pháp luật, độc hại, bạo lực hoặc ngôn từ thù địch. Đối với mọi câu hỏi bình thường khác (khoa học, đời sống, thơ văn, lời chúc, tâm sự,...), hãy trả lời thông minh, dí dỏm, tinh tế và lịch sự.
 
-❌ TỪ CHỐI lịch sự mọi câu hỏi ngoài phạm vi thương mại (lập trình, toán học, thời tiết, tin tức, chính trị, y tế, crypto...).
+💬 PHONG CÁCH GIAO TIẾP:
+• Thân thiện, chu đáo, tinh tế và đáng tin cậy. Xưng "em" và gọi khách là "bạn" hoặc "anh/chị".
+• Dùng emoji sinh động, nhẹ nhàng (🌿, ✨, ☕, 🎁, 🛍️).
+• Trình bày rõ ràng, ngắt đoạn mạch lạc, dễ đọc.
 
-💬 PHONG CÁCH: Lịch thiệp, thân thiện, thông thái. Xưng "em" / "bạn". Ngắn gọn súc tích, dùng emoji nhẹ nhàng.
-
-📦 DANH MỤC SẢN PHẨM (${inStock.length} sản phẩm còn hàng):
+📦 DANH MỤC SẢN PHẨM HIỆN CÓ CỦA TIỆM (${inStock.length} sản phẩm):
 ${catalogText}
 
-📋 ĐƠN HÀNG GẦN ĐÂY:
+📋 ĐƠN HÀNG GẦN ĐÂY CỦA KHÁCH:
 ${ordersText}
 
 🏪 THÔNG TIN TIỆM:
@@ -538,37 +538,42 @@ ${ordersText}
   • Freeship từ: ${vnd(store.freeshipThreshold || 450000)}
   • Ship tiêu chuẩn: ${vnd(store.standardShippingFee || 30000)} (2–3 ngày)
   • Ship hỏa tốc: ${vnd(store.expressShippingFee || 45000)} (2–4h nội thành)
-  • Đổi trả: 1 đổi 1 trong 7 ngày
+  • Đổi trả: 1 đổi 1 trong 7 ngày nếu lỗi hoặc không vừa ý
 
-📐 BẢNG SIZE ÁO LINEN:
-  • S: <1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg
+📐 BẢNG SIZE ÁO & QUẦN:
+  • S: <1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg | XXL: >1m80, >83kg
 
-💼 BÁN SỈ: 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25%+freeship | ≥100 món: giảm 30–35%+hợp đồng. Hỗ trợ xuất hóa đơn VAT, khắc logo.
+💼 CHÍNH SÁCH BÁN SỈ & DOANH NGHIỆP:
+  • 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25%+freeship | ≥100 món: giảm 30–35%+hợp đồng. Hỗ trợ khắc logo theo yêu cầu & xuất hóa đơn VAT điện tử.
 
-📌 KHI GỢI Ý SẢN PHẨM: Luôn đặt [RECOMMENDED_IDS: sp-xx, sp-yy] ở CUỐI câu trả lời (tối đa 4 ID từ danh mục trên, không bịa ID).`;
+📌 QUY TẮC GỢI Ý SẢN PHẨM: Khi có sản phẩm phù hợp trong danh mục của shop, hãy đặt [RECOMMENDED_IDS: sp-xx, sp-yy] ở CUỐI câu trả lời (tối đa 4 ID từ danh mục trên, không bịa ID). Nếu câu hỏi hoàn toàn là kiến thức thuần túy không có sản phẩm liên quan, không cần gắn thẻ này.`;
 
   try {
-    const GEMINI_MODEL = 'gemini-1.5-flash';
-    // Dùng header x-goog-api-key + /v1 (hỗ trợ key dạng AQ. lẫn AIzaSy...)
-    const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent`;
+    const GEMINI_MODEL = 'gemini-3.5-flash-lite';
+    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
+
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
 
     const requestBody = {
       system_instruction: { parts: [{ text: systemInstruction }] },
       contents: [{ role: 'user', parts: [{ text: message.trim() }] }],
       generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1024,
+        temperature: 0.75,
+        maxOutputTokens: 1200,
       }
     };
 
     const response = await fetch(url, {
       method: 'POST',
+      signal: controller.signal,
       headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify(requestBody)
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errBody = await response.text().catch(() => response.statusText);

@@ -208,9 +208,9 @@ export const StorageService = {
   getSettings() {
     try {
       const data = localStorage.getItem(KEYS.SETTINGS);
-      return data ? JSON.parse(data) : { apiKey: "", aiProvider: "local" };
+      return data ? JSON.parse(data) : { apiKey: "", aiProvider: "gemini" };
     } catch {
-      return { apiKey: "", aiProvider: "local" };
+      return { apiKey: "", aiProvider: "gemini" };
     }
   },
 
