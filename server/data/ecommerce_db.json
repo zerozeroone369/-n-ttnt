@@ -9163,6 +9163,46 @@
   ],
   "audit_logs": [
     {
+      "id": "log_1793955613539_ubb1",
+      "timestamp": "2026-11-06T09:00:13.539Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793955547832_73i7",
+      "timestamp": "2026-11-06T08:59:07.832Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793955476248_6d5n",
+      "timestamp": "2026-11-06T08:57:56.248Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793955407732_6v53",
+      "timestamp": "2026-11-06T08:56:47.732Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
       "id": "log_1793955323978_3pyp",
       "timestamp": "2026-11-06T08:55:23.978Z",
       "userId": "usr_admin",
