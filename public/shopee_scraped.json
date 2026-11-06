@@ -1,0 +1,582 @@
+[
+  {
+    "shopee_id": "25826776002",
+    "shop_id": "1234282309",
+    "name": "Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản cao cấp nâng cấp ngoại hình kính mắt y15",
+    "price": 41250,
+    "orig": 150000,
+    "rating": 4.9,
+    "reviews": 2400,
+    "sold": 20000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25826776002.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lvlab4mexuzg8f",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lvlab4mexuzg8f",
+      "vn-11134207-820l4-mj8a8m4s93wlb8",
+      "vn-11134207-7r98o-lvsq5uuy7eyh5b"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1234282309/25826776002",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-001"
+  },
+  {
+    "shopee_id": "19863212321",
+    "shop_id": "257024829",
+    "name": "Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi xe đạp, xe máy, chống tiaUV400, chống mờ hơi,unisex, bảo hộ",
+    "price": 90000,
+    "orig": 199000,
+    "rating": 4.9,
+    "reviews": 12000,
+    "sold": 100000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/19863212321.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lva478xyttot56",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lva478xyttot56",
+      "vn-11134207-81ztc-mroo40iqmolk5f",
+      "vn-11134207-81ztc-mrphgu27vitia9"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/257024829/19863212321",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-002"
+  },
+  {
+    "shopee_id": "47770065516",
+    "shop_id": "196261835",
+    "name": "Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để lái xe du lịch thời trang ngoài trời",
+    "price": 114480,
+    "orig": 177433,
+    "rating": 5.0,
+    "reviews": 600,
+    "sold": 5000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/47770065516.jpg"
+    ],
+    "image_id": "sg-11134301-82596-mqfy3hfdraq336",
+    "all_image_ids": [
+      "sg-11134301-82596-mqfy3hfdraq336",
+      "sg-11134301-825aq-mqfy3hbakwlp13",
+      "sg-11134301-8258w-mqfy3hf3ow7f03"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/196261835/47770065516",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-003"
+  },
+  {
+    "shopee_id": "28153611624",
+    "shop_id": "998924637",
+    "name": "Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông nửa viền kim loại cao cấp thời trang Hàn Quốc kính mắt Y19.",
+    "price": 96000,
+    "orig": 180000,
+    "rating": 4.9,
+    "reviews": 240,
+    "sold": 2000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/28153611624.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-mr61vn5lk9vpdc",
+    "all_image_ids": [
+      "vn-11134207-81ztc-mr61vn5lk9vpdc",
+      "vn-11134207-7r98o-lwwk63lkio6176",
+      "vn-11134207-7ras8-m1qfxccb66ab52"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/998924637/28153611624",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-004"
+  },
+  {
+    "shopee_id": "22978427690",
+    "shop_id": "998924637",
+    "name": "Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang gọng nửa viền kim loại titan cao cấp hiện đại MEME Y15.",
+    "price": 96000,
+    "orig": 200000,
+    "rating": 4.9,
+    "reviews": 3600,
+    "sold": 30000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/22978427690.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lsrswgr0ovd016",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lsrswgr0ovd016",
+      "vn-11134207-81ztc-mr61v1127h1cd5",
+      "vn-11134207-7r98o-lsrswgr0ngskf2"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/998924637/22978427690",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-005"
+  },
+  {
+    "shopee_id": "19996588913",
+    "shop_id": "68362839",
+    "name": "Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ánh sáng xanh ,kính nữa viền cổ điển phong cách Hàn Trung",
+    "price": 37000,
+    "orig": 75000,
+    "rating": 4.8,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/19996588913.jpg"
+    ],
+    "image_id": "sg-11134253-7rens-m90me518n9ehd9",
+    "all_image_ids": [
+      "sg-11134253-7rens-m90me518n9ehd9",
+      "vn-11134207-7r98o-lybqe6lvlbnx2b",
+      "vn-11134207-7r98o-lybqdr1ybarxa8"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/68362839/19996588913",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-006"
+  },
+  {
+    "shopee_id": "25330662526",
+    "shop_id": "10323148",
+    "name": "Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi Bẩn",
+    "price": 68000,
+    "orig": 109000,
+    "rating": 4.9,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25330662526.jpg"
+    ],
+    "image_id": "vn-11134201-7r98o-lyyrvt0oabvle9",
+    "all_image_ids": [
+      "vn-11134201-7r98o-lyyrvt0oabvle9",
+      "vn-11134201-7r98o-lyyrvtud4ae916",
+      "vn-11134201-7r98o-lyyrvt5y2lvx0f"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/10323148/25330662526",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-007"
+  },
+  {
+    "shopee_id": "18887958068",
+    "shop_id": "111519175",
+    "name": "Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành cho nam nữ k78",
+    "price": 24010,
+    "orig": 32000,
+    "rating": 4.9,
+    "reviews": 6000,
+    "sold": 50000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/18887958068.jpg"
+    ],
+    "image_id": "vn-11134207-7qukw-lfttzwegil137d",
+    "all_image_ids": [
+      "vn-11134207-7qukw-lfttzwegil137d",
+      "vn-11134207-7qukw-lfttzwegh6gn6d",
+      "vn-11134207-7qukw-lftu3h2qj1pm48"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/111519175/18887958068",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-008"
+  },
+  {
+    "shopee_id": "29193711372",
+    "shop_id": "1649869410",
+    "name": "【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận thị chống bức xạ ,Kính gọng vuông ,phi giới tính kính mắt 1731",
+    "price": 62442,
+    "orig": 100000,
+    "rating": 4.8,
+    "reviews": 480,
+    "sold": 4000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29193711372.jpg"
+    ],
+    "image_id": "sg-11134253-822zp-moadnwjnj5zf2b",
+    "all_image_ids": [
+      "sg-11134253-822zp-moadnwjnj5zf2b",
+      "vn-11134207-820l4-mhlrbuljcnb808",
+      "vn-11134207-820l4-mhlrc4541hq912"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1649869410/29193711372",
+    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-009"
+  },
+  {
+    "shopee_id": "29557806468",
+    "shop_id": "1324864525",
+    "name": "【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời trang mắt kính cận Hỗ trợ tùy chỉnh Cho nam và nữ K73",
+    "price": 62370,
+    "orig": 105840,
+    "rating": 4.2,
+    "reviews": 81,
+    "sold": 681,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29557806468.jpg"
+    ],
+    "image_id": "cn-11134207-7ras8-m761jf6qh2qk44",
+    "all_image_ids": [
+      "cn-11134207-7ras8-m761jf6qh2qk44",
+      "cn-11134207-7ras8-mbw4gjy6vb4me8",
+      "cn-11134207-7ras8-m761jf6qlas3f2"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1324864525/29557806468",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-010"
+  },
+  {
+    "shopee_id": "23657710174",
+    "shop_id": "183595172",
+    "name": "Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong cách Hàn Quốc, cao cấp, kính nửa gọng.",
+    "price": 54900,
+    "orig": 69000,
+    "rating": 4.8,
+    "reviews": 360,
+    "sold": 3000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/23657710174.jpg"
+    ],
+    "image_id": "sg-11134253-821dv-mgw74rjj8qob92",
+    "all_image_ids": [
+      "sg-11134253-821dv-mgw74rjj8qob92",
+      "vn-11134207-7r98o-lms2i9rn32e7a9",
+      "vn-11134207-7r98o-lms2i9rn4gyn8d"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/183595172/23657710174",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-011"
+  },
+  {
+    "shopee_id": "18666916512",
+    "shop_id": "111715780",
+    "name": "Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vintage COD (San9) Cho Nam",
+    "price": 82080,
+    "orig": 118800,
+    "rating": 4.7,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/18666916512.jpg"
+    ],
+    "image_id": "sg-11134201-22120-zuwll8dsypkvd9",
+    "all_image_ids": [
+      "sg-11134201-22120-zuwll8dsypkvd9",
+      "sg-11134201-22120-ov77b5esypkv0d",
+      "sg-11134201-22120-ngo8mrfsypkv83"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/111715780/18666916512",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-012"
+  },
+  {
+    "shopee_id": "27961442338",
+    "shop_id": "68362839",
+    "name": "Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách Hàn Quốc",
+    "price": 20000,
+    "orig": 35000,
+    "rating": 4.9,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/27961442338.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-m08is320hm2522",
+    "all_image_ids": [
+      "vn-11134207-7r98o-m08is320hm2522",
+      "vn-11134207-7r98o-m08is320hmdr4f",
+      "vn-11134207-7r98o-m08j3qcmwgkt62"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/68362839/27961442338",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-013"
+  },
+  {
+    "shopee_id": "19491707191",
+    "shop_id": "111519175",
+    "name": "Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang Hàn Quốc K118",
+    "price": 27075,
+    "orig": 75000,
+    "rating": 4.9,
+    "reviews": 960,
+    "sold": 8000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/19491707191.jpg"
+    ],
+    "image_id": "vn-11134207-7qukw-lk8yhfa7mhoi30",
+    "all_image_ids": [
+      "vn-11134207-7qukw-lk8yhfa7mhoi30",
+      "vn-11134207-7qukw-lk8yhfa7gveqe1",
+      "vn-11134207-7qukw-lk8yhfa7i9z6de"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/111519175/19491707191",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-014"
+  },
+  {
+    "shopee_id": "26551242939",
+    "shop_id": "949804684",
+    "name": "Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -4.0 -4.5 -5.0 -5.5 -6.0 độ dành cho nam và nữ với tròng kính có thể tháo rời kính chống án",
+    "price": 85071,
+    "orig": 92000,
+    "rating": 4.6,
+    "reviews": 3600,
+    "sold": 30000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/26551242939.jpg"
+    ],
+    "image_id": "cn-11134207-820l4-mhzohgpqr85d93",
+    "all_image_ids": [
+      "cn-11134207-820l4-mhzohgpqr85d93",
+      "sg-11134201-7rd6y-lvvgoh80ce5c02",
+      "sg-11134201-7rd46-lvvgoi8wudn96d"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/949804684/26551242939",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-015"
+  },
+  {
+    "shopee_id": "16655117249",
+    "shop_id": "111519175",
+    "name": "Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quốc K07",
+    "price": 23030,
+    "orig": 32000,
+    "rating": 4.8,
+    "reviews": 2400,
+    "sold": 20000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/16655117249.jpg"
+    ],
+    "image_id": "9764695953b39afafb353113a5422c74",
+    "all_image_ids": [
+      "9764695953b39afafb353113a5422c74",
+      "d83e24af7b91b64c23ddff01e3e862ce",
+      "448c065655075de6b3f7f2500f359c87"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/111519175/16655117249",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-016"
+  },
+  {
+    "shopee_id": "29701524765",
+    "shop_id": "68362839",
+    "name": "Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh gọng vuông độc đáo phong cách Hàn Quốc",
+    "price": 42140,
+    "orig": 60000,
+    "rating": 4.8,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29701524765.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lvzpj8qnx78bac",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lvzpj8qnx78bac",
+      "vn-11134207-7r98o-lvzpj8qnylsr5c",
+      "vn-11134207-7r98o-lvzpqv9ny6zd6f"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/68362839/29701524765",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-017"
+  },
+  {
+    "shopee_id": "25589817384",
+    "shop_id": "431745854",
+    "name": "Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+    "price": 98000,
+    "orig": 130000,
+    "rating": 4.9,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25589817384.jpg"
+    ],
+    "image_id": "cn-11134207-7r98o-ly5yoqqdetwl24",
+    "all_image_ids": [
+      "cn-11134207-7r98o-ly5yoqqdetwl24",
+      "cn-11134207-7r98o-ly5ypxmgn8pxcf",
+      "cn-11134207-7r98o-lxwdmrp5c66dd2"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/431745854/25589817384",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-018"
+  },
+  {
+    "shopee_id": "28158187572",
+    "shop_id": "118645835",
+    "name": "PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Chống Ánh Sáng Xanh tongkhosi2",
+    "price": 22840,
+    "orig": 23000,
+    "rating": 4.9,
+    "reviews": 1080,
+    "sold": 9000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/28158187572.jpg"
+    ],
+    "image_id": "sg-11134201-7rdvp-lz2ylkfe9ybq3b",
+    "all_image_ids": [
+      "sg-11134201-7rdvp-lz2ylkfe9ybq3b",
+      "vn-11134201-7ras8-m1fi7fn5ybmb65",
+      "sg-11134201-7rdyn-lz2yljzaxit085"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/118645835/28158187572",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-019"
+  },
+  {
+    "shopee_id": "40332720316",
+    "shop_id": "196261835",
+    "name": "Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chống bụi để chạy xe đạp nam nữ",
+    "price": 52920,
+    "orig": 95040,
+    "rating": 4.7,
+    "reviews": 600,
+    "sold": 5000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/40332720316.jpg"
+    ],
+    "image_id": "sg-11134301-824in-mq1dtq5juwpa18",
+    "all_image_ids": [
+      "sg-11134301-824in-mq1dtq5juwpa18",
+      "sg-11134301-824jh-mpu8wxvhogsh0a",
+      "sg-11134301-82620-mlacp0lb8yki76"
+    ],
+    "category": "fashion",
+    "keyword": "kính",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/196261835/40332720316",
+    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-020"
+  }
+]
