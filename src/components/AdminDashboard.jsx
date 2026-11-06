@@ -90,6 +90,16 @@ export default function AdminDashboard({
         .then(data => setAuditLogs(data))
         .catch(err => console.warn('Fetch audit logs error:', err));
     }
+    if (activeTab === 'shopeeScraper' && shopeeResults.length === 0) {
+      ApiClient.shopee.getStatus()
+        .then(data => {
+          if (Array.isArray(data.results) && data.results.length > 0) {
+            setShopeeResults(data.results);
+            setShopeeSuccess(`Đã nạp sẵn ${data.results.length} sản phẩm thật từ Shopee.`);
+          }
+        })
+        .catch(err => console.warn('Fetch shopee status error:', err));
+    }
   }, [activeTab]);
 
   // Handle order status update with audit trail
@@ -366,7 +376,7 @@ export default function AdminDashboard({
             : (Array.isArray(data) ? data : []));
       
       if (products.length === 0) {
-        setShopeeError(data.error || 'Không tìm thấy sản phẩm nào phù hợp từ Shopee.');
+        setShopeeError(data.error || 'Không nhận được sản phẩm từ Shopee trong phiên cào này. Vui lòng bấm cào lại sau 3-5 giây.');
       } else {
         setShopeeResults(products);
         setShopeeSuccess(`🎉 Đã cào trực tiếp thành công ${products.length} sản phẩm thật từ Shopee!`);

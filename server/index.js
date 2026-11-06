@@ -699,6 +699,8 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
     scriptArgs.push('--keywords', ...kwList);
   }
 
+  console.log(`[Shopee Scrape] Nhận yêu cầu cào sản phẩm: keywords=${JSON.stringify(kwList)}, limit=${numLimit}`);
+
   const pythonProcess = spawn('python', scriptArgs, {
     cwd: PROJECT_ROOT,
     timeout: 90 * 1000, // 90 giây timeout tối đa, tránh treo vô hạn
@@ -706,7 +708,9 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   });
 
   pythonProcess.stdout.on('data', (data) => {
-    scrapeState.progress += data.toString();
+    const text = data.toString();
+    console.log(`[Scraper stdout]: ${text.trim()}`);
+    scrapeState.progress += text;
   });
 
   pythonProcess.stderr.on('data', (data) => {

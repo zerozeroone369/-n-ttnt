@@ -236,13 +236,14 @@ async def scrape_shopee_live(keywords: list, total_limit: int = 20) -> list:
                         try:
                             data = await resp.json()
                             items = (data.get("data") or {}).get("items") or data.get("items") or []
+                            print(f"    [+] Đã nhận gói tin Shopee search_items: {len(items)} sản phẩm thô.")
                             for it in items:
                                 parsed = parse_shopee_item(it, kw)
                                 if parsed and parsed["shopee_id"] not in seen_ids:
                                     seen_ids.add(parsed["shopee_id"])
                                     captured_items.append(parsed)
                         except Exception as e:
-                            pass
+                            print(f"    [!] Lỗi bóc tách search_items: {e}")
 
                 page.on("response", on_resp)
 
@@ -251,32 +252,44 @@ async def scrape_shopee_live(keywords: list, total_limit: int = 20) -> list:
                 print(f"[*] Đang tìm kiếm sản phẩm thật: '{kw}'...")
 
                 try:
-                    await page.goto(search_url, wait_until="domcontentloaded", timeout=25000)
-                    await page.wait_for_timeout(2000)
+                    await page.goto(search_url, wait_until="commit", timeout=25000)
+                    await page.wait_for_timeout(1000)
 
-                    # Cuộn chuột để Shopee gọi API search_items
-                    for step in range(5):
-                        await page.mouse.wheel(0, 800)
+                    # Cuộn chuột để Shopee render và gọi API search_items
+                    for step in range(15):
+                        await page.mouse.wheel(0, 600)
                         await page.wait_for_timeout(1000)
                         if len(captured_items) >= limit_per_kw:
                             break
+                        if len(captured_items) > 0 and step >= 4:
+                            # Đã có sản phẩm từ gói tin API
+                            break
+
+                    # Chờ thêm 1 giây để hoàn tất xử lý gói tin
+                    if captured_items:
+                        await page.wait_for_timeout(1000)
 
                 except Exception as e:
                     print(f"[!] Lỗi khi truy cập Shopee: {e}")
 
                 page.remove_listener("response", on_resp)
 
-                # Tải ảnh thật cho đợt sản phẩm này
+                # Lấy danh sách sản phẩm theo hạn mức
                 kw_products = captured_items[:limit_per_kw]
                 print(f"    ✓ Bắt được {len(kw_products)} sản phẩm thật từ Shopee cho từ khóa '{kw}'!")
 
-                # Tải ảnh song song
-                for item in kw_products:
-                    if item.get("image_id"):
-                        img_path = await download_image(img_client, item["image_id"], item["shopee_id"])
-                        item["images"] = [img_path]
-                    else:
-                        item["images"] = ["/placeholder.svg"]
+                # Tải ảnh thật đồng thời (concurrency 10) siêu tốc
+                sem = asyncio.Semaphore(10)
+                async def fetch_img(item):
+                    async with sem:
+                        if item.get("image_id"):
+                            img_path = await download_image(img_client, item["image_id"], item["shopee_id"])
+                            item["images"] = [img_path]
+                        else:
+                            item["images"] = ["/placeholder.svg"]
+
+                if kw_products:
+                    await asyncio.gather(*[fetch_img(it) for it in kw_products])
 
                 all_products.extend(kw_products)
 

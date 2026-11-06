@@ -66,11 +66,12 @@ export function requireAuth(req, res, next) {
 
 // Guard middleware: Requires one of allowed roles
 export function requireRole(allowedRoles = []) {
+  const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
   return (req, res, next) => {
     if (!req.user) {
       return res.status(401).json({ error: 'Chưa đăng nhập.' });
     }
-    if (!allowedRoles.includes(req.user.role)) {
+    if (!roles.includes(req.user.role)) {
       return res.status(403).json({ error: 'Bạn không có quyền truy cập khu vực này.' });
     }
     next();
