@@ -135,9 +135,9 @@ export const ApiClient = {
 
   // Shopee Scraper & Sync
   shopee: {
-    scrape: (keywords = []) => request('/shopee/scrape', {
+    scrape: (keywords = [], limit = 20) => request('/shopee/scrape', {
       method: 'POST',
-      body: JSON.stringify({ keywords })
+      body: JSON.stringify({ keywords, limit })
     }),
     importProducts: (products) => request('/shopee/import', {
       method: 'POST',

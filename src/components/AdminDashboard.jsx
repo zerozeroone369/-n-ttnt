@@ -59,7 +59,8 @@ export default function AdminDashboard({
   const [showApiKey, setShowApiKey] = useState(false);
 
   // Shopee Scraper state
-  const [shopeeKeywords, setShopeeKeywords] = useState('áo thun nam nữ, nến thơm decor phòng ngủ, cà phê arabica, tai nghe bluetooth, túi xách nữ da');
+  const [shopeeKeywords, setShopeeKeywords] = useState('áo khoác');
+  const [shopeeLimit, setShopeeLimit] = useState(20);
   const [shopeeLoading, setShopeeLoading] = useState(false);
   const [shopeeResults, setShopeeResults] = useState([]);
   const [shopeeSelected, setShopeeSelected] = useState(new Set());
@@ -356,7 +357,7 @@ export default function AdminDashboard({
         return;
       }
 
-      const data = await ApiClient.shopee.scrape(keywords);
+      const data = await ApiClient.shopee.scrape(keywords, shopeeLimit);
       // Xử lý an toàn tuyệt đối mảng dữ liệu (tránh lỗi crash .map() khi API trả về Object)
       const products = Array.isArray(data.products)
         ? data.products
@@ -365,10 +366,10 @@ export default function AdminDashboard({
             : (Array.isArray(data) ? data : []));
       
       if (products.length === 0) {
-        setShopeeError(data.error || 'Không tìm thấy sản phẩm nào phù hợp hoặc Shopee đang kích hoạt bảo vệ chống bot.');
+        setShopeeError(data.error || 'Không tìm thấy sản phẩm nào phù hợp từ Shopee.');
       } else {
         setShopeeResults(products);
-        setShopeeSuccess(`🎉 Đã thu thập được ${products.length} sản phẩm (Dữ liệu thị trường sẵn sàng xem trước)!`);
+        setShopeeSuccess(`🎉 Đã cào trực tiếp thành công ${products.length} sản phẩm thật từ Shopee!`);
       }
     } catch (err) {
       console.error('Shopee scrape error:', err);
@@ -1525,6 +1526,22 @@ export default function AdminDashboard({
                     </>
                   )}
                 </button>
+
+                {/* Bộ chọn số lượng sản phẩm cần cào */}
+                <div className="flex items-center gap-2 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2">
+                  <span className="text-xs font-semibold text-stone-600">Số lượng cào:</span>
+                  <select
+                    value={shopeeLimit}
+                    onChange={(e) => setShopeeLimit(Number(e.target.value))}
+                    disabled={shopeeLoading}
+                    className="border-none bg-transparent text-xs font-bold text-orange-600 focus:outline-none cursor-pointer"
+                  >
+                    <option value={10}>10 sản phẩm</option>
+                    <option value={20}>20 sản phẩm</option>
+                    <option value={30}>30 sản phẩm</option>
+                    <option value={50}>50 sản phẩm</option>
+                  </select>
+                </div>
 
                 <button
                   onClick={() => setShopeeKeywords('áo thun nam nữ, nến thơm decor phòng ngủ, cà phê arabica, tai nghe bluetooth, túi xách nữ da')}

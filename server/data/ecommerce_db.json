@@ -39,6 +39,138 @@
   ],
   "products": [
     {
+      "id": "sp-1793940578180-2",
+      "createdAt": "2026-11-06T04:49:38.180Z",
+      "name": "Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng dây rút",
+      "category": "fashion",
+      "price": 159000,
+      "originalPrice": 300000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 670,
+      "soldCount": 2100,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_real/vn-11134207-7r98o-lwdcz4q80gd5ce.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng d",
+      "desc": "Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng dây rút",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19178426955",
+        "URL gốc": "https://shopee.vn/B%E1%BB%99-th%E1%BB%83-thao-nam-n%E1%BB%AF-JULIDO-i.33435563.19178426955",
+        "Từ khóa": "thời trang nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "thời",
+        "trang"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793940578171-1",
+      "createdAt": "2026-11-06T04:49:38.172Z",
+      "name": "Áo khoác sweater nam nữ dày dặn cao cấp chất vải nỉ hai da mặc 4 mùa",
+      "category": "fashion",
+      "price": 179000,
+      "originalPrice": 298000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 890,
+      "soldCount": 1900,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_real/vn-11134207-7ras8-md0wnoy1fz2759.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo khoác sweater nam nữ dày dặn cao cấp chất vải nỉ hai da m",
+      "desc": "Áo khoác sweater nam nữ dày dặn cao cấp chất vải nỉ hai da mặc 4 mùa",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "5337914837",
+        "URL gốc": "https://shopee.vn/%C3%81o-kho%C3%A1c-sswwater-nam-n%E1%BB%AF-d%C3%A0y-d%E1%BA%B7n-cao-c%E1%BA%A5p-i.33435563.5337914837",
+        "Từ khóa": "thời trang nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "thời",
+        "trang"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793940578152-0",
+      "createdAt": "2026-11-06T04:49:38.153Z",
+      "name": "Áo khoác bomber dù hai lớp nam nữ JULIDO trượt nước",
+      "category": "fashion",
+      "price": 166002,
+      "originalPrice": 259000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 2500,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_real/vn-11134207-7ras8-m3bufh4u6qw894.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo khoác bomber dù hai lớp nam nữ JULIDO trượt nước",
+      "desc": "Áo khoác bomber dù hai lớp nam nữ JULIDO trượt nước",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "22077902946",
+        "URL gốc": "https://shopee.vn/A%C3%B3-kho%C3%A1c-bomber-d%C3%B9-hai-l%E1%BB%9Bp-nam-n%E1%BB%AF-JULIDO-tr%C6%B0%E1%BB%A3t-n%C6%B0%E1%BB%9Bc-i.33435563.22077902946",
+        "Từ khóa": "thời trang nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "thời",
+        "trang"
+      ],
+      "reviews": []
+    },
+    {
       "id": "sp-1793935825036-0",
       "createdAt": "2026-11-06T03:30:25.036Z",
       "name": "S?n Ph?m Test Shopee Import Kh? Tr�ng",
@@ -5142,6 +5274,135 @@
         "test"
       ],
       "reviews": []
+    },
+    {
+      "id": "sp-1793940578152-0",
+      "name": "Áo khoác bomber dù hai lớp nam nữ JULIDO trượt nước",
+      "category": "fashion",
+      "price": 166002,
+      "originalPrice": 259000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 2500,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_real/vn-11134207-7ras8-m3bufh4u6qw894.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo khoác bomber dù hai lớp nam nữ JULIDO trượt nước",
+      "desc": "Áo khoác bomber dù hai lớp nam nữ JULIDO trượt nước",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "22077902946",
+        "URL gốc": "https://shopee.vn/A%C3%B3-kho%C3%A1c-bomber-d%C3%B9-hai-l%E1%BB%9Bp-nam-n%E1%BB%AF-JULIDO-tr%C6%B0%E1%BB%A3t-n%C6%B0%E1%BB%9Bc-i.33435563.22077902946",
+        "Từ khóa": "thời trang nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "thời",
+        "trang"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793940578171-1",
+      "name": "Áo khoác sweater nam nữ dày dặn cao cấp chất vải nỉ hai da mặc 4 mùa",
+      "category": "fashion",
+      "price": 179000,
+      "originalPrice": 298000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 890,
+      "soldCount": 1900,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_real/vn-11134207-7ras8-md0wnoy1fz2759.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo khoác sweater nam nữ dày dặn cao cấp chất vải nỉ hai da m",
+      "desc": "Áo khoác sweater nam nữ dày dặn cao cấp chất vải nỉ hai da mặc 4 mùa",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "5337914837",
+        "URL gốc": "https://shopee.vn/%C3%81o-kho%C3%A1c-sswwater-nam-n%E1%BB%AF-d%C3%A0y-d%E1%BA%B7n-cao-c%E1%BA%A5p-i.33435563.5337914837",
+        "Từ khóa": "thời trang nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "thời",
+        "trang"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793940578180-2",
+      "name": "Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng dây rút",
+      "category": "fashion",
+      "price": 159000,
+      "originalPrice": 300000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 670,
+      "soldCount": 2100,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_real/vn-11134207-7r98o-lwdcz4q80gd5ce.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng d",
+      "desc": "Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng dây rút",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19178426955",
+        "URL gốc": "https://shopee.vn/B%E1%BB%99-th%E1%BB%83-thao-nam-n%E1%BB%AF-JULIDO-i.33435563.19178426955",
+        "Từ khóa": "thời trang nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "thời",
+        "trang"
+      ],
+      "reviews": []
     }
   ],
   "orders": [
@@ -5541,6 +5802,26 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log_1793940578188_pd4a",
+      "timestamp": "2026-11-06T04:49:38.188Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "SHOPEE_IMPORT",
+      "targetId": "batch",
+      "details": "Nhập 3 sản phẩm từ Shopee (Bỏ qua 0 sản phẩm trùng lặp)"
+    },
+    {
+      "id": "log_1793940423042_u73j",
+      "timestamp": "2026-11-06T04:47:03.043Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
     {
       "id": "log_1793938080114_z4m2",
       "timestamp": "2026-11-06T04:08:00.115Z",

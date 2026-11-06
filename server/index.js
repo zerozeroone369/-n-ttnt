@@ -678,12 +678,13 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
     return res.status(400).json({ error: 'Tiến trình cào dữ liệu đang chạy. Vui lòng chờ đợt trước hoàn tất.' });
   }
 
-  const { keywords } = req.body;
+  const { keywords, limit } = req.body;
   const kwList = Array.isArray(keywords) && keywords.length > 0 
     ? keywords.map(k => String(k).trim()).filter(Boolean)
     : [];
+  const numLimit = Math.min(Math.max(parseInt(limit) || 20, 5), 60);
 
-  scrapeState = { running: true, progress: 'Đang khởi động cào dữ liệu...', error: null };
+  scrapeState = { running: true, progress: 'Đang khởi động cào dữ liệu thật từ Shopee...', error: null };
   const scraperPath = join(PROJECT_ROOT, 'shopee_scraper.py');
   const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
 
@@ -692,8 +693,8 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
     return res.status(500).json({ error: 'Không tìm thấy script cào dữ liệu' });
   }
 
-  // Chuẩn bị tham số dòng lệnh truyền từ khóa động
-  const scriptArgs = [scraperPath];
+  // Chuẩn bị tham số dòng lệnh truyền từ khóa động và số lượng sản phẩm
+  const scriptArgs = [scraperPath, '--limit', String(numLimit)];
   if (kwList.length > 0) {
     scriptArgs.push('--keywords', ...kwList);
   }
