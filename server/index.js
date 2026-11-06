@@ -873,6 +873,16 @@ app.get('/api/health', (req, res) => {
   });
 });
 
+// Serve static frontend build if dist exists (hỗ trợ deploy 24/7 trên Render / Cloud Server)
+const DIST_PATH = join(PROJECT_ROOT, 'dist');
+if (existsSync(DIST_PATH)) {
+  app.use(express.static(DIST_PATH));
+  app.use((req, res, next) => {
+    if (req.path.startsWith('/api/')) return next();
+    res.sendFile(join(DIST_PATH, 'index.html'));
+  });
+}
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`🚀 [Backend Server] Database REST API running at http://localhost:${PORT}`);
