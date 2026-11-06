@@ -6,6 +6,7 @@ dist/
 
 # Scraper & security sensitive files
 shopee_profile/
+tools/edge_profile/
 debug*.json
 raw_*.json
 shopee_scraped.json
@@ -13,6 +14,7 @@ shopee_parsed.json
 *.log
 __pycache__/
 *.pyc
+tools/test_*.py
 
 # Backup and office docs
 TIEM_NHA_NHO_ECOMMERCE_AI/
