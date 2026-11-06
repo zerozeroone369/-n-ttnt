@@ -1,582 +1,1452 @@
 [
   {
-    "shopee_id": "25826776002",
-    "shop_id": "1234282309",
-    "name": "Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản cao cấp nâng cấp ngoại hình kính mắt y15",
-    "price": 41250,
-    "orig": 150000,
-    "rating": 4.9,
-    "reviews": 2400,
-    "sold": 20000,
+    "shopee_id": "40209298196",
+    "shop_id": "1158427083",
+    "name": "Áo khoát nam nhung tăm Áo khoác cặp đôi Tay Dài Áo nam Form Rộng Unisex  phong cách retro phom dáng thoải mái from dáng",
+    "price": 209000,
+    "orig": 250000,
+    "rating": 4.8,
+    "reviews": 120,
+    "sold": 1000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/25826776002.jpg"
+      "/products/shopee_live/40209298196.jpg"
     ],
-    "image_id": "vn-11134207-7r98o-lvlab4mexuzg8f",
+    "image_id": "vn-11134207-81ztc-mlvjkt9z68lc34",
     "all_image_ids": [
-      "vn-11134207-7r98o-lvlab4mexuzg8f",
-      "vn-11134207-820l4-mj8a8m4s93wlb8",
-      "vn-11134207-7r98o-lvsq5uuy7eyh5b"
+      "vn-11134207-81ztc-mlvjkt9z68lc34",
+      "vn-11134207-7ras8-mcg610qe1v823f",
+      "vn-11134207-81ztc-mlvjk1b22c5k96"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/1234282309/25826776002",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "source_url": "https://shopee.vn/product/1158427083/40209298196",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-001"
   },
   {
-    "shopee_id": "19863212321",
-    "shop_id": "257024829",
-    "name": "Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi xe đạp, xe máy, chống tiaUV400, chống mờ hơi,unisex, bảo hộ",
-    "price": 90000,
-    "orig": 199000,
-    "rating": 4.9,
-    "reviews": 12000,
-    "sold": 100000,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/19863212321.jpg"
-    ],
-    "image_id": "vn-11134207-7r98o-lva478xyttot56",
-    "all_image_ids": [
-      "vn-11134207-7r98o-lva478xyttot56",
-      "vn-11134207-81ztc-mroo40iqmolk5f",
-      "vn-11134207-81ztc-mrphgu27vitia9"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/257024829/19863212321",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-002"
-  },
-  {
-    "shopee_id": "47770065516",
-    "shop_id": "196261835",
-    "name": "Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để lái xe du lịch thời trang ngoài trời",
-    "price": 114480,
-    "orig": 177433,
-    "rating": 5.0,
-    "reviews": 600,
-    "sold": 5000,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/47770065516.jpg"
-    ],
-    "image_id": "sg-11134301-82596-mqfy3hfdraq336",
-    "all_image_ids": [
-      "sg-11134301-82596-mqfy3hfdraq336",
-      "sg-11134301-825aq-mqfy3hbakwlp13",
-      "sg-11134301-8258w-mqfy3hf3ow7f03"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/196261835/47770065516",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-003"
-  },
-  {
-    "shopee_id": "28153611624",
-    "shop_id": "998924637",
-    "name": "Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông nửa viền kim loại cao cấp thời trang Hàn Quốc kính mắt Y19.",
-    "price": 96000,
-    "orig": 180000,
+    "shopee_id": "41709302802",
+    "shop_id": "446605715",
+    "name": "Áo Khoác Gió Nam Nữ Pha MÀU  2025, Chống Gió Nước, Lót Lưới Thoáng Mát, Mũ Tháo Rời, Trẻ",
+    "price": 158347,
+    "orig": 219000,
     "rating": 4.9,
     "reviews": 240,
     "sold": 2000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/28153611624.jpg"
+      "/products/shopee_live/41709302802.jpg"
     ],
-    "image_id": "vn-11134207-81ztc-mr61vn5lk9vpdc",
+    "image_id": "vn-11134207-7ras8-mcg76i1p49yb45",
     "all_image_ids": [
-      "vn-11134207-81ztc-mr61vn5lk9vpdc",
-      "vn-11134207-7r98o-lwwk63lkio6176",
-      "vn-11134207-7ras8-m1qfxccb66ab52"
+      "vn-11134207-7ras8-mcg76i1p49yb45",
+      "vn-11134207-7ras8-mcg7khxrjgpe97",
+      "vn-11134207-7ras8-mcg7khxrcfv604"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/998924637/28153611624",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "source_url": "https://shopee.vn/product/446605715/41709302802",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-002"
+  },
+  {
+    "shopee_id": "51868043018",
+    "shop_id": "1188600728",
+    "name": "(M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép dày dặn mẫu phối viền có lô gô THÊU Đắp lô gô 46 , dữ ấm tố",
+    "price": 149000,
+    "orig": 298000,
+    "rating": 4.6,
+    "reviews": 50,
+    "sold": 107,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/51868043018.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-mtajt9p1u9e1f0",
+    "all_image_ids": [
+      "vn-11134207-81ztc-mtajt9p1u9e1f0",
+      "vn-11134207-81ztc-mt8e9mmhophkff",
+      "vn-11134207-81ztc-mtajt9oylo94b3"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1188600728/51868043018",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-003"
+  },
+  {
+    "shopee_id": "25384702853",
+    "shop_id": "959139280",
+    "name": "Áo Khoác Gió 2 Lớp Chống Nước Phối Màu Và Họa Tiết Có Mũ 𝐂𝐨́ 𝐓𝐮́𝐢 𝐓𝐫𝐨𝐧𝐠 Thời Trang Protex G3.1",
+    "price": 167305,
+    "orig": 260000,
+    "rating": 4.8,
+    "reviews": 240,
+    "sold": 2000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25384702853.jpg"
+    ],
+    "image_id": "vn-11134207-7ras8-m2ytewfvd8ts0e",
+    "all_image_ids": [
+      "vn-11134207-7ras8-m2ytewfvd8ts0e",
+      "vn-11134207-820l4-mj6hrm3ic64i99",
+      "vn-11134207-7ras8-m4oazbqkbr9ra1"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/959139280/25384702853",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-004"
   },
   {
-    "shopee_id": "22978427690",
-    "shop_id": "998924637",
-    "name": "Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang gọng nửa viền kim loại titan cao cấp hiện đại MEME Y15.",
-    "price": 96000,
-    "orig": 200000,
-    "rating": 4.9,
-    "reviews": 3600,
-    "sold": 30000,
+    "shopee_id": "20539725608",
+    "shop_id": "619008111",
+    "name": "AOKONG Áo sơ mi dài tay vải nhung phong cách Hồng Kông nam xuân thu áo sơ mi dáng rộng Hàn Quốc hàng đầu giản dị",
+    "price": 182476,
+    "orig": 356400,
+    "rating": 4.7,
+    "reviews": 1200,
+    "sold": 10000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/22978427690.jpg"
+      "/products/shopee_live/20539725608.jpg"
     ],
-    "image_id": "vn-11134207-7r98o-lsrswgr0ovd016",
+    "image_id": "cn-11134211-7ras8-m6f6xojym1zfac",
     "all_image_ids": [
-      "vn-11134207-7r98o-lsrswgr0ovd016",
-      "vn-11134207-81ztc-mr61v1127h1cd5",
-      "vn-11134207-7r98o-lsrswgr0ngskf2"
+      "cn-11134211-7ras8-m6f6xojym1zfac",
+      "9b2c132cc55ca9ac227928e5d217ec74",
+      "4e7b6a12da15570162a9af271efe60a5"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/998924637/22978427690",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "source_url": "https://shopee.vn/product/619008111/20539725608",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-005"
   },
   {
-    "shopee_id": "19996588913",
-    "shop_id": "68362839",
-    "name": "Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ánh sáng xanh ,kính nữa viền cổ điển phong cách Hàn Trung",
-    "price": 37000,
-    "orig": 75000,
+    "shopee_id": "40430035998",
+    "shop_id": "122720461",
+    "name": "Áo Nỉ giả hai lớp, thời trang Hàn Quốc, Dễ phối đồ cho Nam và Nữ, Trẻ trung - Năng Động",
+    "price": 149000,
+    "orig": 249000,
     "rating": 4.8,
     "reviews": 1200,
     "sold": 10000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/19996588913.jpg"
+      "/products/shopee_live/40430035998.jpg"
     ],
-    "image_id": "sg-11134253-7rens-m90me518n9ehd9",
+    "image_id": "sg-11134253-823oc-moozrb4kn2f47f",
     "all_image_ids": [
-      "sg-11134253-7rens-m90me518n9ehd9",
-      "vn-11134207-7r98o-lybqe6lvlbnx2b",
-      "vn-11134207-7r98o-lybqdr1ybarxa8"
+      "sg-11134253-823oc-moozrb4kn2f47f",
+      "vn-11134207-81ztc-mn10zliuu96w08",
+      "vn-11134207-81ztc-mn10zlizn11d5b"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/68362839/19996588913",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "source_url": "https://shopee.vn/product/122720461/40430035998",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-006"
   },
   {
-    "shopee_id": "25330662526",
-    "shop_id": "10323148",
-    "name": "Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi Bẩn",
-    "price": 68000,
-    "orig": 109000,
-    "rating": 4.9,
-    "reviews": 1200,
-    "sold": 10000,
+    "shopee_id": "24616596965",
+    "shop_id": "161050540",
+    "name": "Áo Polo nam nữ oversize cổ bẻ tay lỡ form rộng hình thêu trái tim NNXNN bền đẹp, Áo polo chất liệt cotton tổ ong cao cấp",
+    "price": 139000,
+    "orig": 180000,
+    "rating": 4.8,
+    "reviews": 1080,
+    "sold": 9000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/25330662526.jpg"
+      "/products/shopee_live/24616596965.jpg"
     ],
-    "image_id": "vn-11134201-7r98o-lyyrvt0oabvle9",
+    "image_id": "vn-11134207-7r98o-lsgof0k5iobdd9",
     "all_image_ids": [
-      "vn-11134201-7r98o-lyyrvt0oabvle9",
-      "vn-11134201-7r98o-lyyrvtud4ae916",
-      "vn-11134201-7r98o-lyyrvt5y2lvx0f"
+      "vn-11134207-7r98o-lsgof0k5iobdd9",
+      "vn-11134207-7r98o-lsgof0jljhjt07",
+      "vn-11134207-7r98o-lsgof0kphv4419"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/10323148/25330662526",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "source_url": "https://shopee.vn/product/161050540/24616596965",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-007"
   },
   {
-    "shopee_id": "18887958068",
-    "shop_id": "111519175",
-    "name": "Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành cho nam nữ k78",
-    "price": 24010,
-    "orig": 32000,
-    "rating": 4.9,
-    "reviews": 6000,
-    "sold": 50000,
+    "shopee_id": "21931209640",
+    "shop_id": "70677296",
+    "name": "Áo khoác bomber nhung tăm cổ bẻ kiểu trơn 1 lớp dày dặn chuẩn form siêu xinh sành điệu cao cấp BẢO ĐĂNG",
+    "price": 148720,
+    "orig": 199000,
+    "rating": 4.5,
+    "reviews": 1200,
+    "sold": 10000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/18887958068.jpg"
+      "/products/shopee_live/21931209640.jpg"
     ],
-    "image_id": "vn-11134207-7qukw-lfttzwegil137d",
+    "image_id": "vn-11134207-7ra0g-ma02merf2ptw95",
     "all_image_ids": [
-      "vn-11134207-7qukw-lfttzwegil137d",
-      "vn-11134207-7qukw-lfttzwegh6gn6d",
-      "vn-11134207-7qukw-lftu3h2qj1pm48"
+      "vn-11134207-7ra0g-ma02merf2ptw95",
+      "vn-11134207-7ra0g-ma02merf2q2qe5",
+      "vn-11134207-7ra0g-ma02merf44n60c"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/111519175/18887958068",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
+    "source_url": "https://shopee.vn/product/70677296/21931209640",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-008"
   },
   {
-    "shopee_id": "29193711372",
-    "shop_id": "1649869410",
-    "name": "【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận thị chống bức xạ ,Kính gọng vuông ,phi giới tính kính mắt 1731",
-    "price": 62442,
-    "orig": 100000,
+    "shopee_id": "28130749828",
+    "shop_id": "583014070",
+    "name": "Áo Polo unisex In chữ SASENSHIWEUUSP  Áo Cổ Bẻ Tay Lỡ Chất Liệu Tổ Ong Dệt Trẻ Trung, Cá Tính,Phong Cách Ulzzang",
+    "price": 166320,
+    "orig": 199000,
+    "rating": 4.9,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/28130749828.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-mtd3spcjm70m49",
+    "all_image_ids": [
+      "vn-11134207-81ztc-mtd3spcjm70m49",
+      "vn-11134207-7ra0g-m7rigfmx5xae73",
+      "vn-11134207-81ztc-mtd3slpmjfnl98"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/583014070/28130749828",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-009"
+  },
+  {
+    "shopee_id": "25972168287",
+    "shop_id": "697931037",
+    "name": "Áo Thun Nam Nữ Thêu Hình  APT Unisex Áo Polo From Rộng Tay Lửng  Mùa Hè 2024 Chất Liệu Nhung Tăm Mềm Mịn",
+    "price": 146020,
+    "orig": 180000,
+    "rating": 4.7,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25972168287.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-ltmf0s97756yba",
+    "all_image_ids": [
+      "vn-11134207-7r98o-ltmf0s97756yba",
+      "vn-11134207-7r98o-ltmf0s974c2298",
+      "vn-11134207-7r98o-ltmf0s97bcwa19"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/697931037/25972168287",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-010"
+  },
+  {
+    "shopee_id": "29407543569",
+    "shop_id": "157167248",
+    "name": "Áo sơ mi nam nữ tay ngắn chất kaki cao cấp kiểu dáng form rộng, unisex, dễ phối đồ mặc cực đẹp",
+    "price": 125099,
+    "orig": 278000,
+    "rating": 4.9,
+    "reviews": 2400,
+    "sold": 20000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29407543569.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lyrm278oi1ql74",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lyrm278oi1ql74",
+      "vn-11134207-7r98o-lyrm278om9fx33",
+      "vn-11134207-7r98o-lyrm278okv4x54"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/157167248/29407543569",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-011"
+  },
+  {
+    "shopee_id": "29951583781",
+    "shop_id": "57932039",
+    "name": "Áo sơ mi loang nam nữ đều mặc được chất vải lụa Hàn form rộng mát mẻ dễ phối đồ 4 màu",
+    "price": 149000,
+    "orig": 278000,
     "rating": 4.8,
     "reviews": 480,
     "sold": 4000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/29193711372.jpg"
+      "/products/shopee_live/29951583781.jpg"
     ],
-    "image_id": "sg-11134253-822zp-moadnwjnj5zf2b",
+    "image_id": "vn-11134207-7r98o-lw189y1t123f90",
     "all_image_ids": [
-      "sg-11134253-822zp-moadnwjnj5zf2b",
-      "vn-11134207-820l4-mhlrbuljcnb808",
-      "vn-11134207-820l4-mhlrc4541hq912"
+      "vn-11134207-7r98o-lw189y1t123f90",
+      "vn-11134207-7r98o-lw189y1swue349",
+      "vn-11134207-7r98o-lw189y1t9hi350"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/1649869410/29193711372",
-    "crawled_at": "2026-11-06T06:42:16.033162+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-009"
-  },
-  {
-    "shopee_id": "29557806468",
-    "shop_id": "1324864525",
-    "name": "【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời trang mắt kính cận Hỗ trợ tùy chỉnh Cho nam và nữ K73",
-    "price": 62370,
-    "orig": 105840,
-    "rating": 4.2,
-    "reviews": 81,
-    "sold": 681,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/29557806468.jpg"
-    ],
-    "image_id": "cn-11134207-7ras8-m761jf6qh2qk44",
-    "all_image_ids": [
-      "cn-11134207-7ras8-m761jf6qh2qk44",
-      "cn-11134207-7ras8-mbw4gjy6vb4me8",
-      "cn-11134207-7ras8-m761jf6qlas3f2"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/1324864525/29557806468",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-010"
-  },
-  {
-    "shopee_id": "23657710174",
-    "shop_id": "183595172",
-    "name": "Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong cách Hàn Quốc, cao cấp, kính nửa gọng.",
-    "price": 54900,
-    "orig": 69000,
-    "rating": 4.8,
-    "reviews": 360,
-    "sold": 3000,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/23657710174.jpg"
-    ],
-    "image_id": "sg-11134253-821dv-mgw74rjj8qob92",
-    "all_image_ids": [
-      "sg-11134253-821dv-mgw74rjj8qob92",
-      "vn-11134207-7r98o-lms2i9rn32e7a9",
-      "vn-11134207-7r98o-lms2i9rn4gyn8d"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/183595172/23657710174",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-011"
-  },
-  {
-    "shopee_id": "18666916512",
-    "shop_id": "111715780",
-    "name": "Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vintage COD (San9) Cho Nam",
-    "price": 82080,
-    "orig": 118800,
-    "rating": 4.7,
-    "reviews": 1200,
-    "sold": 10000,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/18666916512.jpg"
-    ],
-    "image_id": "sg-11134201-22120-zuwll8dsypkvd9",
-    "all_image_ids": [
-      "sg-11134201-22120-zuwll8dsypkvd9",
-      "sg-11134201-22120-ov77b5esypkv0d",
-      "sg-11134201-22120-ngo8mrfsypkv83"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/111715780/18666916512",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/57932039/29951583781",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-012"
   },
   {
-    "shopee_id": "27961442338",
-    "shop_id": "68362839",
-    "name": "Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách Hàn Quốc",
-    "price": 20000,
-    "orig": 35000,
+    "shopee_id": "19683315496",
+    "shop_id": "207962048",
+    "name": "Áo khoác unisex thời trang ,nam nữ đều măc đẹp siêu hot hit",
+    "price": 169600,
+    "orig": 265000,
+    "rating": 4.8,
+    "reviews": 480,
+    "sold": 4000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/19683315496.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lks7wg0anhh745",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lks7wg0anhh745",
+      "vn-11134207-7r98o-lks7wg0arp6j2f",
+      "vn-11134207-7r98o-lks7wg0aqam3e1"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/207962048/19683315496",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-013"
+  },
+  {
+    "shopee_id": "16294646170",
+    "shop_id": "933190367",
+    "name": "Áo Polo Nam Nữ Thêu PASRTRO NAD Unisex - Áo Cổ Bẻ Tay Lỡ Chất Liệu Tổ Ong Dệt Trẻ Trung, Cá Tính, Phong Cách Ulzzang",
+    "price": 167200,
+    "orig": 190000,
     "rating": 4.9,
     "reviews": 1200,
     "sold": 10000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/27961442338.jpg"
+      "/products/shopee_live/16294646170.jpg"
     ],
-    "image_id": "vn-11134207-7r98o-m08is320hm2522",
+    "image_id": "vn-11134207-7qukw-lgtbq035d9836a",
     "all_image_ids": [
-      "vn-11134207-7r98o-m08is320hm2522",
-      "vn-11134207-7r98o-m08is320hmdr4f",
-      "vn-11134207-7r98o-m08j3qcmwgkt62"
+      "vn-11134207-7qukw-lgtbq035d9836a",
+      "vn-11134207-7qukw-lgtbq034xsz749",
+      "vn-11134207-7r98o-lw19nym6zhln2c"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/68362839/27961442338",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-013"
-  },
-  {
-    "shopee_id": "19491707191",
-    "shop_id": "111519175",
-    "name": "Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang Hàn Quốc K118",
-    "price": 27075,
-    "orig": 75000,
-    "rating": 4.9,
-    "reviews": 960,
-    "sold": 8000,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/19491707191.jpg"
-    ],
-    "image_id": "vn-11134207-7qukw-lk8yhfa7mhoi30",
-    "all_image_ids": [
-      "vn-11134207-7qukw-lk8yhfa7mhoi30",
-      "vn-11134207-7qukw-lk8yhfa7gveqe1",
-      "vn-11134207-7qukw-lk8yhfa7i9z6de"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/111519175/19491707191",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/933190367/16294646170",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-014"
   },
   {
-    "shopee_id": "26551242939",
-    "shop_id": "949804684",
-    "name": "Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -4.0 -4.5 -5.0 -5.5 -6.0 độ dành cho nam và nữ với tròng kính có thể tháo rời kính chống án",
-    "price": 85071,
-    "orig": 92000,
-    "rating": 4.6,
-    "reviews": 3600,
-    "sold": 30000,
+    "shopee_id": "22067925036",
+    "shop_id": "619008111",
+    "name": "Áo sơ mi nam AOKONG xu hướng mùa hè màu trơn khí chất cổ đứng năm phần tư tay áo tiêu chuẩn thanh niên mới phổ biến Harajuku lười biếng",
+    "price": 140800,
+    "orig": 218000,
+    "rating": 4.8,
+    "reviews": 480,
+    "sold": 4000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/26551242939.jpg"
+      "/products/shopee_live/22067925036.jpg"
     ],
-    "image_id": "cn-11134207-820l4-mhzohgpqr85d93",
+    "image_id": "cn-11134207-7qukw-lgt3otwllqzj86",
     "all_image_ids": [
-      "cn-11134207-820l4-mhzohgpqr85d93",
-      "sg-11134201-7rd6y-lvvgoh80ce5c02",
-      "sg-11134201-7rd46-lvvgoi8wudn96d"
+      "cn-11134207-7qukw-lgt3otwllqzj86",
+      "sg-11134201-7qvdi-lgiwfumnw2ir98",
+      "sg-11134201-7qvd2-lgt489ftao0z22"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/949804684/26551242939",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/619008111/22067925036",
+    "crawled_at": "2026-11-06T07:04:33.582060+00:00",
     "status": "draft",
     "is_verified": true,
     "id": "shopee-live-015"
   },
   {
-    "shopee_id": "16655117249",
-    "shop_id": "111519175",
-    "name": "Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quốc K07",
-    "price": 23030,
-    "orig": 32000,
+    "shopee_id": "23054450850",
+    "shop_id": "89210712",
+    "name": "Áo Sweater nỉ nam nữ,áo nỉ cổ tròn in hình mặt cười nam nữ mặc cực chất-SWEATER",
+    "price": 88000,
+    "orig": 178000,
+    "rating": 4.8,
+    "reviews": 600,
+    "sold": 5000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/23054450850.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-llja9emr3y6gf1",
+    "all_image_ids": [
+      "vn-11134207-7r98o-llja9emr3y6gf1",
+      "vn-11134207-7r98o-llja9emrm7qu33",
+      "vn-11134207-7r98o-llja9emrnmbac7"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/89210712/23054450850",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-016"
+  },
+  {
+    "shopee_id": "27410363691",
+    "shop_id": "974448398",
+    "name": "Áo Khoác Gió Nam Nữ PROTEX 𝐂𝐨́ 𝐓𝐮́𝐢 𝐓𝐫𝐨𝐧𝐠 Phối Màu Và Họa Tiết 2 Phiên Bản G3.1 và G3.2",
+    "price": 177999,
+    "orig": 250000,
+    "rating": 4.5,
+    "reviews": 65,
+    "sold": 545,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/27410363691.jpg"
+    ],
+    "image_id": "vn-11134207-7ras8-m45kf0i5rii8ac",
+    "all_image_ids": [
+      "vn-11134207-7ras8-m45kf0i5rii8ac",
+      "vn-11134207-820l4-miv0pgdy8hdve7",
+      "vn-11134207-820l4-miv1u9emlatce2"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/974448398/27410363691",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-017"
+  },
+  {
+    "shopee_id": "46950404393",
+    "shop_id": "81023597",
+    "name": "Áo Nỉ Nam Cổ Sơ Mi Dài Tay Nỉ Dày Ấm Màu Sắc Thanh Lịch Có Big Size 45-120kg",
+    "price": 215600,
+    "orig": 500000,
+    "rating": 4.9,
+    "reviews": 240,
+    "sold": 2000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/46950404393.jpg"
+    ],
+    "image_id": "vn-11134207-820l4-mgf2otjxzhfy0e",
+    "all_image_ids": [
+      "vn-11134207-820l4-mgf2otjxzhfy0e",
+      "vn-11134207-820l4-mgf2p0apor2m9c",
+      "vn-11134207-820l4-mgf2oph0vo5r3b"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/81023597/46950404393",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-018"
+  },
+  {
+    "shopee_id": "43867435591",
+    "shop_id": "183840366",
+    "name": "Áo Khoác Nỉ Dáng Rộng Nam Nữ RAT-UNISEX Chất Vải Nỉ 2DA Thời Trang Hàn Quốc, Thiết Kế Sọc Tay Cá Tính, 2 Màu Trẻ Trung",
+    "price": 162799,
+    "orig": 220000,
+    "rating": 4.8,
+    "reviews": 100,
+    "sold": 841,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/43867435591.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-moe75godfrwv82",
+    "all_image_ids": [
+      "vn-11134207-81ztc-moe75godfrwv82",
+      "vn-11134207-820l4-me89wk3bz18hea",
+      "vn-11134207-81ztc-moe76nh4yoej27"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/183840366/43867435591",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-019"
+  },
+  {
+    "shopee_id": "24789185517",
+    "shop_id": "1082995176",
+    "name": "Áo Thun Polo Nam Thiết Kế Đơn Giản Thời Trang Hàn Quốc By F-NEMO",
+    "price": 78000,
+    "orig": 120000,
+    "rating": 4.9,
+    "reviews": 52,
+    "sold": 436,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/24789185517.jpg"
+    ],
+    "image_id": "vn-11134201-23030-rc017i42kbov29",
+    "all_image_ids": [
+      "vn-11134201-23030-rc017i42kbov29",
+      "837b18896e230a9b61d6a30516ebdcf1",
+      "d747811f3f3c7357d29b5047e5105bf3"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1082995176/24789185517",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-020"
+  },
+  {
+    "shopee_id": "29404941592",
+    "shop_id": "933190367",
+    "name": "Áo Polo Nam Nữ  RUNIERNNIE NAD Unisex - Áo Cổ Bẻ Chất Cotton tổ ong  Mềm thoáng Mát Oversize Cực Chất",
+    "price": 157520,
+    "orig": 190000,
+    "rating": 4.9,
+    "reviews": 240,
+    "sold": 2000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29404941592.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-ly3cj5ynvvtnad",
+    "all_image_ids": [
+      "vn-11134207-7r98o-ly3cj5ynvvtnad",
+      "vn-11134207-7r98o-lxj8laqfuyu12d",
+      "vn-11134207-7r98o-lxj8laqfuymz8a"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/933190367/29404941592",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-021"
+  },
+  {
+    "shopee_id": "29915701122",
+    "shop_id": "57932039",
+    "name": "Áo bomber Unisex nam nữ đều mặc được phối Layer - Áo khoác chất vải gió dù 2 lớp phối Layer nỉ siêu đẹp màu cực hot",
+    "price": 246400,
+    "orig": 350000,
+    "rating": 4.9,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29915701122.jpg"
+    ],
+    "image_id": "vn-11134207-7ras8-m1vewvn78bpv9c",
+    "all_image_ids": [
+      "vn-11134207-7ras8-m1vewvn78bpv9c",
+      "vn-11134207-7ras8-m1vewvn744an89",
+      "vn-11134207-7ras8-m1vewvn76xfj5f"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/57932039/29915701122",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-022"
+  },
+  {
+    "shopee_id": "10816146455",
+    "shop_id": "289383259",
+    "name": "Áo sơ mi ngắn tay form rộng thời trang hiện đại unisex chất liệu vải lụa mềm chống nhăn",
+    "price": 98000,
+    "orig": 195000,
+    "rating": 4.9,
+    "reviews": 6000,
+    "sold": 50000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/10816146455.jpg"
+    ],
+    "image_id": "27f60dfe9928d3ea286178367673db9b",
+    "all_image_ids": [
+      "27f60dfe9928d3ea286178367673db9b",
+      "8c0593bfd3b07358d7c22cc5e555be0f",
+      "8089a26c20100333c9f7ea07252b1c3a"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/289383259/10816146455",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-023"
+  },
+  {
+    "shopee_id": "18983188286",
+    "shop_id": "689070828",
+    "name": "Áo Sơ Mi Nam Unisex Túi Hộp Form Rộng Tay Lỡ Khóa Ngực, Áo Sơ Mi Kiểu Chất Dày Dặn Phong Cách Hàn Quốc",
+    "price": 149000,
+    "orig": 280000,
+    "rating": 4.8,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/18983188286.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lknf9qohwesqda",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lknf9qohwesqda",
+      "vn-11134207-7r98o-lknf9qohpdyi62",
+      "vn-11134207-7r98o-lknf9qohz7xmc8"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/689070828/18983188286",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-024"
+  },
+  {
+    "shopee_id": "28863257206",
+    "shop_id": "99939683",
+    "name": "Áo Khoác Gió Nam Nữ Mặc Được 2 Mặt,Chất Liệu Gió Tráng Bạc Chống Nước Cản Gió Bụi",
+    "price": 129000,
+    "orig": 180000,
     "rating": 4.8,
     "reviews": 2400,
     "sold": 20000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/16655117249.jpg"
+      "/products/shopee_live/28863257206.jpg"
     ],
-    "image_id": "9764695953b39afafb353113a5422c74",
+    "image_id": "vn-11134207-7ras8-m0yq8viblxun66",
     "all_image_ids": [
-      "9764695953b39afafb353113a5422c74",
-      "d83e24af7b91b64c23ddff01e3e862ce",
-      "448c065655075de6b3f7f2500f359c87"
+      "vn-11134207-7ras8-m0yq8viblxun66",
+      "vn-11134207-7ras8-m0yq98w0128vd0",
+      "vn-11134207-7ras8-m0yq9bfkb2u318"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/111519175/16655117249",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/99939683/28863257206",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
     "status": "draft",
     "is_verified": true,
-    "id": "shopee-live-016"
+    "id": "shopee-live-025"
   },
   {
-    "shopee_id": "29701524765",
-    "shop_id": "68362839",
-    "name": "Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh gọng vuông độc đáo phong cách Hàn Quốc",
-    "price": 42140,
-    "orig": 60000,
+    "shopee_id": "29760735438",
+    "shop_id": "824158303",
+    "name": "Áo khoác có mũ trùm đầu nam ESEA Nhật Bản phong cách Harajuku mát mẻ và mát mẻ mùa xuân thu áo cardigan có mũ trùm đầu thông thường",
+    "price": 256919,
+    "orig": 599400,
+    "rating": 4.6,
+    "reviews": 50,
+    "sold": 187,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29760735438.jpg"
+    ],
+    "image_id": "cn-11134211-7r98o-m01hvd1sfpse29",
+    "all_image_ids": [
+      "cn-11134211-7r98o-m01hvd1sfpse29",
+      "cn-11134207-7r98o-lzzx0but9nduf8",
+      "cn-11134207-7r98o-lzzx0filwrxvca"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/824158303/29760735438",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-026"
+  },
+  {
+    "shopee_id": "22435599205",
+    "shop_id": "57932039",
+    "name": "Áo polo gắn tag Unisex - myndi_clothes - Áo có cổ có khóa kéo chất vải cotton 4 chiều năng động mặc đi học, đi làm",
+    "price": 139920,
+    "orig": 238000,
     "rating": 4.8,
-    "reviews": 120,
-    "sold": 1000,
+    "reviews": 1200,
+    "sold": 10000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/29701524765.jpg"
+      "/products/shopee_live/22435599205.jpg"
     ],
-    "image_id": "vn-11134207-7r98o-lvzpj8qnx78bac",
+    "image_id": "vn-11134207-7qukw-lfb8fyeds2glbe",
     "all_image_ids": [
-      "vn-11134207-7r98o-lvzpj8qnx78bac",
-      "vn-11134207-7r98o-lvzpj8qnylsr5c",
-      "vn-11134207-7r98o-lvzpqv9ny6zd6f"
+      "vn-11134207-7qukw-lfb8fyeds2glbe",
+      "vn-11134207-7qukw-leyc26wz7w472b",
+      "vn-11134207-7qukw-leyc26wz52zbc5"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/68362839/29701524765",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/57932039/22435599205",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
     "status": "draft",
     "is_verified": true,
-    "id": "shopee-live-017"
+    "id": "shopee-live-027"
   },
   {
-    "shopee_id": "25589817384",
-    "shop_id": "431745854",
-    "name": "Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
-    "price": 98000,
-    "orig": 130000,
+    "shopee_id": "51305571482",
+    "shop_id": "1510724288",
+    "name": "Áo Polo Nam Nữ Phối kẻ sơ mi Basic , Phong cách Hàn quốc vải cotton tổ ong thoáng mát",
+    "price": 84226,
+    "orig": 199000,
     "rating": 4.9,
-    "reviews": 120,
-    "sold": 1000,
+    "reviews": 840,
+    "sold": 7000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/25589817384.jpg"
+      "/products/shopee_live/51305571482.jpg"
     ],
-    "image_id": "cn-11134207-7r98o-ly5yoqqdetwl24",
+    "image_id": "vn-11134207-81ztc-mk2aaqvpio76ba",
     "all_image_ids": [
-      "cn-11134207-7r98o-ly5yoqqdetwl24",
-      "cn-11134207-7r98o-ly5ypxmgn8pxcf",
-      "cn-11134207-7r98o-lxwdmrp5c66dd2"
+      "vn-11134207-81ztc-mk2aaqvpio76ba",
+      "vn-11134207-81ztc-mk2a41sfrj0gd2",
+      "vn-11134207-81ztc-mk2a41sqj7rb54"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/431745854/25589817384",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/1510724288/51305571482",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
     "status": "draft",
     "is_verified": true,
-    "id": "shopee-live-018"
+    "id": "shopee-live-028"
   },
   {
-    "shopee_id": "28158187572",
-    "shop_id": "118645835",
-    "name": "PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Chống Ánh Sáng Xanh tongkhosi2",
-    "price": 22840,
-    "orig": 23000,
-    "rating": 4.9,
-    "reviews": 1080,
-    "sold": 9000,
-    "stock": 0,
-    "stock_needs_review": true,
-    "images": [
-      "/products/shopee_live/28158187572.jpg"
-    ],
-    "image_id": "sg-11134201-7rdvp-lz2ylkfe9ybq3b",
-    "all_image_ids": [
-      "sg-11134201-7rdvp-lz2ylkfe9ybq3b",
-      "vn-11134201-7ras8-m1fi7fn5ybmb65",
-      "sg-11134201-7rdyn-lz2yljzaxit085"
-    ],
-    "category": "fashion",
-    "keyword": "kính",
-    "source": "shopee",
-    "source_url": "https://shopee.vn/product/118645835/28158187572",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
-    "status": "draft",
-    "is_verified": true,
-    "id": "shopee-live-019"
-  },
-  {
-    "shopee_id": "40332720316",
-    "shop_id": "196261835",
-    "name": "Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chống bụi để chạy xe đạp nam nữ",
-    "price": 52920,
-    "orig": 95040,
+    "shopee_id": "24935020088",
+    "shop_id": "824158303",
+    "name": "Áo khoác nam ESEA thiết kế thêu Mỹ áo khoác bóng chày mới thời trang",
+    "price": 291478,
+    "orig": 387720,
     "rating": 4.7,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/24935020088.jpg"
+    ],
+    "image_id": "cn-11134207-7r98o-lz6400jm8fhv33",
+    "all_image_ids": [
+      "cn-11134207-7r98o-lz6400jm8fhv33",
+      "cn-11134211-7r98o-lz70x8uihv8zb2",
+      "cn-11134207-7r98o-lz640clkle2b4e"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/824158303/24935020088",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-029"
+  },
+  {
+    "shopee_id": "27054787738",
+    "shop_id": "82095709",
+    "name": "(30-130kg) M-8XL áo phông nam big size Áo Thun Tay Ngắn in Phim hoạt hình Cat Nhóm In ấn Phong Cách Harajuku Dành Cho Nam Nữ",
+    "price": 78880,
+    "orig": 136000,
+    "rating": 4.7,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/27054787738.jpg"
+    ],
+    "image_id": "sg-11134253-7rdyo-mbokov1rspt3f0",
+    "all_image_ids": [
+      "sg-11134253-7rdyo-mbokov1rspt3f0",
+      "sg-11134201-7rdxf-lxgode101qoca3",
+      "sg-11134201-7rdwa-lxgodh9je0rkf9"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/82095709/27054787738",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-030"
+  },
+  {
+    "shopee_id": "24518053056",
+    "shop_id": "1206178315",
+    "name": "Áo Khoác Jean Nam Nữ Jacket Wash RETRO Suông Rộng Cúc Cài Áo Khoác Jean Denim Unisex BIGSIZE Vintage",
+    "price": 179229,
+    "orig": 250000,
+    "rating": 4.9,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/24518053056.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-mpgc03w8pog089",
+    "all_image_ids": [
+      "vn-11134207-81ztc-mpgc03w8pog089",
+      "vn-11134207-81ztc-mkhktey7dm2ra9",
+      "vn-11134207-81ztc-mkhkteybpj467e"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1206178315/24518053056",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-031"
+  },
+  {
+    "shopee_id": "29553498067",
+    "shop_id": "82095709",
+    "name": "(30-130kg) M-8XL áo phông nam big size Áo Thun Tay Ngắn Phim hoạt hình Hàn Quốc Máy điều hòa không khí Mèo in hình Phong Cách Harajuku Dành Cho Nam Nữ",
+    "price": 78880,
+    "orig": 136000,
+    "rating": 4.8,
     "reviews": 600,
     "sold": 5000,
     "stock": 0,
     "stock_needs_review": true,
     "images": [
-      "/products/shopee_live/40332720316.jpg"
+      "/products/shopee_live/29553498067.jpg"
     ],
-    "image_id": "sg-11134301-824in-mq1dtq5juwpa18",
+    "image_id": "sg-11134201-7rd4e-lwtuo8c9zcf95d",
     "all_image_ids": [
-      "sg-11134301-824in-mq1dtq5juwpa18",
-      "sg-11134301-824jh-mpu8wxvhogsh0a",
-      "sg-11134301-82620-mlacp0lb8yki76"
+      "sg-11134201-7rd4e-lwtuo8c9zcf95d",
+      "sg-11134201-7rd4h-lwtuo7m71i4gfe",
+      "sg-11134201-7rd4s-lwtuo7yoj87m55"
     ],
     "category": "fashion",
-    "keyword": "kính",
+    "keyword": "áo nam",
     "source": "shopee",
-    "source_url": "https://shopee.vn/product/196261835/40332720316",
-    "crawled_at": "2026-11-06T06:42:16.034163+00:00",
+    "source_url": "https://shopee.vn/product/82095709/29553498067",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
     "status": "draft",
     "is_verified": true,
-    "id": "shopee-live-020"
+    "id": "shopee-live-032"
+  },
+  {
+    "shopee_id": "14698165298",
+    "shop_id": "457800786",
+    "name": "Áo POLO thêu chữ S+ B phối tương phản , áo Sweater  dài tay nam mùa thu đông đẹp phong cách thời trang Hàn quốc",
+    "price": 135000,
+    "orig": 165000,
+    "rating": 4.7,
+    "reviews": 480,
+    "sold": 4000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/14698165298.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-llth91t9rc2n24",
+    "all_image_ids": [
+      "vn-11134207-7r98o-llth91t9rc2n24",
+      "vn-11134207-7ras8-mazdwlswsz4152",
+      "vn-11134207-7ra0g-m720hoaunuigc0"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/457800786/14698165298",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-033"
+  },
+  {
+    "shopee_id": "25115041701",
+    "shop_id": "161050540",
+    "name": "Áo thun Unisex SOUNDING Áo phông nam nữ tay lỡ oversize form rộng chất liệu cotton dệt tổ ong thoáng mát",
+    "price": 107220,
+    "orig": 150000,
+    "rating": 4.8,
+    "reviews": 840,
+    "sold": 7000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25115041701.jpg"
+    ],
+    "image_id": "vn-11134207-7r98o-lwsf4dbvvtgb74",
+    "all_image_ids": [
+      "vn-11134207-7r98o-lwsf4dbvvtgb74",
+      "vn-11134207-7r98o-ls4d6tja34pl94",
+      "vn-11134207-7r98o-lwsf4dbvt0bfdf"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/161050540/25115041701",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-034"
+  },
+  {
+    "shopee_id": "26021313901",
+    "shop_id": "76875639",
+    "name": "Áo thun tay lỡ form rộng unisex CEST Paris, áo phông nam nữ BT13",
+    "price": 23900,
+    "orig": 24900,
+    "rating": 4.8,
+    "reviews": 2400,
+    "sold": 20000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/26021313901.jpg"
+    ],
+    "image_id": "sg-11134253-7repw-m8zcjhkhnhchee",
+    "all_image_ids": [
+      "sg-11134253-7repw-m8zcjhkhnhchee",
+      "vn-11134207-7ras8-m3zv3a4kbz67a1",
+      "vn-11134207-7ras8-m3zv3bi8ba8w11"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/76875639/26021313901",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-035"
+  },
+  {
+    "shopee_id": "50314778989",
+    "shop_id": "1487042999",
+    "name": "Áo Thun Unisex Starry Sky Họa Tiết Bầu Trời Sao Form Rộng Streetwear Cá Tính - Áo Thun Nam Nữ",
+    "price": 78747,
+    "orig": 150000,
+    "rating": 4.9,
+    "reviews": 240,
+    "sold": 2000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/50314778989.jpg"
+    ],
+    "image_id": "sg-11134201-825b6-mr1tfbku5gcs89",
+    "all_image_ids": [
+      "sg-11134201-825b6-mr1tfbku5gcs89",
+      "sg-11134201-8257z-mr1tfbtqj6yvd0",
+      "sg-11134201-825b3-mr1tfc4kvg9286"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1487042999/50314778989",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-036"
+  },
+  {
+    "shopee_id": "43478315721",
+    "shop_id": "68302424",
+    "name": "Áo POLO Nam Nữ Cao Cấp TeeNee Chất liệu vải cotton mềm mịn co giãn, chống nhăn, thoáng mát form rộng",
+    "price": 146990,
+    "orig": 229000,
+    "rating": 4.9,
+    "reviews": 360,
+    "sold": 3000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/43478315721.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-mmfvo0frbtad84",
+    "all_image_ids": [
+      "vn-11134207-81ztc-mmfvo0frbtad84",
+      "vn-11134207-820l4-mjvgtxy77qbm31",
+      "vn-11134207-820l4-mjvgu8agltdv01"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/68302424/43478315721",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-037"
+  },
+  {
+    "shopee_id": "41879310300",
+    "shop_id": "1316301653",
+    "name": "[ Cổ V Clean fit ] Áo Thun Ngắn Tay Phối Bo,Cổ Tròn Tôn Vai Tôn Dáng. Áo Thun Nam Nữ Unisex Mềm Mịn Co Giãn Chống Nhăn",
+    "price": 99999,
+    "orig": 169999,
+    "rating": 4.9,
+    "reviews": 3600,
+    "sold": 30000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/41879310300.jpg"
+    ],
+    "image_id": "vn-11134207-81ztc-mlw7skwhdgxuc4",
+    "all_image_ids": [
+      "vn-11134207-81ztc-mlw7skwhdgxuc4",
+      "vn-11134207-81ztc-mlw7squur4zmdd",
+      "vn-11134207-81ztc-mlw7socjxkap49"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1316301653/41879310300",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-038"
+  },
+  {
+    "shopee_id": "42755479454",
+    "shop_id": "899100335",
+    "name": "Áo Thun Kẻ Sọc Cổ Tròn Unisex Chất Liệu Cotton Cá Sấu Co Giãn Mềm Mại Form Rộng Phong Cách Hàn Quốc",
+    "price": 139000,
+    "orig": 199000,
+    "rating": 4.8,
+    "reviews": 360,
+    "sold": 3000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/42755479454.jpg"
+    ],
+    "image_id": "vn-11134207-7ras8-mbapbpvbb654cb",
+    "all_image_ids": [
+      "vn-11134207-7ras8-mbapbpvbb654cb",
+      "vn-11134207-7ras8-mbapbpvl7y6v4b",
+      "vn-11134207-7ras8-mbapiuvn61tf87"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/899100335/42755479454",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-039"
+  },
+  {
+    "shopee_id": "20477115816",
+    "shop_id": "892210684",
+    "name": "M-8XL[ có size 40 kg_110 kg ]Áo phông rộng nam nữ Vans Summer Unisex oversize form rộng Áo Thun Mùa Hè Dáng Suông Tay Cộc In Hình Cún Con Bằng Vải Mềm",
+    "price": 78880,
+    "orig": 136000,
+    "rating": 4.6,
+    "reviews": 480,
+    "sold": 4000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/20477115816.jpg"
+    ],
+    "image_id": "sg-11134253-7ra2g-mbnmpfg49wkac2",
+    "all_image_ids": [
+      "sg-11134253-7ra2g-mbnmpfg49wkac2",
+      "ph-11134201-23020-ix9wb2mas3nv13",
+      "sg-11134201-23030-178kqdmo07nv8b"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/892210684/20477115816",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-040"
+  },
+  {
+    "shopee_id": "40803931294",
+    "shop_id": "1267588233",
+    "name": "Áo Thun Phối Thể Thao Local Brand Unisex OneTee PHỐI 88 Form Rộng Tay Lỡ Nam Nữ Cổ Tròn Top Menswear",
+    "price": 89000,
+    "orig": 159000,
+    "rating": 4.8,
+    "reviews": 9600,
+    "sold": 80000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/40803931294.jpg"
+    ],
+    "image_id": "vn-11134207-7ras8-mawab7ktrrgh39",
+    "all_image_ids": [
+      "vn-11134207-7ras8-mawab7ktrrgh39",
+      "vn-11134207-7ra0g-m9zcpitn3n8u1d",
+      "vn-11134207-7ras8-matarkmg16tdc7"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1267588233/40803931294",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-041"
+  },
+  {
+    "shopee_id": "14190132804",
+    "shop_id": "180845148",
+    "name": "Áo Thun Tay Lỡ Nam HappyFamily Graphic Họa Tiết Trẻ Trung Năng Động Phá Cách Chất Cotton 100 Cao Cấp",
+    "price": 115207,
+    "orig": 270000,
+    "rating": 4.9,
+    "reviews": 120,
+    "sold": 1000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/14190132804.jpg"
+    ],
+    "image_id": "3293d2c5761f80972b8bd77281735ad4",
+    "all_image_ids": [
+      "3293d2c5761f80972b8bd77281735ad4",
+      "sg-11134201-22100-9e49slgkwoiv7b",
+      "sg-11134201-22100-c7a5wafkwoivdd"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/180845148/14190132804",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-042"
+  },
+  {
+    "shopee_id": "51404771422",
+    "shop_id": "1721238169",
+    "name": "XIEHNASA-Áo thun nam cotton lỏng lẻo thấm mồ hôi ngắn tay Graffiti phong cách",
+    "price": 129000,
+    "orig": 150000,
+    "rating": 4.8,
+    "reviews": 101,
+    "sold": 844,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/51404771422.jpg"
+    ],
+    "image_id": "cn-11134207-820l4-mjjgqs1xk5xh1b",
+    "all_image_ids": [
+      "cn-11134207-820l4-mjjgqs1xk5xh1b",
+      "cn-11134207-820l4-mjjgqs1r1l3a87",
+      "cn-11134207-820l4-mnmb3mj5ant221"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1721238169/51404771422",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-043"
+  },
+  {
+    "shopee_id": "29513740772",
+    "shop_id": "1095600721",
+    "name": "Áo Khoác Dù 2 Mặt Nam Nữ Unisex Chống Nước Chống Gió Form Rộng Thời Trang Hàn Quốc",
+    "price": 133000,
+    "orig": 199000,
+    "rating": 4.9,
+    "reviews": 2400,
+    "sold": 20000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/29513740772.jpg"
+    ],
+    "image_id": "vn-11134207-7ras8-mcu4py3g9cgse9",
+    "all_image_ids": [
+      "vn-11134207-7ras8-mcu4py3g9cgse9",
+      "vn-11134207-7ras8-md5lw4gm6kik3f",
+      "vn-11134207-7ras8-mcu4py3g9bxpa5"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1095600721/29513740772",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-044"
+  },
+  {
+    "shopee_id": "28330920331",
+    "shop_id": "1384648936",
+    "name": "Áo thun tay ngắn mẫu mới 2025 họa tiết lúa mì, áo polo nam nữ màu trơn Basic nhẹ nhàng cá tính đơn giản hợp thời trang.",
+    "price": 142100,
+    "orig": 219000,
+    "rating": 4.8,
+    "reviews": 480,
+    "sold": 4000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/28330920331.jpg"
+    ],
+    "image_id": "vn-11134207-7ra0g-m7t5otdxxwn710",
+    "all_image_ids": [
+      "vn-11134207-7ra0g-m7t5otdxxwn710",
+      "vn-11134207-7ra0g-m7t5oyju898156",
+      "vn-11134207-7ra0g-m7t5p37pfzwj63"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1384648936/28330920331",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-045"
+  },
+  {
+    "shopee_id": "6823239967",
+    "shop_id": "132094680",
+    "name": "Áo Sơ Mi Tay Dài Caro Unisex EMEY LUXURY Cao Cấp Siêu Hot",
+    "price": 104900,
+    "orig": 165000,
+    "rating": 4.8,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/6823239967.jpg"
+    ],
+    "image_id": "sg-11134253-7repw-m90t8xbdjbmx05",
+    "all_image_ids": [
+      "sg-11134253-7repw-m90t8xbdjbmx05",
+      "vn-11134207-820l4-mh8ngd3wo4co35",
+      "680d4fb41d07f3a6d2cffa39e84879ef"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/132094680/6823239967",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-046"
+  },
+  {
+    "shopee_id": "25213663106",
+    "shop_id": "796350857",
+    "name": "Áo Polo unisex phối logo SUUYY SUNLLNS trước ngực Áo cổ bẻ chất liệu cotton dệt tổ ong thoáng mát",
+    "price": 82000,
+    "orig": 159000,
+    "rating": 4.9,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/25213663106.jpg"
+    ],
+    "image_id": "sg-11134253-7rdyx-mdj8qbor0nrecd",
+    "all_image_ids": [
+      "sg-11134253-7rdyx-mdj8qbor0nrecd",
+      "vn-11134207-7r98o-lrs8uwy69rbte2",
+      "vn-11134207-7r98o-lrs8uwy6b5w900"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/796350857/25213663106",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-047"
+  },
+  {
+    "shopee_id": "18794738525",
+    "shop_id": "1096806130",
+    "name": "[GIAO TRONG NGÀY]Nasa Áo Thun Tay Ngắn Dáng Rộng Thời Trang Mùa Hè 2024 Cho Cặp Đôi Tay áo ngắn áo thun nam",
+    "price": 106000,
+    "orig": 139000,
+    "rating": 4.8,
+    "reviews": 1200,
+    "sold": 10000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/18794738525.jpg"
+    ],
+    "image_id": "cn-11134207-7r98o-lne0tgfmbogra4",
+    "all_image_ids": [
+      "cn-11134207-7r98o-lne0tgfmbogra4",
+      "cn-11134207-7r98o-lnds67j51288a3",
+      "cn-11134207-820l4-meph78gopwcha9"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/1096806130/18794738525",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-048"
+  },
+  {
+    "shopee_id": "21750021075",
+    "shop_id": "796350857",
+    "name": "Áo phông form rộng - MAIZHECLUB - Áo thun tay lỡ ,chất cotton nam nữ đều mặc được",
+    "price": 99000,
+    "orig": 129000,
+    "rating": 4.7,
+    "reviews": 240,
+    "sold": 2000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/21750021075.jpg"
+    ],
+    "image_id": "vn-11134207-7ra0g-m801exoomg6mf9",
+    "all_image_ids": [
+      "vn-11134207-7ra0g-m801exoomg6mf9",
+      "vn-11134207-7ra0g-m801f0p67ouff6",
+      "vn-11134207-7ra0g-m801f4a6yvse25"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/796350857/21750021075",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-049"
+  },
+  {
+    "shopee_id": "23544548774",
+    "shop_id": "82095709",
+    "name": "(30-130kg) M-8XL áo phông nam big size Áo Thun Cotton Tay Ngắn Cổ Tròn In Hoạt Hình Cậu Bé Bút Crayon Xiaoxin",
+    "price": 69000,
+    "orig": 136000,
+    "rating": 4.7,
+    "reviews": 840,
+    "sold": 7000,
+    "stock": 0,
+    "stock_needs_review": true,
+    "images": [
+      "/products/shopee_live/23544548774.jpg"
+    ],
+    "image_id": "sg-11134201-7qve8-lfeuemxr5n0h51",
+    "all_image_ids": [
+      "sg-11134201-7qve8-lfeuemxr5n0h51",
+      "sg-11134201-7qvg7-lfeueniuaryl72",
+      "sg-11134201-7qvdm-lfeueo3ngbgq9d"
+    ],
+    "category": "fashion",
+    "keyword": "áo nam",
+    "source": "shopee",
+    "source_url": "https://shopee.vn/product/82095709/23544548774",
+    "crawled_at": "2026-11-06T07:04:33.583065+00:00",
+    "status": "draft",
+    "is_verified": true,
+    "id": "shopee-live-050"
   }
 ]
