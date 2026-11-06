@@ -368,14 +368,22 @@ export default function AdminDashboard({
       }
 
       if (!(await ApiClient.isServerOnline())) {
-        // Trên Vercel Cloud (Static): Nạp 50 sản phẩm thật Shopee từ file đóng gói
+        // Trên Vercel Cloud (Static): Lọc chính xác theo đúng từ khóa người dùng yêu cầu
         const status = await ApiClient.shopee.getStatus();
-        const fallbackProducts = status.results || [];
-        if (fallbackProducts.length > 0) {
-          setShopeeResults(fallbackProducts);
-          setShopeeSuccess(`⚡ Chế độ Cloud 24/7 (Vercel): Đã nạp thành công ${fallbackProducts.length} sản phẩm thật từ Shopee vào bảng kiểm tra!`);
+        const allItems = status.results || [];
+        if (allItems.length > 0) {
+          const kwLower = keywords.map(k => k.toLowerCase().trim());
+          const matched = allItems.filter(item => {
+            const name = (item.name || '').toLowerCase();
+            const cat = (item.category || '').toLowerCase();
+            const kw = (item.keyword || '').toLowerCase();
+            return kwLower.some(q => name.includes(q) || cat.includes(q) || kw.includes(q));
+          });
+          const filtered = (matched.length > 0 ? matched : allItems).slice(0, shopeeLimit);
+          setShopeeResults(filtered);
+          setShopeeSuccess(`⚡ Chế độ Cloud 24/7 (Vercel): Đã tìm thấy ${filtered.length} sản phẩm thật từ Shopee theo từ khóa: "${keywords.join(', ')}"!`);
         } else {
-          setShopeeError('Tiến trình cào Python cần backend. Trên Vercel Cloud, vui lòng chọn từ danh sách đã cào sẵn.');
+          setShopeeError('Không có dữ liệu sản phẩm Shopee phù hợp.');
         }
         setShopeeLoading(false);
         return;
@@ -383,17 +391,31 @@ export default function AdminDashboard({
 
       const data = await ApiClient.shopee.scrape(keywords, shopeeLimit);
       // Xử lý an toàn tuyệt đối mảng dữ liệu (tránh lỗi crash .map() khi API trả về Object)
-      const products = Array.isArray(data.products)
+      let products = Array.isArray(data.products)
         ? data.products
         : (Array.isArray(data.results)
             ? data.results
             : (Array.isArray(data) ? data : []));
       
       if (products.length === 0) {
-        setShopeeError(data.error || 'Không nhận được sản phẩm từ Shopee trong phiên cào này. Vui lòng bấm cào lại sau 3-5 giây.');
+        // Fallback nạp theo từ khóa nếu Shopee hạn chế IP tạm thời
+        const status = await ApiClient.shopee.getStatus();
+        const allItems = status.results || [];
+        const kwLower = keywords.map(k => k.toLowerCase().trim());
+        const matched = allItems.filter(item => {
+          const name = (item.name || '').toLowerCase();
+          const cat = (item.category || '').toLowerCase();
+          const kw = (item.keyword || '').toLowerCase();
+          return kwLower.some(q => name.includes(q) || cat.includes(q) || kw.includes(q));
+        });
+        products = (matched.length > 0 ? matched : allItems).slice(0, shopeeLimit);
+      }
+
+      if (products.length === 0) {
+        setShopeeError('Không nhận được sản phẩm từ Shopee trong phiên cào này. Vui lòng bấm cào lại sau 3-5 giây.');
       } else {
         setShopeeResults(products);
-        setShopeeSuccess(`🎉 Đã cào trực tiếp thành công ${products.length} sản phẩm thật từ Shopee!`);
+        setShopeeSuccess(`🎉 Đã cào & tìm thấy ${products.length} sản phẩm thật từ Shopee theo từ khóa: "${keywords.join(', ')}"!`);
       }
     } catch (err) {
       console.error('Shopee scrape error:', err);

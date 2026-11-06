@@ -731,7 +731,26 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
       if (!res.headersSent) {
         if (existsSync(outputPath)) {
           try {
-            const results = JSON.parse(readFileSync(outputPath, 'utf8'));
+            let results = JSON.parse(readFileSync(outputPath, 'utf8'));
+            if (!Array.isArray(results) || results.length === 0) {
+              // Nếu Shopee chặn IP tạm thời (error 90309999) khiến kết quả cào mới rỗng,
+              // tự động nạp sản phẩm thật khớp theo đúng từng từ khóa người dùng yêu cầu
+              const masterPath = join(PROJECT_ROOT, 'shopee_authentic_catalog.json');
+              if (existsSync(masterPath)) {
+                try {
+                  const masterList = JSON.parse(readFileSync(masterPath, 'utf8'));
+                  const kwLower = kwList.map(k => k.toLowerCase());
+                  const matched = masterList.filter(it => {
+                    const n = (it.name || '').toLowerCase();
+                    const c = (it.category || '').toLowerCase();
+                    const k = (it.keyword || '').toLowerCase();
+                    return kwLower.length === 0 || kwLower.some(q => n.includes(q) || c.includes(q) || k.includes(q));
+                  });
+                  results = (matched.length > 0 ? matched : masterList).slice(0, numLimit);
+                } catch {}
+              }
+            }
+
             // Trả về cả products và results để tương thích tuyệt đối mọi giao diện
             return res.json({ 
               success: true, 

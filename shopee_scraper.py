@@ -311,6 +311,10 @@ async def main():
 
     products = await scrape_shopee_live(args.keywords, total_limit=args.limit)
 
+    if not products:
+        print("[!] Không bắt được sản phẩm mới từ Shopee trong phiên này (Shopee hạn chế IP tạm thời). Giữ nguyên file dữ liệu hiện tại.")
+        return
+
     # Đánh số ID cho từng sản phẩm
     for i, p in enumerate(products, 1):
         p["id"] = f"shopee-live-{i:03d}"
