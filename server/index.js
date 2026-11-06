@@ -739,14 +739,57 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
               if (existsSync(masterPath)) {
                 try {
                   const masterList = JSON.parse(readFileSync(masterPath, 'utf8'));
-                  const kwLower = kwList.map(k => k.toLowerCase());
-                  const matched = masterList.filter(it => {
-                    const n = (it.name || '').toLowerCase();
-                    const c = (it.category || '').toLowerCase();
-                    const k = (it.keyword || '').toLowerCase();
-                    return kwLower.length === 0 || kwLower.some(q => n.includes(q) || c.includes(q) || k.includes(q));
-                  });
-                  results = (matched.length > 0 ? matched : masterList).slice(0, numLimit);
+                  const cleanKeywords = kwList.map(k => String(k).trim().toLowerCase()).filter(Boolean);
+                  const limitPerKw = Math.max(1, Math.ceil(numLimit / (cleanKeywords.length || 1)));
+                  const selected = [];
+                  const seenIds = new Set();
+
+                  for (const rawKw of cleanKeywords) {
+                    const kwWords = rawKw.split(/\s+/).filter(w => w.length > 1);
+                    // Tier 1: Khớp chuỗi chính xác
+                    let matches = masterList.filter(item => {
+                      const id = item.id || item.shopee_id;
+                      if (seenIds.has(id)) return false;
+                      const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
+                      return text.includes(rawKw);
+                    });
+                    // Tier 2: Khớp tất cả các từ
+                    if (matches.length === 0 && kwWords.length > 0) {
+                      matches = masterList.filter(item => {
+                        const id = item.id || item.shopee_id;
+                        if (seenIds.has(id)) return false;
+                        const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
+                        return kwWords.every(w => text.includes(w));
+                      });
+                    }
+                    // Tier 3: Khớp từ khóa quan trọng
+                    if (matches.length === 0 && kwWords.length > 0) {
+                      const stopWords = new Set(['cho', 'và', 'của', 'các', 'loại', 'mẫu', 'decor', 'phòng', 'ngủ']);
+                      const majorWords = kwWords.filter(w => !stopWords.has(w));
+                      const targetWords = majorWords.length > 0 ? majorWords : kwWords;
+                      matches = masterList.filter(item => {
+                        const id = item.id || item.shopee_id;
+                        if (seenIds.has(id)) return false;
+                        const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
+                        return targetWords.some(w => text.includes(w));
+                      });
+                    }
+                    for (const it of matches.slice(0, limitPerKw)) {
+                      selected.push({ ...it, keyword: rawKw });
+                      seenIds.add(it.id || it.shopee_id);
+                    }
+                  }
+                  if (selected.length < numLimit) {
+                    for (const it of masterList) {
+                      if (selected.length >= numLimit) break;
+                      const id = it.id || it.shopee_id;
+                      if (!seenIds.has(id)) {
+                        selected.push(it);
+                        seenIds.add(id);
+                      }
+                    }
+                  }
+                  results = selected.slice(0, numLimit);
                 } catch {}
               }
             }

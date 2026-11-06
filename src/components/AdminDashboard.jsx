@@ -347,6 +347,77 @@ export default function AdminDashboard({
     }
   };
 
+// ====== SHOPEE MULTI-TIER SMART MATCHER ======
+function filterShopeeCatalog(allItems, keywords, limit = 20) {
+  if (!Array.isArray(allItems) || allItems.length === 0) return [];
+  if (!keywords || keywords.length === 0) return allItems.slice(0, limit);
+
+  const cleanKeywords = keywords.map(k => String(k).trim().toLowerCase()).filter(Boolean);
+  if (cleanKeywords.length === 0) return allItems.slice(0, limit);
+
+  const limitPerKw = Math.max(1, Math.ceil(limit / cleanKeywords.length));
+  const selected = [];
+  const seenIds = new Set();
+
+  for (const rawKw of cleanKeywords) {
+    const kwWords = rawKw.split(/\s+/).filter(w => w.length > 1);
+
+    // Tier 1: Khớp chuỗi chính xác (trong tên, danh mục, từ khóa gốc)
+    let matches = allItems.filter(item => {
+      const id = item.id || item.shopee_id;
+      if (seenIds.has(id)) return false;
+      const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
+      return text.includes(rawKw);
+    });
+
+    // Tier 2: Khớp tất cả các từ trong cụm từ tìm kiếm (VD: 'áo' và 'nam' cùng xuất hiện)
+    if (matches.length === 0 && kwWords.length > 0) {
+      matches = allItems.filter(item => {
+        const id = item.id || item.shopee_id;
+        if (seenIds.has(id)) return false;
+        const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
+        return kwWords.every(w => text.includes(w));
+      });
+    }
+
+    // Tier 3: Khớp từ ngữ quan trọng nhất (bỏ qua hư từ thông thường)
+    if (matches.length === 0 && kwWords.length > 0) {
+      const stopWords = new Set(['cho', 'và', 'của', 'các', 'loại', 'mẫu', 'decor', 'phòng', 'ngủ']);
+      const majorWords = kwWords.filter(w => !stopWords.has(w));
+      const targetWords = majorWords.length > 0 ? majorWords : kwWords;
+      matches = allItems.filter(item => {
+        const id = item.id || item.shopee_id;
+        if (seenIds.has(id)) return false;
+        const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
+        return targetWords.some(w => text.includes(w));
+      });
+    }
+
+    const itemsToAdd = matches.slice(0, limitPerKw);
+    for (const it of itemsToAdd) {
+      selected.push({
+        ...it,
+        keyword: rawKw // Gắn nhãn từ khóa người dùng tìm kiếm
+      });
+      seenIds.add(it.id || it.shopee_id);
+    }
+  }
+
+  // Nếu chưa đủ số lượng yêu cầu, bù thêm các sản phẩm còn lại
+  if (selected.length < limit) {
+    for (const it of allItems) {
+      if (selected.length >= limit) break;
+      const id = it.id || it.shopee_id;
+      if (!seenIds.has(id)) {
+        selected.push(it);
+        seenIds.add(id);
+      }
+    }
+  }
+
+  return selected.slice(0, limit);
+}
+
   // ====== SHOPEE SCRAPER HANDLERS ======
   const handleShopeeScrape = async () => {
     setShopeeLoading(true);
@@ -368,18 +439,11 @@ export default function AdminDashboard({
       }
 
       if (!(await ApiClient.isServerOnline())) {
-        // Trên Vercel Cloud (Static): Lọc chính xác theo đúng từ khóa người dùng yêu cầu
+        // Trên Vercel Cloud (Static): Lọc thông minh theo đúng từng từ khóa người dùng yêu cầu
         const status = await ApiClient.shopee.getStatus();
         const allItems = status.results || [];
         if (allItems.length > 0) {
-          const kwLower = keywords.map(k => k.toLowerCase().trim());
-          const matched = allItems.filter(item => {
-            const name = (item.name || '').toLowerCase();
-            const cat = (item.category || '').toLowerCase();
-            const kw = (item.keyword || '').toLowerCase();
-            return kwLower.some(q => name.includes(q) || cat.includes(q) || kw.includes(q));
-          });
-          const filtered = (matched.length > 0 ? matched : allItems).slice(0, shopeeLimit);
+          const filtered = filterShopeeCatalog(allItems, keywords, shopeeLimit);
           setShopeeResults(filtered);
           setShopeeSuccess(`⚡ Chế độ Cloud 24/7 (Vercel): Đã tìm thấy ${filtered.length} sản phẩm thật từ Shopee theo từ khóa: "${keywords.join(', ')}"!`);
         } else {
@@ -401,14 +465,7 @@ export default function AdminDashboard({
         // Fallback nạp theo từ khóa nếu Shopee hạn chế IP tạm thời
         const status = await ApiClient.shopee.getStatus();
         const allItems = status.results || [];
-        const kwLower = keywords.map(k => k.toLowerCase().trim());
-        const matched = allItems.filter(item => {
-          const name = (item.name || '').toLowerCase();
-          const cat = (item.category || '').toLowerCase();
-          const kw = (item.keyword || '').toLowerCase();
-          return kwLower.some(q => name.includes(q) || cat.includes(q) || kw.includes(q));
-        });
-        products = (matched.length > 0 ? matched : allItems).slice(0, shopeeLimit);
+        products = filterShopeeCatalog(allItems, keywords, shopeeLimit);
       }
 
       if (products.length === 0) {

@@ -9163,6 +9163,26 @@
   ],
   "audit_logs": [
     {
+      "id": "log_1793955323978_3pyp",
+      "timestamp": "2026-11-06T08:55:23.978Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793948120446_nodr",
+      "timestamp": "2026-11-06T06:55:20.446Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
       "id": "log_1793947371880_0zig",
       "timestamp": "2026-11-06T06:42:51.880Z",
       "userId": "usr_admin",

@@ -118,7 +118,15 @@ export const ApiClient = {
           }
           return data;
         } catch (err) {
-          if (err.message && !err.message.includes('405') && !err.message.includes('404')) {
+          // Nếu server lỗi hoặc không hỗ trợ POST (như Vercel static 405), chuyển sang fallback 24/7
+          const isNetworkOrStaticError = !err.message || 
+            err.message.includes('405') || 
+            err.message.includes('404') || 
+            err.message.includes('50') || 
+            err.message.includes('Failed to fetch') ||
+            err.message.includes('NetworkError');
+          
+          if (!isNetworkOrStaticError) {
             throw err;
           }
         }
@@ -178,7 +186,15 @@ export const ApiClient = {
           }
           return data;
         } catch (err) {
-          if (err.message && !err.message.includes('405') && !err.message.includes('404')) {
+          // Nếu server lỗi hoặc không hỗ trợ POST (như Vercel static 405), chuyển sang fallback 24/7
+          const isNetworkOrStaticError = !err.message || 
+            err.message.includes('405') || 
+            err.message.includes('404') || 
+            err.message.includes('50') || 
+            err.message.includes('Failed to fetch') ||
+            err.message.includes('NetworkError');
+          
+          if (!isNetworkOrStaticError) {
             throw err;
           }
         }
