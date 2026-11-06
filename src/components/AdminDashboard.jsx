@@ -367,6 +367,20 @@ export default function AdminDashboard({
         return;
       }
 
+      if (!(await ApiClient.isServerOnline())) {
+        // Trên Vercel Cloud (Static): Nạp 50 sản phẩm thật Shopee từ file đóng gói
+        const status = await ApiClient.shopee.getStatus();
+        const fallbackProducts = status.results || [];
+        if (fallbackProducts.length > 0) {
+          setShopeeResults(fallbackProducts);
+          setShopeeSuccess(`⚡ Chế độ Cloud 24/7 (Vercel): Đã nạp thành công ${fallbackProducts.length} sản phẩm thật từ Shopee vào bảng kiểm tra!`);
+        } else {
+          setShopeeError('Tiến trình cào Python cần backend. Trên Vercel Cloud, vui lòng chọn từ danh sách đã cào sẵn.');
+        }
+        setShopeeLoading(false);
+        return;
+      }
+
       const data = await ApiClient.shopee.scrape(keywords, shopeeLimit);
       // Xử lý an toàn tuyệt đối mảng dữ liệu (tránh lỗi crash .map() khi API trả về Object)
       const products = Array.isArray(data.products)
@@ -400,6 +414,52 @@ export default function AdminDashboard({
     
     try {
       const selectedProducts = shopeeResults.filter((_, i) => shopeeSelected.has(i));
+
+      if (!(await ApiClient.isServerOnline())) {
+        // Fallback lưu trực tiếp vào StorageService trên Vercel Cloud
+        const currentProducts = StorageService.getProducts();
+        const existingShopeeIds = new Set(
+          currentProducts.map(p => p.shopee_id || p.shopeeId).filter(Boolean)
+        );
+        let importedCount = 0;
+        let skipped = 0;
+        const newItems = [];
+        
+        for (const item of selectedProducts) {
+          if (item.shopee_id && existingShopeeIds.has(item.shopee_id)) {
+            skipped++;
+            continue;
+          }
+          const draft = {
+            id: `sp-shopee-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
+            name: item.name || 'Sản phẩm Shopee',
+            category: item.category || 'fashion',
+            price: Number(item.price) || 0,
+            originalPrice: item.orig ? Number(item.orig) : null,
+            stock: 0,
+            stockNeedsReview: true,
+            status: 'draft',
+            images: Array.isArray(item.images) && item.images.length > 0 ? item.images : ['/placeholder.svg'],
+            rating: item.rating || 5.0,
+            reviewsCount: item.reviews || 0,
+            soldCount: item.sold || 0,
+            shopeeId: item.shopee_id,
+            sourceUrl: item.source_url
+          };
+          newItems.push(draft);
+          existingShopeeIds.add(item.shopee_id);
+          importedCount++;
+        }
+        
+        const updatedList = [...currentProducts, ...newItems];
+        StorageService.saveProducts(updatedList);
+        setProducts(updatedList);
+        setShopeeSuccess(`✅ Đã nhập thành công ${importedCount} sản phẩm vào kho hàng (Bản Nháp)! Đã bỏ qua ${skipped} sản phẩm trùng.`);
+        setShopeeSelected(new Set());
+        setShopeeImporting(false);
+        return;
+      }
+
       const data = await ApiClient.shopee.importProducts(selectedProducts);
       
       // Refresh product list

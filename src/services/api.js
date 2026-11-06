@@ -33,7 +33,11 @@ export const ApiClient = {
   async isServerOnline() {
     try {
       const res = await fetch(`${API_BASE}/health`, { method: 'GET', cache: 'no-cache' });
-      return res.ok;
+      if (!res.ok) return false;
+      const contentType = res.headers.get('content-type') || '';
+      if (!contentType.includes('application/json')) return false;
+      const data = await res.json();
+      return data?.status === 'online';
     } catch {
       return false;
     }
@@ -143,7 +147,24 @@ export const ApiClient = {
       method: 'POST',
       body: JSON.stringify({ products })
     }),
-    getStatus: () => request('/shopee/status')
+    getStatus: async () => {
+      try {
+        const res = await fetch('/api/shopee/status');
+        const contentType = res.headers.get('content-type') || '';
+        if (res.ok && contentType.includes('application/json')) {
+          return await res.json();
+        }
+      } catch {}
+      // Fallback nạp dữ liệu cào thật đã đóng gói cho Vercel Cloud tĩnh
+      try {
+        const staticRes = await fetch('/shopee_scraped.json');
+        if (staticRes.ok) {
+          const results = await staticRes.json();
+          return { running: false, progress: 'Nạp dữ liệu Shopee đóng gói', results };
+        }
+      } catch {}
+      return { running: false, results: [] };
+    }
   }
 };
 
