@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Search, Store, ShieldCheck, Sparkles, UserCheck, Heart, PackageCheck, User, LogOut, Bell, Smartphone } from 'lucide-react';
+import { ShoppingBag, Search, Store, ShieldCheck, Sparkles, UserCheck, Heart, PackageCheck, User, LogOut } from 'lucide-react';
 import { formatCurrency } from '../services/aiChatEngine.js';
 
 export default function Header({
@@ -10,9 +10,6 @@ export default function Header({
   onOpenWishlist,
   ordersCount,
   onOpenOrders,
-  updatesCount = 0,
-  onOpenUpdates,
-  onOpenDownload,
   searchQuery,
   setSearchQuery,
   isAdminView,
@@ -46,30 +43,30 @@ export default function Header({
   return (
     <header className="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-stone-200 transition-all">
       {/* Top Announcement Bar */}
-      <div className="bg-stone-900 text-stone-200 text-[11px] sm:text-xs py-1.5 px-3 text-center flex flex-wrap items-center justify-center gap-1 sm:gap-2 font-medium overflow-hidden">
-        <span className="inline-flex items-center gap-1 text-amber-300 shrink-0">
+      <div className="bg-stone-900 text-stone-200 text-xs py-1.5 px-4 text-center flex items-center justify-center gap-2 font-medium">
+        <span className="inline-flex items-center gap-1 text-amber-300">
           <Sparkles className="w-3.5 h-3.5 animate-spin" style={{ animationDuration: '3s' }} /> 
-          Ưu đãi:
+          Ưu đãi khai trương:
         </span>
-        <span className="truncate sm:whitespace-normal">Nhập mã <strong className="text-amber-300 bg-stone-800 px-1.5 py-0.5 rounded tracking-wider">TIEMMOI</strong> giảm 20k • Freeship đơn từ 450k</span>
+        <span>Nhập mã <strong className="text-amber-300 bg-stone-800 px-1.5 py-0.5 rounded tracking-wider">TIEMMOI</strong> giảm 20.000đ • Miễn phí vận chuyển đơn từ 450.000đ</span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16 sm:h-20 gap-2 sm:gap-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div className="flex items-center justify-between h-20 gap-4">
           {/* Brand Logo */}
           <div 
             onClick={() => setIsAdminView(false)}
-            className="flex items-center gap-2 sm:gap-3 cursor-pointer group shrink-0"
+            className="flex items-center gap-3 cursor-pointer group flex-shrink-0"
           >
-            <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-xl sm:rounded-2xl bg-gradient-to-br from-amber-700 via-amber-800 to-stone-900 flex items-center justify-center text-white shadow-md shadow-amber-900/20 group-hover:scale-105 transition-transform">
-              <Store className="w-5 h-5 sm:w-6 sm:h-6 text-amber-100" />
+            <div className="w-11 h-11 rounded-2xl bg-gradient-to-br from-amber-700 via-amber-800 to-stone-900 flex items-center justify-center text-white shadow-md shadow-amber-900/20 group-hover:scale-105 transition-transform">
+              <Store className="w-6 h-6 text-amber-100" />
             </div>
             <div>
-              <div className="flex items-center gap-1 sm:gap-1.5">
-                <span className="font-extrabold text-lg sm:text-2xl tracking-tight text-stone-900 font-serif whitespace-nowrap">Tiệm Nhà Nhỏ</span>
-                <span className="hidden sm:inline-block text-[10px] uppercase font-bold tracking-widest bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-full border border-amber-300">Boutique</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-stone-900 font-serif">Tiệm Nhà Nhỏ</span>
+                <span className="text-[10px] uppercase font-bold tracking-widest bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-full border border-amber-300">Boutique</span>
               </div>
-              <p className="text-xs text-stone-500 hidden md:block">Living & Lifestyle Selection</p>
+              <p className="text-xs text-stone-500 hidden sm:block">Living & Lifestyle Selection</p>
             </div>
           </div>
 
@@ -98,45 +95,17 @@ export default function Header({
           )}
 
           {/* Action Buttons */}
-          <div className="flex items-center gap-1.5 sm:gap-2.5 shrink-0">
-
-            {/* Install / Download App Button */}
-            {!isAdminView && (
-              <button
-                onClick={onOpenDownload}
-                className="flex items-center gap-1 px-2 py-1.5 sm:px-3 sm:py-2 rounded-xl text-xs font-bold text-orange-700 bg-orange-50 hover:bg-orange-100 border border-orange-200/80 transition-all shadow-2xs active:scale-95 cursor-pointer"
-                title="Cài đặt App Tiệm Nhà Nhỏ lên điện thoại"
-              >
-                <Smartphone className="w-4 h-4 text-orange-600 animate-pulse" />
-                <span className="hidden sm:inline">Cài App</span>
-              </button>
-            )}
-
-            {/* Shop Updates Bell Icon */}
-            {!isAdminView && (
-              <button
-                onClick={onOpenUpdates}
-                className="relative p-2 sm:p-2.5 rounded-xl bg-stone-100 hover:bg-amber-50 text-stone-700 hover:text-amber-800 border border-stone-200 transition-colors cursor-pointer"
-                title="Bản cập nhật từ Shop & Shopee"
-              >
-                <Bell className="w-4 h-4" />
-                {updatesCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 bg-orange-500 text-white font-bold text-[10px] w-4 h-4 rounded-full flex items-center justify-center ring-2 ring-white animate-bounce">
-                    {updatesCount}
-                  </span>
-                )}
-              </button>
-            )}
+          <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
             
             {/* Customer Orders button */}
             {!isAdminView && (
               <button
                 onClick={onOpenOrders}
-                className="hidden md:flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-colors"
                 title="Xem đơn hàng của bạn"
               >
                 <PackageCheck className="w-4 h-4 text-stone-600" />
-                <span className="hidden lg:inline">Đơn của tôi</span>
+                <span className="hidden sm:inline">Đơn của tôi</span>
                 {ordersCount > 0 && (
                   <span className="bg-amber-900 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
                     {ordersCount}
@@ -149,7 +118,7 @@ export default function Header({
             {!isAdminView && (
               <button
                 onClick={onOpenWishlist}
-                className="hidden sm:flex relative p-2.5 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-600 border border-stone-200 transition-colors"
+                className="relative p-2.5 rounded-xl bg-stone-100 hover:bg-rose-50 text-stone-700 hover:text-rose-600 border border-stone-200 transition-colors"
                 title="Sản phẩm yêu thích"
               >
                 <Heart className={`w-4 h-4 ${wishlistCount > 0 ? 'fill-rose-500 text-rose-500' : ''}`} />
@@ -163,19 +132,16 @@ export default function Header({
 
             {/* User Account / Auth Button */}
             {currentUser ? (
-              <div className="flex items-center gap-1 bg-stone-100 border border-stone-200 p-1 sm:p-1.5 rounded-xl">
-                <div className="hidden sm:flex flex-col text-left px-1.5">
-                  <span className="text-xs font-bold text-stone-900 max-w-[100px] truncate leading-tight">
+              <div className="flex items-center gap-1.5 bg-stone-100 border border-stone-200 p-1.5 rounded-xl">
+                <div className="flex flex-col text-left px-1.5">
+                  <span className="text-xs font-bold text-stone-900 max-w-[110px] truncate leading-tight">
                     {currentUser.name}
                   </span>
                   <div className="mt-0.5">{getRoleBadge(currentUser.role)}</div>
                 </div>
-                <div className="sm:hidden px-1 text-stone-700">
-                  <User className="w-4 h-4" />
-                </div>
                 <button
                   onClick={onLogout}
-                  className="p-1 sm:p-1.5 text-stone-400 hover:text-rose-600 hover:bg-white rounded-lg transition-colors"
+                  className="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-white rounded-lg transition-colors"
                   title="Đăng xuất"
                 >
                   <LogOut className="w-3.5 h-3.5" />
@@ -184,11 +150,11 @@ export default function Header({
             ) : (
               <button
                 onClick={onOpenAuth}
-                className="flex items-center gap-1 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold text-stone-800 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-stone-800 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-colors"
                 title="Đăng nhập hoặc đăng ký tài khoản"
               >
                 <User className="w-4 h-4 text-stone-600" />
-                <span className="hidden sm:inline">Đăng Nhập</span>
+                <span>Đăng Nhập</span>
               </button>
             )}
 
@@ -196,7 +162,7 @@ export default function Header({
             {(currentUser?.role === 'admin' || currentUser?.role === 'staff' || isAdminView) && (
               <button
                 onClick={handleAdminToggle}
-                className={`flex items-center gap-1 p-2 sm:px-3 sm:py-2 rounded-xl text-xs font-bold transition-all border ${
+                className={`flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all border ${
                   isAdminView
                     ? 'bg-amber-900 text-white border-amber-900 shadow-sm'
                     : 'bg-amber-100/70 text-amber-950 hover:bg-amber-200/80 border-amber-300'
@@ -206,13 +172,15 @@ export default function Header({
                   <>
                     <UserCheck className="w-4 h-4 text-amber-300" />
                     <span className="hidden sm:inline">Về Cửa Hàng</span>
+                    <span className="sm:hidden">Cửa hàng</span>
                   </>
                 ) : (
                   <>
                     <ShieldCheck className="w-4 h-4 text-amber-800" />
                     <span className="hidden sm:inline">
-                      {currentUser?.role === 'staff' ? 'Xử Lý Đơn' : 'Quản Trị'}
+                      {currentUser?.role === 'staff' ? 'Xử Lý Đơn Hàng' : 'Quản Trị Shop'}
                     </span>
+                    <span className="sm:hidden">Quản trị</span>
                   </>
                 )}
               </button>
@@ -222,12 +190,12 @@ export default function Header({
             {!isAdminView && (
               <button
                 onClick={onOpenCart}
-                className="relative flex items-center gap-1.5 sm:gap-2.5 bg-stone-900 hover:bg-stone-800 text-white p-2 sm:px-4 sm:py-2.5 rounded-xl text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95"
+                className="relative flex items-center gap-2.5 bg-stone-900 hover:bg-stone-800 text-white px-3.5 sm:px-4 py-2.5 rounded-xl text-sm font-medium transition-all shadow-sm hover:shadow active:scale-95"
               >
                 <div className="relative">
-                  <ShoppingBag className="w-4 h-4 sm:w-5 sm:h-5 text-amber-200" />
+                  <ShoppingBag className="w-5 h-5 text-amber-200" />
                   {cartCount > 0 && (
-                    <span className="absolute -top-2 -right-2 sm:-top-2 sm:-right-2.5 bg-rose-500 text-white font-bold text-[10px] w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center ring-2 ring-white animate-pulse">
+                    <span className="absolute -top-2 -right-2.5 bg-rose-500 text-white font-bold text-[10px] w-5 h-5 rounded-full flex items-center justify-center ring-2 ring-white animate-pulse">
                       {cartCount}
                     </span>
                   )}

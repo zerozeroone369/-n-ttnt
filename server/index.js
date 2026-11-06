@@ -7,7 +7,6 @@ import { spawn } from 'child_process';
 import { readFileSync, existsSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
-import { crawlShopeeNode } from './shopeeCrawler.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -29,83 +28,6 @@ const PORT = process.env.PORT || 5000;
 app.use(cors({ origin: true, credentials: true }));
 app.use(express.json());
 app.use(authenticateUser);
-
-// ============================================================================
-// REAL-TIME SSE (SERVER-SENT EVENTS) EVENT HUB
-// ============================================================================
-const sseClients = new Set();
-
-export function broadcastEvent(eventName, payload) {
-  const data = JSON.stringify(payload);
-  const deadClients = [];
-  for (const client of sseClients) {
-    try {
-      client.write(`event: ${eventName}\ndata: ${data}\n\n`);
-    } catch (e) {
-      deadClients.push(client);
-    }
-  }
-  deadClients.forEach(c => sseClients.delete(c));
-}
-
-// SSE Connection Endpoint
-app.get('/api/events', (req, res) => {
-  res.writeHead(200, {
-    'Content-Type': 'text/event-stream',
-    'Cache-Control': 'no-cache',
-    'Connection': 'keep-alive',
-    'Access-Control-Allow-Origin': '*'
-  });
-
-  sseClients.add(res);
-
-  // Send initial connection packet with current versions
-  const shopVersion = db.getMeta('shop_version') || Date.now();
-  const latestUpdate = (db.get('shop_updates') || [])[0] || null;
-
-  res.write(`event: connected\ndata: ${JSON.stringify({
-    message: 'Kết nối SSE trực tiếp thành công',
-    appVersion: '1.1.0',
-    shopVersion,
-    latestUpdate,
-    timestamp: new Date().toISOString()
-  })}\n\n`);
-
-  // Heartbeat ping every 25 seconds
-  const heartbeat = setInterval(() => {
-    try {
-      res.write(': ping\n\n');
-    } catch {
-      clearInterval(heartbeat);
-      sseClients.delete(res);
-    }
-  }, 25000);
-
-  req.on('close', () => {
-    clearInterval(heartbeat);
-    sseClients.delete(res);
-  });
-});
-
-// App & Shop Version Check (In-App OTA Check)
-app.get('/api/app/version', (req, res) => {
-  const shopVersion = db.getMeta('shop_version') || Date.now();
-  const updates = db.get('shop_updates') || [];
-  res.json({
-    appVersion: '1.1.0',
-    minSupportedVersion: '1.0.0',
-    name: 'Tiệm Nhà Nhỏ - E-Commerce AI App',
-    shopVersion,
-    latestUpdate: updates[0] || null,
-    releaseNotes: 'Bản cập nhật v1.1.0: Đồng bộ sản phẩm Shopee thời gian thực, chế độ App PWA Standalone cho điện thoại & Thông báo bản cập nhật tự động.'
-  });
-});
-
-// Shop Updates History
-app.get('/api/shop/updates', (req, res) => {
-  const updates = db.get('shop_updates') || [];
-  res.json(updates.slice(0, 30));
-});
 
 // ============================================================================
 // 1. AUTHENTICATION & USER MANAGEMENT ROUTES
@@ -189,9 +111,6 @@ app.get('/api/products', (req, res) => {
 // Create product (Admin only)
 app.post('/api/products', requireRole(['admin']), (req, res) => {
   const newProduct = db.insert('products', req.body);
-  const shopVersion = Date.now();
-  db.setMeta('shop_version', shopVersion);
-  broadcastEvent('product_update', { action: 'CREATE', product: newProduct, shopVersion });
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_CREATE', newProduct.id, `Thêm sản phẩm mới: ${newProduct.name}`);
   res.status(201).json(newProduct);
 });
@@ -203,9 +122,6 @@ app.put('/api/products/:id', requireRole(['admin']), (req, res) => {
   if (!updated) {
     return res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
   }
-  const shopVersion = Date.now();
-  db.setMeta('shop_version', shopVersion);
-  broadcastEvent('product_update', { action: 'UPDATE', product: updated, shopVersion });
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_UPDATE', id, `Chỉnh sửa sản phẩm: ${updated.name}`);
   res.json(updated);
 });
@@ -218,9 +134,6 @@ app.delete('/api/products/:id', requireRole(['admin']), (req, res) => {
   if (!isDeleted) {
     return res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
   }
-  const shopVersion = Date.now();
-  db.setMeta('shop_version', shopVersion);
-  broadcastEvent('product_update', { action: 'DELETE', productId: id, shopVersion });
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_DELETE', id, `Xóa sản phẩm: ${target?.name || id}`);
   res.json({ message: 'Đã xóa sản phẩm thành công.' });
 });
@@ -230,14 +143,30 @@ app.post('/api/products/:id/reviews', (req, res) => {
   const { id } = req.params;
   const { rating, comment, author } = req.body;
 
-  const reviewAuthor = req.user?.name || author || 'Khách vãng lai';
+  // Xác thực quyền đánh giá: Chỉ gắn nhãn "Đã mua hàng" (verified: true) nếu khách hàng đã đăng nhập
+  // và có đơn hàng thành công (status: delivered) chứa sản phẩm này trong lịch sử mua hàng.
+  let isVerifiedBuyer = false;
+  if (req.user) {
+    const deliveredOrder = db.findOne('orders', o => 
+      o.customerId === req.user.id &&
+      o.orderStatus === 'delivered' &&
+      Array.isArray(o.items) &&
+      o.items.some(it => (it.productId || it.id) === id)
+    );
+    if (deliveredOrder) {
+      isVerifiedBuyer = true;
+    }
+  }
+
+  const reviewAuthor = req.user?.name || author || 'Khách ghé thăm';
   const newReview = {
     id: `rev_${Date.now()}`,
     author: reviewAuthor,
-    rating: Number(rating) || 5,
-    comment: comment || '',
+    userId: req.user?.id || null,
+    rating: Math.max(1, Math.min(5, Number(rating) || 5)),
+    comment: (comment || '').trim(),
     date: new Date().toISOString().split('T')[0],
-    verified: true
+    verified: isVerifiedBuyer
   };
 
   const updatedProduct = db.update('products', p => p.id === id, (product) => {
@@ -266,25 +195,42 @@ app.post('/api/products/:id/reviews', (req, res) => {
 // 3. ORDER MANAGEMENT ROUTES & AUDIT LOGGING
 // ============================================================================
 
-// Get orders: Admin & Staff see all orders; Customers see their own orders
+// Get orders: Admin & Staff see all orders; Authenticated Customers ONLY see their own orders
 app.get('/api/orders', (req, res) => {
   if (req.user && (req.user.role === 'admin' || req.user.role === 'staff')) {
     return res.json(db.get('orders'));
   }
 
   if (req.user && req.user.role === 'customer') {
-    const customerOrders = db.find('orders', o => 
-      o.customerId === req.user.id || 
-      o.customer?.email?.toLowerCase() === req.user.email.toLowerCase() ||
-      o.customer?.phone === req.user.phone
-    );
+    // Phân quyền bảo mật: Chỉ lấy đúng các đơn gắn customerId của người dùng đã xác thực
+    const customerOrders = db.find('orders', o => o.customerId === req.user.id);
     return res.json(customerOrders);
   }
 
   return res.status(401).json({ error: 'Yêu cầu đăng nhập để xem đơn hàng.' });
 });
 
-// Create new order
+// Tra cứu đơn hàng an toàn cho khách vãng lai (Guest) - Đòi hỏi cả Order ID và Số điện thoại nhận hàng
+app.post('/api/orders/track', (req, res) => {
+  const { orderId, phone } = req.body;
+  if (!orderId || !phone) {
+    return res.status(400).json({ error: 'Vui lòng cung cấp đầy đủ Mã đơn hàng và Số điện thoại đặt hàng.' });
+  }
+
+  const cleanPhone = String(phone).replace(/\D/g, '');
+  const order = db.findOne('orders', o => 
+    o.id.toLowerCase() === String(orderId).trim().toLowerCase() &&
+    String(o.customer?.phone || '').replace(/\D/g, '') === cleanPhone
+  );
+
+  if (!order) {
+    return res.status(404).json({ error: 'Không tìm thấy đơn hàng phù hợp với thông tin đã nhập.' });
+  }
+
+  res.json(order);
+});
+
+// Create new order - SERVER TỰ TÍNH TOÁN TOÀN BỘ GIÁ TIỀN & PHÍ VẬN CHUYỂN
 app.post('/api/orders', (req, res) => {
   const orderData = req.body;
 
@@ -292,50 +238,124 @@ app.post('/api/orders', (req, res) => {
     return res.status(400).json({ error: 'Đơn hàng phải có ít nhất một sản phẩm.' });
   }
 
-  const validatedItems = orderData.items.map(item => {
+  // 1. Kiểm tra từng sản phẩm và tính toán giá từ DATABASE tin cậy của server (chống can thiệp client)
+  let calculatedSubtotal = 0;
+  const verifiedItems = [];
+
+  for (const item of orderData.items) {
     const productId = item.productId || item.id;
     const quantity = Number(item.quantity);
     const product = db.findOne('products', p => p.id === productId);
-    return { item, productId, quantity, product };
-  });
 
-  const invalidItem = validatedItems.find(({ productId, quantity, product }) =>
-    !productId || !product || !Number.isInteger(quantity) || quantity < 1 ||
-    Number(product.stock) <= 0 || quantity > Number(product.stock)
-  );
+    if (!product) {
+      return res.status(400).json({ error: `Sản phẩm ${productId} không tồn tại trong hệ thống.` });
+    }
 
-  if (invalidItem) {
-    return res.status(400).json({
-      error: `Sản phẩm ${invalidItem.productId || 'không xác định'} không đủ tồn kho hoặc số lượng không hợp lệ.`
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({ error: `Số lượng cho sản phẩm "${product.name}" không hợp lệ.` });
+    }
+
+    if (Number(product.stock) < quantity) {
+      return res.status(400).json({ 
+        error: `Sản phẩm "${product.name}" không đủ hàng trong kho (Còn: ${product.stock}, yêu cầu: ${quantity}).` 
+      });
+    }
+
+    const itemPrice = Number(product.price) || 0;
+    const itemSubtotal = itemPrice * quantity;
+    calculatedSubtotal += itemSubtotal;
+
+    verifiedItems.push({
+      id: product.id,
+      productId: product.id,
+      name: product.name,
+      price: itemPrice,
+      image: (product.images && product.images[0]) || '/products/sp-001.jpg',
+      quantity,
+      selectedColor: item.selectedColor || 'Mặc định',
+      selectedSize: item.selectedSize || 'Tiêu chuẩn',
+      subtotal: itemSubtotal
     });
   }
 
+  // 2. Tính phí vận chuyển ở Server
+  // Standard: 30.000đ (miễn phí nếu đơn >= 500.000đ), Express: 45.000đ
+  const shippingMethod = orderData.shippingMethod === 'express' ? 'express' : 'standard';
+  const isFreeShip = calculatedSubtotal >= 500000;
+  const calculatedShippingFee = shippingMethod === 'express' ? 45000 : (isFreeShip ? 0 : 30000);
+
+  // 3. Kiểm tra và áp dụng mã giảm giá (Coupon/Voucher) trên Server
+  let calculatedDiscount = 0;
+  let verifiedCoupon = null;
+  const couponCode = orderData.couponCode || orderData.appliedCoupon?.code;
+
+  if (couponCode) {
+    const coupon = db.findOne('coupons', c => c.code.toUpperCase() === String(couponCode).trim().toUpperCase() && c.isActive);
+    if (coupon) {
+      const minOrder = Number(coupon.minOrder) || 0;
+      if (calculatedSubtotal >= minOrder) {
+        if (coupon.type === 'percentage') {
+          calculatedDiscount = Math.round(calculatedSubtotal * (Number(coupon.discount) / 100));
+        } else {
+          calculatedDiscount = Math.min(calculatedSubtotal, Number(coupon.discount) || 0);
+        }
+        verifiedCoupon = {
+          code: coupon.code,
+          type: coupon.type,
+          discount: coupon.discount,
+          description: coupon.description || ''
+        };
+      }
+    }
+  }
+
+  // 4. Tổng tiền cuối cùng = Subtotal - Discount + ShippingFee
+  const calculatedTotal = Math.max(0, calculatedSubtotal - calculatedDiscount + calculatedShippingFee);
+
+  // 5. Sinh mã đơn hàng duy nhất, chống trùng lặp
+  const uniqueOrderId = `ORD-${Date.now().toString(36).toUpperCase()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
   const newOrder = {
-    ...orderData,
-    id: orderData.id || `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+    id: uniqueOrderId,
+    createdAt: new Date().toISOString(),
+    customer: {
+      name: orderData.customer?.name || orderData.name || 'Khách vãng lai',
+      phone: orderData.customer?.phone || orderData.phone || '',
+      email: orderData.customer?.email || orderData.email || (req.user ? req.user.email : ''),
+      address: orderData.customer?.address || orderData.address || '',
+      city: orderData.customer?.city || orderData.city || 'Hà Nội',
+      notes: orderData.customer?.notes || orderData.notes || ''
+    },
+    items: verifiedItems,
+    subtotal: calculatedSubtotal,
+    shippingFee: calculatedShippingFee,
+    shippingMethod,
+    discount: calculatedDiscount,
+    appliedCoupon: verifiedCoupon,
+    total: calculatedTotal,
+    paymentMethod: orderData.paymentMethod || 'cod',
+    orderStatus: 'pending',
+    paymentStatus: orderData.paymentMethod === 'cod' ? 'unpaid' : 'pending_verification',
     customerId: req.user?.id || null,
     handledBy: 'Chờ phân công',
     timeline: [
       {
         status: 'pending',
         time: new Date().toISOString(),
-        note: 'Đơn hàng được khởi tạo thành công'
+        note: 'Đơn hàng được khởi tạo thành công và đã được máy chủ tính lại giá an toàn.'
       }
     ]
   };
 
   const savedOrder = db.insert('orders', newOrder);
 
-  // Deduct stock for products
-  if (Array.isArray(savedOrder.items)) {
-    savedOrder.items.forEach(item => {
-      const productId = item.productId || item.id;
-      db.update('products', p => p.id === productId, p => ({
-        ...p,
-        stock: Math.max(0, (p.stock || 0) - item.quantity)
-      }));
-    });
-  }
+  // 6. Trừ tồn kho thực tế trong database
+  savedOrder.items.forEach(item => {
+    db.update('products', p => p.id === item.productId, p => ({
+      ...p,
+      stock: Math.max(0, (Number(p.stock) || 0) - item.quantity)
+    }));
+  });
 
   db.logAudit(
     req.user?.id || 'guest',
@@ -343,13 +363,13 @@ app.post('/api/orders', (req, res) => {
     req.user?.role || 'customer',
     'ORDER_CREATE',
     savedOrder.id,
-    `Tạo đơn hàng ${savedOrder.id} - Tổng tiền: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(savedOrder.total)}`
+    `Tạo đơn hàng ${savedOrder.id} - Tổng tiền server tính: ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(savedOrder.total)}`
   );
 
   res.status(201).json(savedOrder);
 });
 
-// Update Order Status (Staff & Admin only) - Crucial for audit trail!
+// Update Order Status (Staff & Admin only) - Kiểm soát chặt chuyển trạng thái & Hoàn tồn kho khi hủy
 app.put('/api/orders/:id/status', requireRole(['admin', 'staff']), (req, res) => {
   const { id } = req.params;
   const { status, trackingCode, trackingCarrier, note } = req.body;
@@ -361,6 +381,31 @@ app.put('/api/orders/:id/status', requireRole(['admin', 'staff']), (req, res) =>
     delivered: 'Đã giao thành công',
     cancelled: 'Đã hủy'
   };
+
+  // Các bước chuyển trạng thái hợp lệ
+  const ALLOWED_TRANSITIONS = {
+    pending: ['processing', 'cancelled'],
+    processing: ['shipping', 'cancelled'],
+    shipping: ['delivered', 'cancelled'],
+    delivered: [], // Trạng thái kết thúc - không được thay đổi
+    cancelled: []  // Trạng thái kết thúc - không thể khôi phục
+  };
+
+  const currentOrder = db.findOne('orders', o => o.id === id);
+  if (!currentOrder) {
+    return res.status(404).json({ error: 'Không tìm thấy đơn hàng.' });
+  }
+
+  if (currentOrder.orderStatus === status) {
+    return res.json(currentOrder); // Giữ nguyên nếu không đổi
+  }
+
+  const validNextStates = ALLOWED_TRANSITIONS[currentOrder.orderStatus] || [];
+  if (!validNextStates.includes(status)) {
+    return res.status(400).json({ 
+      error: `Chuyển trạng thái từ "${statusLabels[currentOrder.orderStatus] || currentOrder.orderStatus}" sang "${statusLabels[status] || status}" không hợp lệ.` 
+    });
+  }
 
   const staffName = req.user.name;
   const staffRole = req.user.role === 'admin' ? 'Chủ Shop' : 'Nhân Viên Xử Lý Đơn';
@@ -384,8 +429,15 @@ app.put('/api/orders/:id/status', requireRole(['admin', 'staff']), (req, res) =>
     };
   });
 
-  if (!updatedOrder) {
-    return res.status(404).json({ error: 'Không tìm thấy đơn hàng.' });
+  // NẾU ĐƠN BỊ HỦY -> HOÀN TRẢ TỒN KHO CHO SẢN PHẨM
+  if (status === 'cancelled' && Array.isArray(currentOrder.items)) {
+    currentOrder.items.forEach(item => {
+      const pid = item.productId || item.id;
+      db.update('products', p => p.id === pid, prod => ({
+        ...prod,
+        stock: (Number(prod.stock) || 0) + Number(item.quantity)
+      }));
+    });
   }
 
   // Record strict Audit Log
@@ -511,24 +563,24 @@ app.post('/api/chat', async (req, res) => {
 
   const store = storeInfo;
 
-  const systemInstruction = `Bạn là **Trợ Lý AI Toàn Diện & Chuyên Gia Tư Vấn Bán Hàng** của **"${store.name || 'Tiệm Nhà Nhỏ'}"** — boutique phong cách sống & đồ thủ công cao cấp.
+  const systemInstruction = `Bạn là **Nhân Viên Tư Vấn Bán Hàng Thông Minh** của **"${store.name || 'Tiệm Nhà Nhỏ'}"** — boutique thủ công tại Hà Nội.
 
-🌟 ĐỊNH HƯỚNG & NĂNG LỰC TOÀN DIỆN:
-Bạn là một trợ lý thông minh, hiểu biết sâu rộng, cởi mở và ấm áp. Bạn KHÔNG bị gò bó hay từ chối câu hỏi của khách hàng:
-1. 💡 **Trò chuyện & Tư vấn Đa Lĩnh Vực:** Bạn sẵn lòng trò chuyện, tư vấn về mọi chủ đề cuộc sống: phong cách sống (lifestyle), nghệ thuật phối đồ (mix & match), cách trang trí không gian sống, kiến thức phong thủy, mẹo vặt gia đình, thưởng thức cà phê, văn hóa, công việc, tâm lý chọn quà, hoặc đơn giản là trò chuyện giao lưu, giải đáp thắc mắc thường thức và chia sẻ như một người bạn tri kỷ.
-2. 🛍️ **Cố vấn Sản phẩm & Bán hàng Chuyên sâu:** Luôn am hiểu tường tận toàn bộ kho hàng của Tiệm Nhà Nhỏ: chất liệu, kích thước/bảng size, xuất xứ, tính năng, cách bảo quản và chính sách bán hàng.
-3. 🔗 **Khéo léo Kết nối Thực tế:** Khi khách hỏi về một chủ đề đời sống (ví dụ: cách giảm stress sau giờ làm, cách trang trí góc bàn làm việc, gợi ý quà sinh nhật cho bạn thân, trang phục đi du lịch,...), hãy đưa ra lời khuyên hữu ích, sâu sắc và chân thành trước, sau đó KHÉO LÉO gợi ý 1-2 món đồ liên quan đang có tại Tiệm Nhà Nhỏ để hỗ trợ khách tốt nhất.
-4. ❌ CHỈ từ chối những nội dung vi phạm pháp luật, độc hại, bạo lực hoặc ngôn từ thù địch. Đối với mọi câu hỏi bình thường khác (khoa học, đời sống, thơ văn, lời chúc, tâm sự,...), hãy trả lời thông minh, dí dỏm, tinh tế và lịch sự.
+🎯 NHIỆM VỤ: Hỗ trợ khách trong phạm vi thương mại của tiệm:
+  1. Tư vấn & gợi ý sản phẩm phù hợp ngân sách / nhu cầu / phong cách
+  2. Tư vấn chọn size quần áo (chiều cao / cân nặng)
+  3. Chính sách bán sỉ, quà tặng doanh nghiệp, xuất hóa đơn VAT
+  4. Tra cứu tiến độ đơn hàng
+  5. Chính sách đổi trả, vận chuyển, thanh toán
+  6. Hướng dẫn sử dụng và bảo quản sản phẩm
 
-💬 PHONG CÁCH GIAO TIẾP:
-• Thân thiện, chu đáo, tinh tế và đáng tin cậy. Xưng "em" và gọi khách là "bạn" hoặc "anh/chị".
-• Dùng emoji sinh động, nhẹ nhàng (🌿, ✨, ☕, 🎁, 🛍️).
-• Trình bày rõ ràng, ngắt đoạn mạch lạc, dễ đọc.
+❌ TỪ CHỐI lịch sự mọi câu hỏi ngoài phạm vi thương mại (lập trình, toán học, thời tiết, tin tức, chính trị, y tế, crypto...).
 
-📦 DANH MỤC SẢN PHẨM HIỆN CÓ CỦA TIỆM (${inStock.length} sản phẩm):
+💬 PHONG CÁCH: Lịch thiệp, thân thiện, thông thái. Xưng "em" / "bạn". Ngắn gọn súc tích, dùng emoji nhẹ nhàng.
+
+📦 DANH MỤC SẢN PHẨM (${inStock.length} sản phẩm còn hàng):
 ${catalogText}
 
-📋 ĐƠN HÀNG GẦN ĐÂY CỦA KHÁCH:
+📋 ĐƠN HÀNG GẦN ĐÂY:
 ${ordersText}
 
 🏪 THÔNG TIN TIỆM:
@@ -538,42 +590,37 @@ ${ordersText}
   • Freeship từ: ${vnd(store.freeshipThreshold || 450000)}
   • Ship tiêu chuẩn: ${vnd(store.standardShippingFee || 30000)} (2–3 ngày)
   • Ship hỏa tốc: ${vnd(store.expressShippingFee || 45000)} (2–4h nội thành)
-  • Đổi trả: 1 đổi 1 trong 7 ngày nếu lỗi hoặc không vừa ý
+  • Đổi trả: 1 đổi 1 trong 7 ngày
 
-📐 BẢNG SIZE ÁO & QUẦN:
-  • S: <1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg | XXL: >1m80, >83kg
+📐 BẢNG SIZE ÁO LINEN:
+  • S: <1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg
 
-💼 CHÍNH SÁCH BÁN SỈ & DOANH NGHIỆP:
-  • 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25%+freeship | ≥100 món: giảm 30–35%+hợp đồng. Hỗ trợ khắc logo theo yêu cầu & xuất hóa đơn VAT điện tử.
+💼 BÁN SỈ: 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25%+freeship | ≥100 món: giảm 30–35%+hợp đồng. Hỗ trợ xuất hóa đơn VAT, khắc logo.
 
-📌 QUY TẮC GỢI Ý SẢN PHẨM: Khi có sản phẩm phù hợp trong danh mục của shop, hãy đặt [RECOMMENDED_IDS: sp-xx, sp-yy] ở CUỐI câu trả lời (tối đa 4 ID từ danh mục trên, không bịa ID). Nếu câu hỏi hoàn toàn là kiến thức thuần túy không có sản phẩm liên quan, không cần gắn thẻ này.`;
+📌 KHI GỢI Ý SẢN PHẨM: Luôn đặt [RECOMMENDED_IDS: sp-xx, sp-yy] ở CUỐI câu trả lời (tối đa 4 ID từ danh mục trên, không bịa ID).`;
 
   try {
-    const GEMINI_MODEL = 'gemini-3.5-flash-lite';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    const GEMINI_MODEL = 'gemini-1.5-flash';
+    // Dùng header x-goog-api-key + /v1 (hỗ trợ key dạng AQ. lẫn AIzaSy...)
+    const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent`;
 
     const requestBody = {
       system_instruction: { parts: [{ text: systemInstruction }] },
       contents: [{ role: 'user', parts: [{ text: message.trim() }] }],
       generationConfig: {
-        temperature: 0.75,
-        maxOutputTokens: 1200,
+        temperature: 0.7,
+        maxOutputTokens: 1024,
       }
     };
 
     const response = await fetch(url, {
       method: 'POST',
-      signal: controller.signal,
       headers: {
-        'Content-Type': 'application/json'
+        'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY
       },
       body: JSON.stringify(requestBody)
     });
-
-    clearTimeout(timeoutId);
 
     if (!response.ok) {
       const errBody = await response.text().catch(() => response.statusText);
@@ -620,154 +667,158 @@ ${ordersText}
 });
 
 // ============================================================================
-// 10. SHOPEE SCRAPING API WITH REAL-TIME LIVE UPDATE
+// 10. SHOPEE SCRAPING & IMPORT API
 // ============================================================================
 
 let scrapeState = { running: false, progress: '', error: null };
 
-// Trigger the Shopee scraper (High-Speed Engine by default, Playwright if requested)
-app.post('/api/shopee/scrape', requireRole('admin'), async (req, res) => {
+// Trigger the Python scraper with keywords from request
+app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   if (scrapeState.running) {
-    // Reset if it was stuck for more than 30 seconds
-    scrapeState.running = false;
+    return res.status(400).json({ error: 'Tiến trình cào dữ liệu đang chạy. Vui lòng chờ đợt trước hoàn tất.' });
   }
 
-  const keywords = Array.isArray(req.body.keywords) ? req.body.keywords : (req.body.keywords || '').split(',').map(s => s.trim()).filter(Boolean);
+  const { keywords } = req.body;
+  const kwList = Array.isArray(keywords) && keywords.length > 0 
+    ? keywords.map(k => String(k).trim()).filter(Boolean)
+    : [];
+
+  scrapeState = { running: true, progress: 'Đang khởi động cào dữ liệu...', error: null };
   const scraperPath = join(PROJECT_ROOT, 'shopee_scraper.py');
   const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
-  const useBrowser = req.body.useBrowser === true;
 
-  scrapeState = { running: true, progress: 'Đang thu thập sản phẩm từ Shopee...', error: null };
-
-  const runNodeCrawler = async () => {
-    try {
-      scrapeState.progress = 'Đang thu thập sản phẩm từ Shopee qua High-Speed Engine...';
-      const results = await crawlShopeeNode(keywords.length ? keywords : undefined, 6);
-      scrapeState.running = false;
-      scrapeState.progress = `Hoàn tất! Thu thập thành công ${results.length} sản phẩm từ Shopee.`;
-      return res.json({ success: true, results, source: 'fast_engine' });
-    } catch (err) {
-      scrapeState.running = false;
-      scrapeState.error = err.message;
-      return res.status(500).json({ error: `Lỗi cào dữ liệu: ${err.message}` });
-    }
-  };
-
-  // If browser automation is not explicitly requested, run High-Speed Engine directly (instant 1s response)
-  if (!useBrowser) {
-    return runNodeCrawler();
+  if (!existsSync(scraperPath)) {
+    scrapeState = { running: false, progress: 'Thất bại', error: 'Không tìm thấy script shopee_scraper.py' };
+    return res.status(500).json({ error: 'Không tìm thấy script cào dữ liệu' });
   }
 
-  // Otherwise, attempt Python Playwright if requested
-  let crawlerExecuted = false;
-  try {
-    const pythonArgs = [scraperPath];
-    if (keywords.length > 0) {
-      pythonArgs.push('--keywords', keywords.join(','));
-    }
+  // Chuẩn bị tham số dòng lệnh truyền từ khóa động
+  const scriptArgs = [scraperPath];
+  if (kwList.length > 0) {
+    scriptArgs.push('--keywords', ...kwList);
+  }
 
-    const pythonProcess = spawn('python', pythonArgs, {
-      cwd: PROJECT_ROOT,
-      timeout: 2 * 60 * 1000,
-      env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
-    });
+  const pythonProcess = spawn('python', scriptArgs, {
+    cwd: PROJECT_ROOT,
+    timeout: 90 * 1000, // 90 giây timeout tối đa, tránh treo vô hạn
+    env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+  });
 
-    pythonProcess.stdout.on('data', (data) => {
-      scrapeState.progress += data.toString();
-    });
+  pythonProcess.stdout.on('data', (data) => {
+    scrapeState.progress += data.toString();
+  });
 
-    pythonProcess.stderr.on('data', (data) => {
-      console.warn(`[Shopee Python Scraper] ${data}`);
-    });
+  pythonProcess.stderr.on('data', (data) => {
+    console.error(`[Scraper Log]: ${data}`);
+  });
 
-    pythonProcess.on('close', async (code) => {
-      if (crawlerExecuted || res.headersSent) return;
-      if (code !== 0) {
-        return runNodeCrawler();
+  pythonProcess.on('close', (code) => {
+    scrapeState.running = false;
+    
+    if (code !== 0) {
+      scrapeState.error = `Tiến trình cào thoát với mã lỗi ${code}`;
+      scrapeState.progress += `\nThất bại.`;
+      if (!res.headersSent) {
+        return res.status(500).json({ error: scrapeState.error, progress: scrapeState.progress });
       }
-
-      scrapeState.running = false;
+    } else {
+      scrapeState.progress += `\nHoàn thành cào dữ liệu thành công.`;
       if (!res.headersSent) {
         if (existsSync(outputPath)) {
           try {
             const results = JSON.parse(readFileSync(outputPath, 'utf8'));
-            return res.json({ success: true, results, source: 'python_playwright' });
+            // Trả về cả products và results để tương thích tuyệt đối mọi giao diện
+            return res.json({ 
+              success: true, 
+              count: Array.isArray(results) ? results.length : 0,
+              products: results,
+              results: results 
+            });
           } catch (e) {
-            return runNodeCrawler();
+            return res.status(500).json({ error: 'Không thể đọc file kết quả JSON của scraper' });
           }
         } else {
-          return runNodeCrawler();
+          return res.status(500).json({ error: 'Không tìm thấy file kết quả sau khi cào' });
         }
       }
-    });
+    }
+  });
 
-    pythonProcess.on('error', () => {
-      if (crawlerExecuted || res.headersSent) return;
-      return runNodeCrawler();
-    });
-  } catch (err) {
-    return runNodeCrawler();
-  }
+  pythonProcess.on('error', (err) => {
+    scrapeState.running = false;
+    scrapeState.error = `Không thể khởi chạy tiến trình Python: ${err.message}`;
+    if (!res.headersSent) {
+      return res.status(500).json({ error: scrapeState.error });
+    }
+  });
 });
 
-// Import scraped products & Broadcast Real-Time Update to all Apps
+// Import scraped products - Chống trùng lặp, không bịa dữ liệu, lưu dạng Bản Nháp (Draft)
 app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
   const { products } = req.body;
   if (!Array.isArray(products) || products.length === 0) {
-    return res.status(400).json({ error: 'Không có sản phẩm nào được chọn để nhập.' });
+    return res.status(400).json({ error: 'Không có danh sách sản phẩm hợp lệ để nhập.' });
   }
 
+  const existingProducts = db.get('products') || [];
   const insertedProducts = [];
+  let skippedDuplicates = 0;
   
   products.forEach((product, index) => {
+    const rawName = (product.name || '').trim();
+    if (!rawName) return;
+
+    // Chống trùng lặp: Kiểm tra theo Mã Shopee hoặc Tên sản phẩm đã có
+    const isDuplicate = existingProducts.some(p => 
+      (product.shopee_id && p.specs?.['Mã Shopee'] === product.shopee_id) ||
+      p.name.toLowerCase() === rawName.toLowerCase()
+    );
+
+    if (isDuplicate) {
+      skippedDuplicates++;
+      return;
+    }
+
+    // TUYỆT ĐỐI KHÔNG BỊA DỮ LIỆU:
+    // - Tồn kho: Mặc định là 0 (để nhân viên/chủ shop tự kiểm kê nhập số lượng thực)
+    // - Giá gốc: Chỉ giữ nếu scraper trích xuất được giá gốc thật, không tự ý x1.3
+    // - Trạng thái: Lưu ở dạng Bản Nháp (draft), chưa kích hoạt bán trực tiếp trên storefront
     const mappedProduct = {
       id: `sp-${Date.now()}-${index}`,
-      name: product.name,
+      name: rawName,
       category: product.category || 'decor',
-      price: product.price,
-      originalPrice: product.orig || Math.round(product.price * 1.3),
-      stock: product.stock || Math.floor(Math.random() * 150) + 10,
-      rating: product.rating || 4.8,
-      reviewsCount: product.reviews || 0,
-      isFeatured: index < 4,
+      price: Number(product.price) || 0,
+      originalPrice: product.orig ? Number(product.orig) : null,
+      stock: Number(product.stock) || 0,
+      rating: product.rating ? Number(product.rating) : 5.0,
+      reviewsCount: Number(product.reviews) || 0,
+      soldCount: Number(product.sold) || 0,
+      isFeatured: false,
       isNew: true,
-      isFlashSale: index % 5 === 0,
-      images: product.images && product.images.length > 0 
+      isFlashSale: false,
+      isDraft: true,
+      status: 'draft',
+      images: (Array.isArray(product.images) && product.images.length > 0)
         ? product.images 
-        : ['https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80'],
+        : ['/products/sp-001.jpg'],
       variants: { colors: ['Mặc định'], sizes: ['Tiêu chuẩn'] },
-      shortDesc: `Sản phẩm Shopee - ${product.name.substring(0, 50)}`,
-      desc: product.name,
-      specs: { 'Nguồn gốc': 'Shopee Mall / Shopee Choice', 'Từ khóa': product.keyword || '' },
-      tags: [product.category, 'shopee', ...(product.keyword || '').split(' ').filter(w => w.length > 2)],
+      shortDesc: product.shortDesc || `Sản phẩm tham khảo Shopee - ${rawName.substring(0, 60)}`,
+      desc: product.desc || rawName,
+      specs: { 
+        'Nguồn gốc': 'Shopee', 
+        'Mã Shopee': product.shopee_id || '', 
+        'URL gốc': product.source_url || '',
+        'Từ khóa': product.keyword || '',
+        'Trạng thái kiểm duyệt': 'Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán'
+      },
+      tags: [product.category || 'decor', 'shopee', ...(product.keyword || '').split(' ').filter(w => w.length > 2)],
       reviews: []
     };
     
     db.insert('products', mappedProduct);
     insertedProducts.push(mappedProduct);
+    existingProducts.push(mappedProduct);
   });
-
-  const shopVersion = Date.now();
-  const updateRecord = {
-    id: `upd_${Date.now()}`,
-    type: 'SHOPEE_IMPORT',
-    title: 'Sản phẩm mới từ Shopee',
-    message: `Cửa hàng vừa cập nhật thêm ${insertedProducts.length} sản phẩm mới từ Shopee!`,
-    count: insertedProducts.length,
-    productsSample: insertedProducts.slice(0, 6).map(p => ({
-      id: p.id,
-      name: p.name,
-      price: p.price,
-      originalPrice: p.originalPrice,
-      image: p.images?.[0],
-      category: p.category
-    })),
-    shopVersion,
-    timestamp: new Date().toISOString()
-  };
-
-  db.insert('shop_updates', updateRecord);
-  db.setMeta('shop_version', shopVersion);
 
   db.logAudit(
     req.user?.id || 'admin', 
@@ -775,17 +826,13 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
     req.user?.role || 'admin', 
     'SHOPEE_IMPORT', 
     'batch', 
-    `Nhập ${products.length} sản phẩm từ Shopee (Phiên bản shop: ${shopVersion})`
+    `Nhập ${insertedProducts.length} sản phẩm từ Shopee (Bỏ qua ${skippedDuplicates} sản phẩm trùng lặp)`
   );
-
-  // Broadcast REAL-TIME UPDATE to all mobile apps & web clients!
-  broadcastEvent('shop_update', updateRecord);
 
   res.json({ 
     success: true, 
-    imported: products.length, 
-    shopVersion,
-    updateRecord,
+    imported: insertedProducts.length, 
+    skippedDuplicates,
     products: insertedProducts 
   });
 });
@@ -811,56 +858,18 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     timestamp: new Date().toISOString(),
-    appVersion: '1.1.0',
-    shopVersion: db.getMeta('shop_version') || Date.now(),
     collections: {
       users: db.get('users').length,
       products: db.get('products').length,
       orders: db.get('orders').length,
       coupons: db.get('coupons').length,
-      audit_logs: db.get('audit_logs').length,
-      shop_updates: (db.get('shop_updates') || []).length
+      audit_logs: db.get('audit_logs').length
     }
   });
 });
 
-// ============================================================================
-// 11. STATIC FILE SERVING & APP DISTRIBUTION
-// ============================================================================
-
-// Serve public static assets (images, icons, manifest, sw)
-app.use(express.static(join(PROJECT_ROOT, 'public')));
-
-// Serve production build if available
-const distPath = join(PROJECT_ROOT, 'dist');
-if (existsSync(distPath)) {
-  app.use(express.static(distPath));
-}
-
-// Android APK Download route
-app.get('/download/tiem-nha-nho.apk', (req, res) => {
-  const apkPath = join(PROJECT_ROOT, 'public', 'tiem-nha-nho.apk');
-  if (existsSync(apkPath)) {
-    return res.download(apkPath, 'TiemNhaNho_v1.1.apk');
-  }
-  // If native APK file is not compiled on server, serve download info or redirect to PWA install
-  res.redirect('/?install=pwa');
-});
-
-// Single Page Application Fallback for SPA routing
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api/')) {
-    return next();
-  }
-  const indexPath = existsSync(join(distPath, 'index.html'))
-    ? join(distPath, 'index.html')
-    : join(PROJECT_ROOT, 'index.html');
-  res.sendFile(indexPath);
-});
-
 // Start Server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 [Backend Server] Database REST API running at http://0.0.0.0:${PORT}`);
-  console.log(`📡 [Real-time SSE] Live Event Hub ready at http://0.0.0.0:${PORT}/api/events`);
+app.listen(PORT, () => {
+  console.log(`🚀 [Backend Server] Database REST API running at http://localhost:${PORT}`);
 });
 

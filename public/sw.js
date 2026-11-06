@@ -1,112 +1,70 @@
-const APP_VERSION = '1.1.0';
-const CACHE_NAME = `tiem-nha-nho-v${APP_VERSION}`;
-
-const STATIC_ASSETS = [
+const CACHE_NAME = 'tiem-nha-nho-v1';
+const ASSETS_TO_CACHE = [
   '/',
-  '/index.html',
-  '/manifest.json',
-  '/icons/icon.svg',
-  '/icons/icon-192.png',
-  '/icons/icon-512.png'
+  '/index.html'
 ];
 
-// Install: Cache critical static shell
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      return cache.addAll(STATIC_ASSETS).catch((err) => {
-        console.warn('SW: Pre-cache warning:', err);
-      });
-    })
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(ASSETS_TO_CACHE))
+      .then(() => self.skipWaiting())
   );
-  // Auto-activate or wait for client skipWaiting trigger
-  self.skipWaiting();
 });
 
-// Activate: Clean up old caches
 self.addEventListener('activate', (event) => {
   event.waitUntil(
-    caches.keys().then((keys) => {
+    caches.keys().then((cacheNames) => {
       return Promise.all(
-        keys.map((key) => {
-          if (key !== CACHE_NAME) {
-            console.log('SW: Purging old cache:', key);
-            return caches.delete(key);
-          }
-        })
+        cacheNames
+          .filter((name) => name !== CACHE_NAME)
+          .map((name) => caches.delete(name))
       );
-    }).then(() => self.clients.claim())
+    })
   );
+  self.clients.claim();
 });
 
-// Listen for message from client (e.g. SKIP_WAITING from update modal)
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    self.skipWaiting();
-  }
-});
-
-// Fetch handler
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
-  // 1. Bypass Server-Sent Events and Real-time API
-  if (url.pathname.startsWith('/api/events') || url.pathname.startsWith('/api/shopee/status')) {
-    return; // Pass through directly to network
-  }
-
-  // 2. Other API requests: Network-first
+  // API requests: Luôn gọi trực tiếp mạng (Network-only), TUYỆT ĐỐI không cache các API chứa thông tin cá nhân/nhạy cảm
   if (url.pathname.startsWith('/api/')) {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          return response;
-        })
-        .catch(() => caches.match(event.request))
-    );
+    // Không can thiệp cache đối với toàn bộ request API (đơn hàng, tài khoản, audit logs, v.v.)
+    event.respondWith(fetch(event.request));
     return;
   }
 
-  // 3. Navigation requests (HTML pages): Network-first, fallback to cached index.html
-  if (event.request.mode === 'navigate') {
-    event.respondWith(
-      fetch(event.request)
-        .then((response) => {
-          const clone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-          return response;
-        })
-        .catch(() => caches.match('/index.html'))
-    );
-    return;
-  }
-
-  // 4. Static assets (JS, CSS, Images, Fonts): Stale-while-revalidate
+  // Static assets: Cache-first
   if (
-    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|webp|woff|woff2|ttf)$/) ||
+    url.pathname.match(/\.(js|css|png|jpg|jpeg|svg|gif|woff|woff2|ttf|eot)$/) ||
     url.pathname.startsWith('/assets/') ||
-    url.pathname.startsWith('/icons/') ||
-    url.pathname.startsWith('/products/')
+    url.pathname.startsWith('/icons/')
   ) {
     event.respondWith(
-      caches.match(event.request).then((cachedResponse) => {
-        const fetchPromise = fetch(event.request)
-          .then((networkResponse) => {
-            if (networkResponse && networkResponse.status === 200) {
-              const clone = networkResponse.clone();
-              caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
-            }
-            return networkResponse;
-          })
-          .catch(() => cachedResponse);
-
-        return cachedResponse || fetchPromise;
+      caches.match(event.request).then((response) => {
+        return response || fetch(event.request).then((fetchResponse) => {
+          const clonedResponse = fetchResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, clonedResponse);
+          });
+          return fetchResponse;
+        });
       })
     );
     return;
   }
 
-  // Default: Network with fallback to cache
+  // Navigation requests: Network-first, fallback to /index.html
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => caches.match('/index.html'))
+    );
+    return;
+  }
+
+  // Default: Network-first, fallback to cache
   event.respondWith(
     fetch(event.request).catch(() => caches.match(event.request))
   );

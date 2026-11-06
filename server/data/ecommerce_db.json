@@ -39,19 +39,24 @@
   ],
   "products": [
     {
-      "id": "sp-1793519443789-0",
-      "createdAt": "2026-11-01T07:50:43.789Z",
-      "name": "S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall . [Qu?n nam]",
+      "id": "sp-1793935825036-0",
+      "createdAt": "2026-11-06T03:30:25.036Z",
+      "name": "S?n Ph?m Test Shopee Import Kh? Tr�ng",
       "category": "decor",
-      "price": 230000,
-      "originalPrice": 335000,
-      "stock": 97,
-      "rating": 4.9,
-      "reviewsCount": 417,
-      "isFeatured": true,
+      "price": 120000,
+      "originalPrice": 150000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 50,
+      "soldCount": 100,
+      "isFeatured": false,
       "isNew": true,
-      "isFlashSale": true,
-      "images": "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=800&auto=format&fit=crop&q=80 https://images.unsplash.com/photo-1616486338812-3dadae4b4ace?w=800&auto=format&fit=crop&q=80",
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/sp-001.jpg"
+      ],
       "variants": {
         "colors": [
           "Mặc định"
@@ -60,134 +65,19 @@
           "Tiêu chuẩn"
         ]
       },
-      "shortDesc": "Sản phẩm Shopee - S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall .",
-      "desc": "S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall . [Qu?n nam]",
+      "shortDesc": "Sản phẩm tham khảo Shopee - S?n Ph?m Test Shopee Import Kh? Tr�ng",
+      "desc": "S?n Ph?m Test Shopee Import Kh? Tr�ng",
       "specs": {
-        "Nguồn gốc": "Shopee Mall / Shopee Choice",
-        "Từ khóa": "qu?n nam"
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "test_item_9999",
+        "URL gốc": "https://shopee.vn/test",
+        "Từ khóa": "test",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
       },
       "tags": [
         "decor",
         "shopee",
-        "qu?n",
-        "nam"
-      ],
-      "reviews": []
-    },
-    {
-      "id": "sp-1793515399985-1",
-      "createdAt": "2026-11-01T06:43:19.985Z",
-      "name": "Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shopee Mall • [Quần nam]",
-      "category": "fashion",
-      "price": 375000,
-      "originalPrice": 549000,
-      "stock": 140,
-      "rating": 4.9,
-      "reviewsCount": 883,
-      "isFeatured": true,
-      "isNew": true,
-      "isFlashSale": false,
-      "images": [
-        "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1541099649105-f69ad21f3246?w=800&auto=format&fit=crop&q=80"
-      ],
-      "variants": {
-        "colors": [
-          "Mặc định"
-        ],
-        "sizes": [
-          "Tiêu chuẩn"
-        ]
-      },
-      "shortDesc": "Sản phẩm Shopee - Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shop",
-      "desc": "Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shopee Mall • [Quần nam]",
-      "specs": {
-        "Nguồn gốc": "Shopee Mall / Shopee Choice",
-        "Từ khóa": "quần nam"
-      },
-      "tags": [
-        "fashion",
-        "shopee",
-        "quần",
-        "nam"
-      ],
-      "reviews": []
-    },
-    {
-      "id": "sp-1793515399983-0",
-      "createdAt": "2026-11-01T06:43:19.983Z",
-      "name": "Quần Jean Ống Rộng Baggy Phong Cách Hàn Quốc Hot Trend • [Quần nam]",
-      "category": "fashion",
-      "price": 335000,
-      "originalPrice": 663000,
-      "stock": 116,
-      "rating": 5,
-      "reviewsCount": 2636,
-      "isFeatured": true,
-      "isNew": true,
-      "isFlashSale": true,
-      "images": [
-        "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80"
-      ],
-      "variants": {
-        "colors": [
-          "Mặc định"
-        ],
-        "sizes": [
-          "Tiêu chuẩn"
-        ]
-      },
-      "shortDesc": "Sản phẩm Shopee - Quần Jean Ống Rộng Baggy Phong Cách Hàn Quốc Hot T",
-      "desc": "Quần Jean Ống Rộng Baggy Phong Cách Hàn Quốc Hot Trend • [Quần nam]",
-      "specs": {
-        "Nguồn gốc": "Shopee Mall / Shopee Choice",
-        "Từ khóa": "quần nam"
-      },
-      "tags": [
-        "fashion",
-        "shopee",
-        "quần",
-        "nam"
-      ],
-      "reviews": []
-    },
-    {
-      "id": "sp-1793513850949-1",
-      "createdAt": "2026-11-01T06:17:30.949Z",
-      "name": "Áo Polo Nam Bo Dệt Cao Cấp Thoáng Khí Hàng Chính Hãng Shopee (áo thun oversize)",
-      "category": "fashion",
-      "price": 312000,
-      "originalPrice": 458720,
-      "stock": 62,
-      "rating": 4.9,
-      "reviewsCount": 4516,
-      "isFeatured": true,
-      "isNew": true,
-      "isFlashSale": false,
-      "images": [
-        "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=800&auto=format&fit=crop&q=80",
-        "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&auto=format&fit=crop&q=80"
-      ],
-      "variants": {
-        "colors": [
-          "Mặc định"
-        ],
-        "sizes": [
-          "Tiêu chuẩn"
-        ]
-      },
-      "shortDesc": "Sản phẩm Shopee - Áo Polo Nam Bo Dệt Cao Cấp Thoáng Khí Hàng Chính H",
-      "desc": "Áo Polo Nam Bo Dệt Cao Cấp Thoáng Khí Hàng Chính Hãng Shopee (áo thun oversize)",
-      "specs": {
-        "Nguồn gốc": "Shopee Mall / Shopee Choice",
-        "Từ khóa": "áo thun oversize"
-      },
-      "tags": [
-        "fashion",
-        "shopee",
-        "thun",
-        "oversize"
+        "test"
       ],
       "reviews": []
     },
@@ -199,7 +89,7 @@
       "originalPrice": 119618,
       "rating": 4.9,
       "reviewsCount": 9999,
-      "stock": 184,
+      "stock": 182,
       "isFeatured": true,
       "isNew": true,
       "isFlashSale": true,
@@ -5210,9 +5100,143 @@
         "chính hãng"
       ],
       "reviews": []
+    },
+    {
+      "id": "sp-1793935825036-0",
+      "name": "S?n Ph?m Test Shopee Import Kh? Tr�ng",
+      "category": "decor",
+      "price": 120000,
+      "originalPrice": 150000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 50,
+      "soldCount": 100,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/sp-001.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - S?n Ph?m Test Shopee Import Kh? Tr�ng",
+      "desc": "S?n Ph?m Test Shopee Import Kh? Tr�ng",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "test_item_9999",
+        "URL gốc": "https://shopee.vn/test",
+        "Từ khóa": "test",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "decor",
+        "shopee",
+        "test"
+      ],
+      "reviews": []
     }
   ],
   "orders": [
+    {
+      "id": "ORD-MW4F33K1-8259",
+      "createdAt": "2026-11-06T03:30:48.385Z",
+      "customer": {
+        "name": "Test",
+        "phone": "0900000000",
+        "email": "",
+        "address": "HN",
+        "city": "HN",
+        "notes": ""
+      },
+      "items": [
+        {
+          "id": "sp-001",
+          "productId": "sp-001",
+          "name": "Áo sát nách Sleeveless tanktop thể thao Active Essentials thấm hút tốt vải thoáng mát Coolmate",
+          "price": 81340,
+          "image": "/products/sp-001.jpg",
+          "quantity": 2,
+          "selectedColor": "Mặc định",
+          "selectedSize": "Tiêu chuẩn",
+          "subtotal": 162680
+        }
+      ],
+      "subtotal": 162680,
+      "shippingFee": 30000,
+      "shippingMethod": "standard",
+      "discount": 0,
+      "appliedCoupon": null,
+      "total": 192680,
+      "paymentMethod": "cod",
+      "orderStatus": "cancelled",
+      "paymentStatus": "pending_verification",
+      "customerId": null,
+      "handledBy": "Chủ Shop: Chủ Tiệm (Admin)",
+      "timeline": [
+        {
+          "status": "pending",
+          "time": "2026-11-06T03:30:48.385Z",
+          "note": "Đơn hàng được khởi tạo thành công và đã được máy chủ tính lại giá an toàn."
+        },
+        {
+          "status": "cancelled",
+          "time": "2026-11-06T03:30:48.416Z",
+          "handler": "Chủ Shop: Chủ Tiệm (Admin)",
+          "note": "Test ho�n h�ng"
+        }
+      ]
+    },
+    {
+      "id": "ORD-MW4F2QTP-9487",
+      "createdAt": "2026-11-06T03:30:31.885Z",
+      "customer": {
+        "name": "Kh�ch Ki?m Tra",
+        "phone": "0987654321",
+        "email": "",
+        "address": "123 Du?ng L�ng, D?ng Da",
+        "city": "H� N?i",
+        "notes": ""
+      },
+      "items": [
+        {
+          "id": "sp-001",
+          "productId": "sp-001",
+          "name": "Áo sát nách Sleeveless tanktop thể thao Active Essentials thấm hút tốt vải thoáng mát Coolmate",
+          "price": 81340,
+          "image": "/products/sp-001.jpg",
+          "quantity": 2,
+          "selectedColor": "Tr?ng",
+          "selectedSize": "M",
+          "subtotal": 162680
+        }
+      ],
+      "subtotal": 162680,
+      "shippingFee": 30000,
+      "shippingMethod": "standard",
+      "discount": 0,
+      "appliedCoupon": null,
+      "total": 192680,
+      "paymentMethod": "cod",
+      "orderStatus": "pending",
+      "paymentStatus": "unpaid",
+      "customerId": null,
+      "handledBy": "Chờ phân công",
+      "timeline": [
+        {
+          "status": "pending",
+          "time": "2026-11-06T03:30:31.885Z",
+          "note": "Đơn hàng được khởi tạo thành công và đã được máy chủ tính lại giá an toàn."
+        }
+      ]
+    },
     {
       "id": "ORD-7388",
       "createdAt": "2026-10-02T06:12:19.305Z",
@@ -5518,48 +5542,78 @@
   ],
   "audit_logs": [
     {
-      "id": "log_1793519443794_dr49",
-      "timestamp": "2026-11-01T07:50:43.794Z",
+      "id": "log_1793935848425_iayi",
+      "timestamp": "2026-11-06T03:30:48.425Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "ORDER_STATUS_UPDATE",
+      "targetId": "ORD-MW4F33K1-8259",
+      "details": "[Chủ Shop] Chủ Tiệm (Admin) đã cập nhật trạng thái đơn ORD-MW4F33K1-8259 thành \"Đã hủy\"."
+    },
+    {
+      "id": "log_1793935848393_a1l4",
+      "timestamp": "2026-11-06T03:30:48.393Z",
+      "userId": "guest",
+      "userName": "Test",
+      "userRole": "customer",
+      "action": "ORDER_CREATE",
+      "targetId": "ORD-MW4F33K1-8259",
+      "details": "Tạo đơn hàng ORD-MW4F33K1-8259 - Tổng tiền server tính: 192.680 ₫"
+    },
+    {
+      "id": "log_1793935848325_w0iv",
+      "timestamp": "2026-11-06T03:30:48.325Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793935839885_tioj",
+      "timestamp": "2026-11-06T03:30:39.885Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
+      "id": "log_1793935831914_0vvw",
+      "timestamp": "2026-11-06T03:30:31.914Z",
+      "userId": "guest",
+      "userName": "Kh�ch Ki?m Tra",
+      "userRole": "customer",
+      "action": "ORDER_CREATE",
+      "targetId": "ORD-MW4F2QTP-9487",
+      "details": "Tạo đơn hàng ORD-MW4F2QTP-9487 - Tổng tiền server tính: 192.680 ₫"
+    },
+    {
+      "id": "log_1793935825053_kkar",
+      "timestamp": "2026-11-06T03:30:25.053Z",
       "userId": "usr_admin",
       "userName": "Chủ Tiệm (Admin)",
       "userRole": "admin",
       "action": "SHOPEE_IMPORT",
       "targetId": "batch",
-      "details": "Nhập 1 sản phẩm từ Shopee (Phiên bản shop: 1793519443791)"
+      "details": "Nhập 0 sản phẩm từ Shopee (Bỏ qua 1 sản phẩm trùng lặp)"
     },
     {
-      "id": "log_1793519443648_kfyu",
-      "timestamp": "2026-11-01T07:50:43.648Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "LOGIN",
-      "targetId": "usr_admin",
-      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
-    },
-    {
-      "id": "log_1793519435578_qd96",
-      "timestamp": "2026-11-01T07:50:35.578Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "LOGIN",
-      "targetId": "usr_admin",
-      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
-    },
-    {
-      "id": "log_1793515399991_j9nv",
-      "timestamp": "2026-11-01T06:43:19.991Z",
+      "id": "log_1793935825041_c8qv",
+      "timestamp": "2026-11-06T03:30:25.041Z",
       "userId": "usr_admin",
       "userName": "Chủ Tiệm (Admin)",
       "userRole": "admin",
       "action": "SHOPEE_IMPORT",
       "targetId": "batch",
-      "details": "Nhập 2 sản phẩm từ Shopee (Phiên bản shop: 1793515399987)"
+      "details": "Nhập 1 sản phẩm từ Shopee (Bỏ qua 0 sản phẩm trùng lặp)"
     },
     {
-      "id": "log_1793515399971_mta6",
-      "timestamp": "2026-11-01T06:43:19.971Z",
+      "id": "log_1793935825013_4thi",
+      "timestamp": "2026-11-06T03:30:25.013Z",
       "userId": "usr_admin",
       "userName": "Chủ Tiệm (Admin)",
       "userRole": "admin",
@@ -5568,8 +5622,8 @@
       "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
     },
     {
-      "id": "log_1793515392814_0c66",
-      "timestamp": "2026-11-01T06:43:12.814Z",
+      "id": "log_1793935804855_tfqk",
+      "timestamp": "2026-11-06T03:30:04.855Z",
       "userId": "usr_admin",
       "userName": "Chủ Tiệm (Admin)",
       "userRole": "admin",
@@ -5578,58 +5632,8 @@
       "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
     },
     {
-      "id": "log_1793514197588_8m5o",
-      "timestamp": "2026-11-01T06:23:17.588Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "PRODUCT_DELETE",
-      "targetId": "sp-1793513850950-2",
-      "details": "Xóa sản phẩm: Túi Xách Da Nữ Nắp Khóa Bấm Tinh Tế Phong Cách Hàn Quốc (áo thun oversize)"
-    },
-    {
-      "id": "log_1793514189881_8wg5",
-      "timestamp": "2026-11-01T06:23:09.881Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "PRODUCT_DELETE",
-      "targetId": "sp-1793513850947-0",
-      "details": "Xóa sản phẩm: Áo Thun Cotton Compact 100% Form Rộng Unisex Shopee Mall (áo thun oversize)"
-    },
-    {
-      "id": "log_1793514141597_4d4k",
-      "timestamp": "2026-11-01T06:22:21.597Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "LOGIN",
-      "targetId": "usr_admin",
-      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
-    },
-    {
-      "id": "log_1793513850955_56vw",
-      "timestamp": "2026-11-01T06:17:30.955Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "SHOPEE_IMPORT",
-      "targetId": "batch",
-      "details": "Nhập 3 sản phẩm từ Shopee (Phiên bản shop: 1793513850951)"
-    },
-    {
-      "id": "log_1793513850324_xduc",
-      "timestamp": "2026-11-01T06:17:30.324Z",
-      "userId": "usr_admin",
-      "userName": "Chủ Tiệm (Admin)",
-      "userRole": "admin",
-      "action": "LOGIN",
-      "targetId": "usr_admin",
-      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
-    },
-    {
-      "id": "log_1793513807295_qpts",
-      "timestamp": "2026-11-01T06:16:47.295Z",
+      "id": "log_1793929704348_lvwl",
+      "timestamp": "2026-11-06T01:48:24.348Z",
       "userId": "usr_admin",
       "userName": "Chủ Tiệm (Admin)",
       "userRole": "admin",
@@ -6437,95 +6441,5 @@
       "targetId": "db_setup",
       "details": "Khởi tạo cơ sở dữ liệu Tiệm Nhà Nhỏ với dữ liệu mẫu chuẩn"
     }
-  ],
-  "shop_updates": [
-    {
-      "id": "upd_1793519443791",
-      "createdAt": "2026-11-01T07:50:43.791Z",
-      "type": "SHOPEE_IMPORT",
-      "title": "Sản phẩm mới từ Shopee",
-      "message": "Cửa hàng vừa cập nhật thêm 1 sản phẩm mới từ Shopee!",
-      "count": 1,
-      "productsSample": [
-        {
-          "id": "sp-1793519443789-0",
-          "name": "S?n Ph?m Cao C?p Phong C�ch T?i Gi?n Shopee Mall . [Qu?n nam]",
-          "price": 230000,
-          "originalPrice": 335000,
-          "image": "h",
-          "category": "decor"
-        }
-      ],
-      "shopVersion": 1793519443791,
-      "timestamp": "2026-11-01T07:50:43.791Z"
-    },
-    {
-      "id": "upd_1793515399987",
-      "createdAt": "2026-11-01T06:43:19.987Z",
-      "type": "SHOPEE_IMPORT",
-      "title": "Sản phẩm mới từ Shopee",
-      "message": "Cửa hàng vừa cập nhật thêm 2 sản phẩm mới từ Shopee!",
-      "count": 2,
-      "productsSample": [
-        {
-          "id": "sp-1793515399983-0",
-          "name": "Quần Jean Ống Rộng Baggy Phong Cách Hàn Quốc Hot Trend • [Quần nam]",
-          "price": 335000,
-          "originalPrice": 663000,
-          "image": "https://images.unsplash.com/photo-1542272604-787c3835535d?w=800&auto=format&fit=crop&q=80",
-          "category": "fashion"
-        },
-        {
-          "id": "sp-1793515399985-1",
-          "name": "Quần Tây Co Giãn Dáng Slimfit Công Sở Cao Cấp Shopee Mall • [Quần nam]",
-          "price": 375000,
-          "originalPrice": 549000,
-          "image": "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?w=800&auto=format&fit=crop&q=80",
-          "category": "fashion"
-        }
-      ],
-      "shopVersion": 1793515399987,
-      "timestamp": "2026-11-01T06:43:19.987Z"
-    },
-    {
-      "id": "upd_1793513850951",
-      "createdAt": "2026-11-01T06:17:30.951Z",
-      "type": "SHOPEE_IMPORT",
-      "title": "Sản phẩm mới từ Shopee",
-      "message": "Cửa hàng vừa cập nhật thêm 3 sản phẩm mới từ Shopee!",
-      "count": 3,
-      "productsSample": [
-        {
-          "id": "sp-1793513850947-0",
-          "name": "Áo Thun Cotton Compact 100% Form Rộng Unisex Shopee Mall (áo thun oversize)",
-          "price": 189000,
-          "originalPrice": 305388,
-          "image": "https://images.unsplash.com/photo-1521572267360-ee0c2909d518?w=800&auto=format&fit=crop&q=80",
-          "category": "fashion"
-        },
-        {
-          "id": "sp-1793513850949-1",
-          "name": "Áo Polo Nam Bo Dệt Cao Cấp Thoáng Khí Hàng Chính Hãng Shopee (áo thun oversize)",
-          "price": 312000,
-          "originalPrice": 458720,
-          "image": "https://images.unsplash.com/photo-1598033129183-c4f50c736f10?w=800&auto=format&fit=crop&q=80",
-          "category": "fashion"
-        },
-        {
-          "id": "sp-1793513850950-2",
-          "name": "Túi Xách Da Nữ Nắp Khóa Bấm Tinh Tế Phong Cách Hàn Quốc (áo thun oversize)",
-          "price": 145000,
-          "originalPrice": 197941,
-          "image": "https://images.unsplash.com/photo-1572804013309-59a88b7e92f1?w=800&auto=format&fit=crop&q=80",
-          "category": "fashion"
-        }
-      ],
-      "shopVersion": 1793513850951,
-      "timestamp": "2026-11-01T06:17:30.951Z"
-    }
-  ],
-  "meta": {
-    "app_version": "1.1.0",
-    "shop_version": 1793519443791
-  }
+  ]
 }

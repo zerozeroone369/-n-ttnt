@@ -27,12 +27,7 @@ class PersistentDatabase {
       products: [],
       orders: [],
       coupons: [],
-      audit_logs: [],
-      shop_updates: [],
-      meta: {
-        app_version: '1.1.0',
-        shop_version: Date.now()
-      }
+      audit_logs: []
     };
     this.init();
   }
@@ -46,13 +41,6 @@ class PersistentDatabase {
       try {
         const content = fs.readFileSync(DB_FILE, 'utf-8');
         this.data = JSON.parse(content);
-        if (!this.data.shop_updates) this.data.shop_updates = [];
-        if (!this.data.meta) {
-          this.data.meta = {
-            app_version: '1.1.0',
-            shop_version: Date.now()
-          };
-        }
         console.log(`[Database] Loaded successfully from ${DB_FILE}`);
         return;
       } catch (err) {
@@ -222,19 +210,6 @@ class PersistentDatabase {
     }
     this.save();
     return logEntry;
-  }
-
-  // Metadata operations (app version, shop version, etc.)
-  getMeta(key) {
-    if (!this.data.meta) this.data.meta = {};
-    return this.data.meta[key];
-  }
-
-  setMeta(key, value) {
-    if (!this.data.meta) this.data.meta = {};
-    this.data.meta[key] = value;
-    this.save();
-    return value;
   }
 }
 

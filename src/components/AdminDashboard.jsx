@@ -351,19 +351,24 @@ export default function AdminDashboard({
         .filter(k => k.length > 0);
       
       if (keywords.length === 0) {
-        setShopeeError('Vui lòng nhập ít nhất 1 từ khóa để cào dữ liệu.');
+        setShopeeError('Vui lòng nhập ít nhất 1 từ khóa để tìm kiếm và cào dữ liệu.');
         setShopeeLoading(false);
         return;
       }
 
       const data = await ApiClient.shopee.scrape(keywords);
-      const products = data.results || data.products || (Array.isArray(data) ? data : []);
+      // Xử lý an toàn tuyệt đối mảng dữ liệu (tránh lỗi crash .map() khi API trả về Object)
+      const products = Array.isArray(data.products)
+        ? data.products
+        : (Array.isArray(data.results)
+            ? data.results
+            : (Array.isArray(data) ? data : []));
       
       if (products.length === 0) {
-        setShopeeError('Không tìm thấy sản phẩm nào. Shopee có thể đang chặn bot — vui lòng thử lại sau vài phút.');
+        setShopeeError(data.error || 'Không tìm thấy sản phẩm nào phù hợp hoặc Shopee đang kích hoạt bảo vệ chống bot.');
       } else {
         setShopeeResults(products);
-        setShopeeSuccess(`🎉 Đã cào được ${products.length} sản phẩm từ Shopee!`);
+        setShopeeSuccess(`🎉 Đã thu thập được ${products.length} sản phẩm (Dữ liệu thị trường sẵn sàng xem trước)!`);
       }
     } catch (err) {
       console.error('Shopee scrape error:', err);
@@ -391,12 +396,13 @@ export default function AdminDashboard({
         const freshProducts = await ApiClient.products.getAll();
         setProducts(freshProducts);
         StorageService.saveProducts(freshProducts);
-      } else {
-        const freshProducts = StorageService.getProducts();
-        setProducts(freshProducts);
       }
       
-      setShopeeSuccess(`✅ Đã nhập thành công ${data.imported || selectedProducts.length} sản phẩm vào kho hàng! AI Chatbot sẽ tự động sử dụng dữ liệu mới.`);
+      const successMsg = data.skippedDuplicates > 0
+        ? `✅ Đã nhập thành công ${data.imported} sản phẩm vào kho hàng (Trạng thái Bản Nháp)! Đã tự động bỏ qua ${data.skippedDuplicates} sản phẩm trùng lặp.`
+        : `✅ Đã nhập thành công ${data.imported || selectedProducts.length} sản phẩm vào kho hàng (Trạng thái Bản Nháp)!`;
+
+      setShopeeSuccess(successMsg);
       setShopeeSelected(new Set());
     } catch (err) {
       console.error('Shopee import error:', err);
@@ -1543,22 +1549,22 @@ export default function AdminDashboard({
                     <Loader2 className="w-5 h-5 text-orange-600 animate-spin" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-stone-900">⚡ Đang cào dữ liệu Shopee siêu tốc...</p>
-                    <p className="text-xs text-stone-500">Hệ thống tự động tìm kiếm, phân tích và tải sản phẩm theo đúng từ khóa của bạn.</p>
+                    <p className="text-sm font-bold text-stone-900">Đang cào dữ liệu từ Shopee...</p>
+                    <p className="text-xs text-stone-500">Quá trình này có thể mất 2-5 phút. Vui lòng không tắt trang.</p>
                   </div>
                 </div>
                 <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
-                  <div className="bg-gradient-to-r from-orange-500 via-amber-500 to-emerald-500 h-full rounded-full animate-pulse" style={{ width: '85%' }} />
+                  <div className="bg-gradient-to-r from-orange-500 to-red-500 h-full rounded-full animate-pulse" style={{ width: '60%' }} />
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <div className="bg-orange-50 rounded-lg p-2">
-                    <p className="text-xs text-orange-800 font-medium">⚡ Quét từ khóa Shopee</p>
+                    <p className="text-xs text-orange-800 font-medium">🌐 Truy cập Shopee</p>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-2">
-                    <p className="text-xs text-amber-800 font-medium">🔍 Phân tích giá & thông số</p>
+                    <p className="text-xs text-amber-800 font-medium">🔍 Tìm sản phẩm</p>
                   </div>
-                  <div className="bg-emerald-50 rounded-lg p-2">
-                    <p className="text-xs text-emerald-700 font-medium">✓ Sẵn sàng nhập kho</p>
+                  <div className="bg-stone-50 rounded-lg p-2">
+                    <p className="text-xs text-stone-600 font-medium">📥 Tải ảnh về</p>
                   </div>
                 </div>
               </div>
@@ -1682,7 +1688,7 @@ export default function AdminDashboard({
                           )}
                         </div>
 
-                        <div className="flex items-center gap-3 text-[11px] text-stone-500">
+                        <div className="flex items-center gap-3 text-[11px] text-stone-500 flex-wrap">
                           {product.rating && (
                             <span className="flex items-center gap-0.5">
                               <Star className="w-3 h-3 text-amber-400 fill-amber-400" />
@@ -1692,18 +1698,29 @@ export default function AdminDashboard({
                           {product.reviews > 0 && (
                             <span>{product.reviews.toLocaleString()} đánh giá</span>
                           )}
-                          {product.stock && (
-                            <span>Kho: {product.stock}</span>
-                          )}
+                          <span className="text-amber-700 bg-amber-50 px-1.5 py-0.5 rounded font-medium">
+                            Kho tiệm: 0 (Cần kiểm kê)
+                          </span>
                         </div>
                         
-                        {product.keyword && (
-                          <div className="mt-2">
-                            <span className="text-[10px] font-medium text-stone-400 bg-stone-50 px-2 py-0.5 rounded">
+                        <div className="mt-2 flex items-center justify-between text-[10px]">
+                          {product.keyword && (
+                            <span className="font-medium text-stone-500 bg-stone-100 px-2 py-0.5 rounded">
                               🔍 {product.keyword}
                             </span>
-                          </div>
-                        )}
+                          )}
+                          {product.source_url && (
+                            <a 
+                              href={product.source_url} 
+                              target="_blank" 
+                              rel="noreferrer" 
+                              className="text-orange-600 hover:underline font-medium"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Nguồn Shopee ↗
+                            </a>
+                          )}
+                        </div>
                       </div>
                     </div>
                   ))}
@@ -1738,10 +1755,10 @@ export default function AdminDashboard({
                 Lưu ý quan trọng
               </h4>
               <ul className="text-xs text-amber-800 space-y-1.5 leading-relaxed">
-                <li>• <strong>Yêu cầu hệ thống:</strong> Server backend phải đang chạy, máy cần cài Python 3.8+ và Playwright (<code className="bg-amber-200/50 px-1 rounded">pip install playwright httpx</code>).</li>
-                <li>• <strong>Thời gian cào:</strong> Mỗi lần cào mất khoảng 2-5 phút tùy theo số từ khóa và tốc độ mạng.</li>
-                <li>• <strong>Giới hạn Shopee:</strong> Shopee có cơ chế chống bot, có thể cần chờ vài phút giữa các lần cào nếu bị chặn.</li>
-                <li>• <strong>Dữ liệu AI:</strong> Sau khi nhập sản phẩm, AI Chatbot sẽ <strong>tự động</strong> sử dụng dữ liệu mới để tư vấn khách hàng chính xác hơn.</li>
+                <li>• <strong>Quy chuẩn bảo mật:</strong> Hệ thống không hardcode thông tin đăng nhập, không lưu cookie tài khoản cá nhân, tuân thủ an toàn mạng.</li>
+                <li>• <strong>Kiểm soát dữ liệu thực tế (Zero Hallucination):</strong> Scraper không tự bịa giá gốc, không random tồn kho ảo, không gán số bán vào đánh giá.</li>
+                <li>• <strong>Quy trình nhập kho an toàn:</strong> Toàn bộ sản phẩm nhập từ Shopee được lưu ở trạng thái <strong>Bản Nháp (Draft)</strong> với <strong>Tồn kho = 0</strong>, giúp chủ shop kiểm kê và điều chỉnh giá trước khi kích hoạt bán thật trên storefront.</li>
+                <li>• <strong>Chống trùng lặp (Deduplication):</strong> Hệ thống tự động phát hiện và bỏ qua các sản phẩm đã có trong cơ sở dữ liệu để tránh nhập đè.</li>
               </ul>
             </div>
 

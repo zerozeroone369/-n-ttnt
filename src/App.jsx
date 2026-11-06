@@ -11,9 +11,6 @@ import InvoicePrintModal from './components/InvoicePrintModal';
 import Chatbot from './components/Chatbot';
 import AdminDashboard from './components/AdminDashboard';
 import AuthModal from './components/AuthModal';
-import AppUpdateNotification from './components/AppUpdateNotification';
-import ShopUpdatesModal from './components/ShopUpdatesModal';
-import AppDownloadModal from './components/AppDownloadModal';
 import { StorageService } from './services/storage';
 import { ApiClient } from './services/api';
 import { getOrdersForUser } from './services/aiChatEngine';
@@ -51,100 +48,22 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
 
-  // Shopee Real-Time & App Updates State
-  const [latestShopUpdate, setLatestShopUpdate] = useState(null);
-  const [shopUpdates, setShopUpdates] = useState([]);
-  const [isShopUpdatesOpen, setIsShopUpdatesOpen] = useState(false);
-  const [isAppDownloadOpen, setIsAppDownloadOpen] = useState(false);
-  const [hasAppCodeUpdate, setHasAppCodeUpdate] = useState(false);
-  const [waitingWorker, setWaitingWorker] = useState(null);
-
-  // Single PWA Install Prompt Listener
+  // PWA install prompt handler (Đã gộp listener duy nhất, tối ưu kiểm tra thiết bị)
   useEffect(() => {
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
-      setShowInstallBanner(true);
+      const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
+      if (isMobile) {
+        setShowInstallBanner(true);
+      }
     };
 
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    };
   }, []);
-
-  // Fetch initial updates & version check
-  useEffect(() => {
-    ApiClient.shop.getUpdates().then(list => {
-      if (Array.isArray(list)) setShopUpdates(list);
-    }).catch(() => {});
-  }, []);
-
-  // Real-Time SSE Listener for Live Shopee & Catalog Updates
-  useEffect(() => {
-    const unsubscribe = ApiClient.events.subscribe(async (event) => {
-      if (event.type === 'SHOP_UPDATE') {
-        try {
-          if (await ApiClient.isServerOnline()) {
-            const freshProducts = await ApiClient.products.getAll();
-            setProducts(freshProducts);
-            StorageService.saveProducts(freshProducts);
-          } else {
-            const freshProducts = StorageService.getProducts();
-            setProducts(freshProducts);
-          }
-        } catch (e) {}
-
-        setLatestShopUpdate(event.data);
-        setShopUpdates(prev => [event.data, ...prev]);
-        showToast(`🛍️ ${event.data.message || 'Cửa hàng vừa cập nhật sản phẩm mới từ Shopee!'}`);
-      } else if (event.type === 'PRODUCT_UPDATE') {
-        try {
-          if (await ApiClient.isServerOnline()) {
-            const freshProducts = await ApiClient.products.getAll();
-            setProducts(freshProducts);
-            StorageService.saveProducts(freshProducts);
-          } else {
-            const freshProducts = StorageService.getProducts();
-            setProducts(freshProducts);
-          }
-        } catch (e) {}
-      }
-    });
-
-    return () => unsubscribe();
-  }, []);
-
-  // Service Worker OTA Update Detection
-  useEffect(() => {
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.addEventListener('updatefound', () => {
-          const newWorker = reg.installing;
-          if (newWorker) {
-            newWorker.addEventListener('statechange', () => {
-              if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-                setHasAppCodeUpdate(true);
-                setWaitingWorker(newWorker);
-              }
-            });
-          }
-        });
-      }).catch(() => {});
-    }
-  }, []);
-
-  const handleApplyAppCodeUpdate = () => {
-    if (waitingWorker) {
-      waitingWorker.postMessage({ type: 'SKIP_WAITING' });
-    }
-    window.location.reload();
-  };
-
-  const handleViewNewProducts = (update) => {
-    setActiveCategory('all');
-    setSearchQuery('Shopee');
-    const el = document.getElementById('products-section');
-    if (el) el.scrollIntoView({ behavior: 'smooth' });
-  };
 
   // Initial Sync from Backend Database Server
   useEffect(() => {
@@ -302,8 +221,26 @@ export default function App() {
     );
   };
 
-  const handleBuyNow = (product, quantity, variant) => {
-    handleAddToCart(product, quantity, variant);
+  const handleBuyNow = (product, quantity = 1, variant = null) => {
+    // Cập nhật giỏ hàng tức thời và đồng bộ Storage trước khi mở Checkout
+    setCart((prev) => {
+      const existingIndex = prev.findIndex(
+        (item) => item.id === product.id && item.variant === variant
+      );
+      let updated;
+      if (existingIndex > -1) {
+        updated = [...prev];
+        updated[existingIndex] = {
+          ...updated[existingIndex],
+          quantity: updated[existingIndex].quantity + quantity
+        };
+      } else {
+        updated = [...prev, { ...product, quantity, variant }];
+      }
+      StorageService.saveCart(updated);
+      return updated;
+    });
+
     setSelectedProduct(null);
     setIsCartOpen(false);
     setIsCheckoutOpen(true);
@@ -324,22 +261,27 @@ export default function App() {
     setIsCheckoutOpen(true);
   };
 
-  const handleOrderSuccess = async (newOrder) => {
-    try {
-      if (await ApiClient.isServerOnline()) {
-        const saved = await ApiClient.orders.create(newOrder);
-        setOrders(prev => [saved, ...prev]);
-      } else {
-        const updatedOrders = StorageService.addOrder(newOrder);
-        setOrders(updatedOrders);
-      }
-    } catch (err) {
-      console.warn("Order creation fallback:", err);
-      const updatedOrders = StorageService.addOrder(newOrder);
+  const handleOrderSuccess = async (newOrderPayload) => {
+    let saved = null;
+    if (await ApiClient.isServerOnline()) {
+      saved = await ApiClient.orders.create(newOrderPayload);
+      setOrders(prev => [saved, ...prev]);
+    } else {
+      const fallbackOrder = {
+        ...newOrderPayload,
+        id: `ORD-${Date.now().toString(36).toUpperCase()}`,
+        createdAt: new Date().toISOString(),
+        orderStatus: 'pending'
+      };
+      const updatedOrders = StorageService.addOrder(fallbackOrder);
       setOrders(updatedOrders);
+      saved = fallbackOrder;
     }
+
     setCart([]);
     setAppliedCoupon(null);
+    StorageService.saveCart([]);
+    return saved;
   };
 
   const handleAuthSuccess = (user) => {
@@ -378,7 +320,7 @@ export default function App() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="min-h-screen w-full max-w-full overflow-x-hidden bg-[#faf8f5] text-stone-800 flex flex-col selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen bg-[#faf8f5] text-stone-800 flex flex-col selection:bg-amber-100 selection:text-amber-900">
       
       {/* Toast Notification */}
       {toastMessage && (
@@ -399,9 +341,6 @@ export default function App() {
         onOpenWishlist={() => setIsWishlistOpen(true)}
         ordersCount={orders.length}
         onOpenOrders={() => setIsCustomerOrdersOpen(true)}
-        updatesCount={shopUpdates.length}
-        onOpenUpdates={() => setIsShopUpdatesOpen(true)}
-        onOpenDownload={() => setIsAppDownloadOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         isAdminView={isAdminView}
@@ -661,37 +600,6 @@ export default function App() {
         onOrderSuccess={handleOrderSuccess}
         onOpenCheckout={handleOpenCheckout}
         initialQuery={chatInitialQuery}
-      />
-
-      {/* Real-time Shopee & App Update Notification Banner */}
-      <AppUpdateNotification
-        latestShopUpdate={latestShopUpdate}
-        onViewNewProducts={handleViewNewProducts}
-        hasAppCodeUpdate={hasAppCodeUpdate}
-        onApplyAppCodeUpdate={handleApplyAppCodeUpdate}
-      />
-
-      {/* Shop Updates History & Changelog Modal */}
-      <ShopUpdatesModal
-        isOpen={isShopUpdatesOpen}
-        onClose={() => setIsShopUpdatesOpen(false)}
-        updates={shopUpdates}
-        onSelectProduct={(p) => {
-          const fullProd = products.find(x => x.id === p.id) || p;
-          setSelectedProduct(fullProd);
-        }}
-      />
-
-      {/* App Download / Web-to-App Install Modal */}
-      <AppDownloadModal
-        isOpen={isAppDownloadOpen}
-        onClose={() => setIsAppDownloadOpen(false)}
-        deferredPrompt={deferredPrompt}
-        onInstallSuccess={() => {
-          setDeferredPrompt(null);
-          setShowInstallBanner(false);
-          showToast('🎉 Chúc mừng bạn đã cài đặt ứng dụng Tiệm Nhà Nhỏ thành công!');
-        }}
       />
 
       {/* Login / Register & RBAC Modal */}

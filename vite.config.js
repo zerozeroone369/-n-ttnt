@@ -7,6 +7,7 @@ export default defineConfig({
   server: {
     port: 5173,
     host: true,
+    allowedHosts: true,
     watch: {
       ignored: ['**/shopee_profile/**', '**/shopee_scraped.json', '**/.user_uploaded/**']
     },

@@ -49,21 +49,22 @@ export default function CheckoutModal({
 
   const total = Math.max(0, subtotal - discountAmount + shippingFee);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!formData.name || !formData.phone || !formData.address) {
       alert('Vui lòng điền đầy đủ Họ tên, Số điện thoại và Địa chỉ nhận hàng.');
       return;
     }
 
+    if (!cart || cart.length === 0) {
+      alert('Giỏ hàng của bạn đang trống.');
+      return;
+    }
+
     setIsSubmitting(true);
 
-    // Simulate order placement
-    setTimeout(() => {
-      const orderId = `ORD-${Math.floor(1000 + Math.random() * 9000)}`;
-      const newOrder = {
-        id: orderId,
-        createdAt: new Date().toISOString(),
+    try {
+      const orderPayload = {
         customer: { ...formData },
         items: cart.map(item => ({
           productId: item.id,
@@ -73,20 +74,15 @@ export default function CheckoutModal({
           variant: item.variant,
           image: item.image || item.images?.[0]
         })),
-        subtotal,
-        discount: discountAmount,
-        couponCode: appliedCoupon?.code || null,
-        shippingFee,
         shippingMethod,
-        total,
         paymentMethod,
-        paymentStatus: paymentMethod === 'vietqr' ? 'pending_verification' : 'pending',
-        orderStatus: 'pending',
-        trackingCarrier: shippingMethod === 'express' ? 'Ahamove Hỏa Tốc' : 'GHTK Tiêu Chuẩn',
-        trackingCode: `${shippingMethod === 'express' ? 'EXP' : 'GHTK'}-${Math.floor(100000 + Math.random() * 900000)}`
+        couponCode: appliedCoupon?.code || null
       };
 
-      // Trigger Confetti!
+      // Gửi yêu cầu lên backend và chờ xác thực máy chủ (Server tính giá, kiểm tồn kho)
+      const savedOrder = await onOrderSuccess(orderPayload);
+
+      // Bắn pháo hoa ăn mừng khi và chỉ khi máy chủ đã ghi nhận đơn thành công
       try {
         confetti({
           particleCount: 80,
@@ -97,10 +93,13 @@ export default function CheckoutModal({
         // Safe fallback if canvas blocked
       }
 
-      setCompletedOrder(newOrder);
-      onOrderSuccess(newOrder);
+      setCompletedOrder(savedOrder || orderPayload);
+    } catch (err) {
+      console.error('Lỗi khi gửi đơn hàng:', err);
+      alert(err.message || 'Không thể tạo đơn hàng trên hệ thống. Vui lòng thử lại!');
+    } finally {
       setIsSubmitting(false);
-    }, 600);
+    }
   };
 
   const handleCopy = (text) => {

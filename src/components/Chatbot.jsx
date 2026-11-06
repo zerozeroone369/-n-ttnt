@@ -575,7 +575,7 @@ export default function Chatbot({
 
       {/* Floating Chat Box Window */}
       {isOpen && (
-        <div className="fixed inset-x-3 bottom-3 sm:inset-x-auto sm:bottom-6 sm:right-6 sm:w-[440px] h-[620px] max-h-[88vh] z-50 bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-slideUp">
+        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[94vw] sm:w-[440px] h-[620px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-slideUp">
           
           {/* Header */}
           <div className="bg-stone-900 text-white px-4 py-3.5 flex items-center justify-between flex-shrink-0">
@@ -595,7 +595,7 @@ export default function Chatbot({
                     {chatSettings.aiProvider === 'gemini' ? 'Gemini AI' : 'AI Cục Bộ'}
                   </span>
                 </div>
-                <p className="text-[11px] text-stone-400">Trợ lý AI Đa Năng — Tư vấn lối sống, phối đồ & mua sắm</p>
+                <p className="text-[11px] text-stone-400">Cố vấn kinh doanh, bán sỉ & sản phẩm chuyên sâu</p>
               </div>
             </div>
 
@@ -724,20 +724,6 @@ export default function Chatbot({
               className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-white hover:bg-stone-200 text-stone-700 text-[11px] font-medium border border-stone-200 shadow-2xs whitespace-nowrap transition-all"
             >
               <Tag className="w-3 h-3 text-purple-600" /> Voucher
-            </button>
-
-            <button
-              onClick={() => handleQuickChip("Tư vấn giúp mình cách phối đồ chuẩn gu & thanh lịch")}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-amber-50 hover:bg-amber-100 text-amber-900 text-[11px] font-bold border border-amber-200 whitespace-nowrap transition-all"
-            >
-              ✨ Phối đồ có gu
-            </button>
-
-            <button
-              onClick={() => handleQuickChip("Gợi ý cách trang trí góc phòng và thư giãn với nến thơm")}
-              className="flex items-center gap-1 px-2.5 py-1.5 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-[11px] font-bold border border-emerald-200 whitespace-nowrap transition-all"
-            >
-              🌿 Decor & Thư giãn
             </button>
           </div>
 
