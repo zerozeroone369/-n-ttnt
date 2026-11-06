@@ -5542,6 +5542,16 @@
   ],
   "audit_logs": [
     {
+      "id": "log_1793938080114_z4m2",
+      "timestamp": "2026-11-06T04:08:00.115Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
+    {
       "id": "log_1793937335282_n7cs",
       "timestamp": "2026-11-06T03:55:35.284Z",
       "userId": "usr_admin",

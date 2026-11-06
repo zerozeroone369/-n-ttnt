@@ -800,7 +800,7 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
       status: 'draft',
       images: (Array.isArray(product.images) && product.images.length > 0)
         ? product.images 
-        : ['/products/sp-001.jpg'],
+        : ['/products/market/ao_khoac_1.jpg'],
       variants: { colors: ['Mặc định'], sizes: ['Tiêu chuẩn'] },
       shortDesc: product.shortDesc || `Sản phẩm tham khảo Shopee - ${rawName.substring(0, 60)}`,
       desc: product.desc || rawName,

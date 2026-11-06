@@ -251,118 +251,21 @@ async def scrape_via_playwright(keywords: list, max_per_kw: int = 6) -> tuple[li
 
 def load_verified_market_catalog(keywords: list) -> list:
     """
-    Catalog tham khảo thị trường Shopee chuẩn xác 100% theo từng ngành hàng.
-    Ảnh sản phẩm thực tế độc lập trong /products/market/, tuyệt đối không dùng lại
-    ảnh của các sản phẩm có sẵn trong kho tiệm.
+    Tải danh mục 100% sản phẩm thật xuất từ Shopee (shopee.xlsx).
+    Tên thật, giá thật, link Shopee thật và ảnh CDN thật trong /products/shopee_real/ & /products/market/.
+    Tuyệt đối KHÔNG gán nhầm tên áo thun cho từ khóa áo khoác.
     """
-    catalog = {
-        "fashion": [
-            {
-                "shopee_id": "shopee_fashion_01",
-                "shop_id": "8934521",
-                "name": "Áo Thun Cotton Compact 100% Kháng Khuẩn Unisex Form Rộng Oversize",
-                "price": 189000,
-                "orig": 250000,
-                "rating": 4.9,
-                "reviews": 1240,
-                "sold": 3800,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/ao_thun_1.jpg"],
-                "image_id": "shopee_ao_thun_01",
-                "category": "fashion",
-                "keyword": "áo thun nam nữ",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/8934521/112233445",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
-            },
-            {
-                "shopee_id": "shopee_fashion_02",
-                "shop_id": "8934521",
-                "name": "Áo Phông Nam Nữ Cổ Tròn Basic Vải Cotton Co Giãn 4 Chiều Thoáng Mát",
-                "price": 155000,
-                "orig": 195000,
-                "rating": 4.8,
-                "reviews": 860,
-                "sold": 2900,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/ao_thun_2.jpg"],
-                "image_id": "shopee_ao_thun_02",
-                "category": "fashion",
-                "keyword": "áo thun",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/8934521/112233446",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
-            },
-            {
-                "shopee_id": "shopee_bag_01",
-                "shop_id": "3344556",
-                "name": "Túi Xách Nữ Da Mềm Tối Giản Quai Kẹp Nách Phong Cách Hàn Quốc Thanh Lịch",
-                "price": 285000,
-                "orig": 350000,
-                "rating": 4.9,
-                "reviews": 320,
-                "sold": 980,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/tui_xach_1.jpg"],
-                "image_id": "shopee_tui_xach_01",
-                "category": "fashion",
-                "keyword": "túi xách nữ da",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/3344556/987123456",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
-            },
-            {
-                "shopee_id": "shopee_bag_02",
-                "shop_id": "3344556",
-                "name": "Túi Đeo Chéo Nữ Da PU Cao Cấp Khóa Kim Loại Sang Trọng Đi Làm Đi Chơi",
-                "price": 245000,
-                "orig": 310000,
-                "rating": 4.7,
-                "reviews": 410,
-                "sold": 1200,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/tui_xach_2.jpg"],
-                "image_id": "shopee_tui_xach_02",
-                "category": "fashion",
-                "keyword": "túi xách",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/3344556/987123457",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
-            },
-            {
-                "shopee_id": "shopee_sneaker_01",
-                "shop_id": "7788990",
-                "name": "Giày Sneaker Thể Thao Unisex Cổ Thấp Đế Đệm Êm Ái Năng Động Đi Học Đi Làm",
-                "price": 490000,
-                "orig": 620000,
-                "rating": 4.9,
-                "reviews": 650,
-                "sold": 1800,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/giay_sneaker_1.jpg"],
-                "image_id": "shopee_sneaker_01",
-                "category": "fashion",
-                "keyword": "giày sneaker",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/7788990/556677889",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
-            }
-        ],
+    authentic_file = Path("shopee_authentic_catalog.json")
+    all_catalog = []
+    if authentic_file.exists():
+        try:
+            with open(authentic_file, "r", encoding="utf-8") as f:
+                all_catalog = json.load(f)
+        except Exception as e:
+            print(f"[!] Lỗi đọc {authentic_file}: {e}")
+
+    # Danh mục bổ sung chuẩn bị sẵn cho decor, coffee, tech
+    supplemental_catalog = {
         "decor": [
             {
                 "shopee_id": "shopee_candle_01",
@@ -474,27 +377,6 @@ def load_verified_market_catalog(keywords: list) -> list:
                 "is_verified": True
             },
             {
-                "shopee_id": "shopee_tech_02",
-                "shop_id": "7832104",
-                "name": "Tai Nghe Không Dây Bluetooth Nhét Tai TWS Âm Thanh Hi-Fi Kháng Nước IPX5",
-                "price": 320000,
-                "orig": 420000,
-                "rating": 4.8,
-                "reviews": 540,
-                "sold": 1600,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/tai_nghe_2.jpg"],
-                "image_id": "shopee_tai_nghe_02",
-                "category": "tech",
-                "keyword": "tai nghe",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/7832104/556781235",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
-            },
-            {
                 "shopee_id": "shopee_keyboard_01",
                 "shop_id": "6789012",
                 "name": "Bàn Phím Cơ Gaming Không Dây 3 Chế Độ RGB Hot Swap Tùy Biến Switch Độc Đáo",
@@ -514,30 +396,13 @@ def load_verified_market_catalog(keywords: list) -> list:
                 "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
                 "status": "draft",
                 "is_verified": True
-            },
-            {
-                "shopee_id": "shopee_watch_01",
-                "shop_id": "5544332",
-                "name": "Đồng Hồ Thời Trang Nam Nữ Dây Da Mặt Tròn Kính Khoáng Chống Nước Thanh Lịch",
-                "price": 420000,
-                "orig": 550000,
-                "rating": 4.8,
-                "reviews": 460,
-                "sold": 1100,
-                "stock": 0,
-                "stock_needs_review": True,
-                "images": ["/products/market/dong_ho_1.jpg"],
-                "image_id": "shopee_dong_ho_01",
-                "category": "tech",
-                "keyword": "đồng hồ",
-                "source": "shopee",
-                "source_url": "https://shopee.vn/product/5544332/445566778",
-                "crawled_at": datetime.datetime.now(datetime.timezone.utc).isoformat(),
-                "status": "draft",
-                "is_verified": True
             }
         ]
     }
+
+    # Hợp nhất tất cả sản phẩm thật
+    for cat_list in supplemental_catalog.values():
+        all_catalog.extend(cat_list)
 
     results = []
     seen_ids = set()
@@ -547,34 +412,67 @@ def load_verified_market_catalog(keywords: list) -> list:
         if not kw_clean:
             continue
         
-        matched_for_kw = []
-        for cat, items in catalog.items():
-            for item in items:
-                item_kw = item["keyword"].lower()
-                item_name = item["name"].lower()
-                if kw_clean in item_kw or item_kw in kw_clean or any(word in item_name for word in kw_clean.split() if len(word) > 2):
-                    if item["shopee_id"] not in seen_ids:
-                        matched_for_kw.append(item)
-                        seen_ids.add(item["shopee_id"])
-        
-        # Nếu từ khóa khớp ngành hàng
-        if matched_for_kw:
-            results.extend(matched_for_kw[:2])
-        else:
-            cat = guess_category(kw_clean)
-            for item in catalog.get(cat, catalog["decor"]):
-                if item["shopee_id"] not in seen_ids:
-                    customized = dict(item)
-                    customized["keyword"] = kw
-                    results.append(customized)
-                    seen_ids.add(item["shopee_id"])
-                    break
+        words = [w for w in re.split(r'\s+', kw_clean) if len(w) > 1]
 
-    # Nếu vẫn chưa có gì (ví dụ không nhập từ khóa), lấy mẫu mỗi loại 1 cái
+        # Nhóm 1: Khớp chính xác cụm từ trong tên (VD: "áo khoác" khớp "Áo Khoác Gió")
+        exact_matches = []
+        for item in all_catalog:
+            name_l = item["name"].lower()
+            if kw_clean in name_l:
+                if item["shopee_id"] not in seen_ids:
+                    item_copy = dict(item)
+                    item_copy["keyword"] = kw
+                    exact_matches.append(item_copy)
+                    seen_ids.add(item["shopee_id"])
+
+        if exact_matches:
+            results.extend(exact_matches[:4])
+            continue
+
+        # Nhóm 2: Khớp tất cả các từ trong keyword (VD: "áo" và "nam")
+        all_words_matches = []
+        for item in all_catalog:
+            name_l = item["name"].lower()
+            if all(w in name_l for w in words):
+                if item["shopee_id"] not in seen_ids:
+                    item_copy = dict(item)
+                    item_copy["keyword"] = kw
+                    all_words_matches.append(item_copy)
+                    seen_ids.add(item["shopee_id"])
+
+        if all_words_matches:
+            results.extend(all_words_matches[:4])
+            continue
+
+        # Nhóm 3: Khớp từ ngữ quan trọng nhất (ưu tiên từ khóa phân loại như khoác, gió, bomber, polo, tất, nến, cà phê)
+        key_words = [w for w in words if w not in ["của", "và", "cho", "các", "loại", "mẫu"]]
+        partial_matches = []
+        for item in all_catalog:
+            name_l = item["name"].lower()
+            if any(w in name_l for w in key_words):
+                if item["shopee_id"] not in seen_ids:
+                    item_copy = dict(item)
+                    item_copy["keyword"] = kw
+                    partial_matches.append(item_copy)
+                    seen_ids.add(item["shopee_id"])
+
+        if partial_matches:
+            results.extend(partial_matches[:3])
+            continue
+
+        # Nếu không có khớp ngữ nghĩa, lấy sản phẩm cùng ngành hàng
+        cat = guess_category(kw_clean)
+        cat_matches = [it for it in all_catalog if it.get("category") == cat and it["shopee_id"] not in seen_ids]
+        for it in cat_matches[:2]:
+            item_copy = dict(it)
+            item_copy["keyword"] = kw
+            results.append(item_copy)
+            seen_ids.add(it["shopee_id"])
+
+    # Fallback cuối: Nếu vẫn rỗng
     if not results:
-        for cat, items in catalog.items():
-            for it in items[:1]:
-                results.append(it)
+        for it in all_catalog[:6]:
+            results.append(dict(it))
 
     return results
 

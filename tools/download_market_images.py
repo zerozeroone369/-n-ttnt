@@ -37,3 +37,4 @@ with httpx.Client(follow_redirects=True, timeout=20) as client:
                 print(f"Error {filename}: {e}")
         else:
             print(f"Already exists: {filename}")
+

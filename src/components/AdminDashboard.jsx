@@ -126,7 +126,7 @@ export default function AdminDashboard({
       return;
     }
 
-    const defaultImg = newProduct.imageUrl.trim() || "https://images.unsplash.com/photo-1544816155-12df9643f363?w=800&auto=format&fit=crop&q=80";
+    const defaultImg = newProduct.imageUrl.trim() || "/placeholder.svg";
 
     const productPayload = {
       id: `sp-${Date.now()}`,
@@ -1527,17 +1527,36 @@ export default function AdminDashboard({
                 </button>
 
                 <button
-                  onClick={() => setShopeeKeywords('áo thun nam nữ, nến thơm decor phòng ngủ, cà phê arabica, tai nghe bluetooth chống ồn, kem dưỡng da mặt, túi xách nữ da, đèn led decor, bàn phím cơ gaming, đồng hồ thời trang, giày sneaker unisex')}
+                  onClick={() => setShopeeKeywords('áo thun nam nữ, nến thơm decor phòng ngủ, cà phê arabica, tai nghe bluetooth, túi xách nữ da')}
                   disabled={shopeeLoading}
                   className="px-4 py-2.5 rounded-xl text-sm font-medium border border-stone-300 text-stone-700 hover:bg-stone-50 transition-all flex items-center gap-2"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
-                  Dùng 10 từ khóa mặc định
+                  Mặc định (5 nhóm)
                 </button>
 
-                <span className="text-xs text-stone-400">
-                  {shopeeKeywords.split(',').filter(k => k.trim()).length} từ khóa • Tối đa ~100 sản phẩm
-                </span>
+                <div className="flex flex-wrap items-center gap-1.5 ml-auto">
+                  <span className="text-xs font-semibold text-stone-500 mr-1">Gợi ý từ khóa:</span>
+                  {[
+                    { label: 'Áo khoác', kw: 'áo khoác' },
+                    { label: 'Áo thun', kw: 'áo thun' },
+                    { label: 'Áo polo', kw: 'áo polo' },
+                    { label: 'Quần đùi', kw: 'quần đùi' },
+                    { label: 'Tất vớ', kw: 'tất' },
+                    { label: 'Nến thơm', kw: 'nến thơm' },
+                    { label: 'Cà phê', kw: 'cà phê' },
+                    { label: 'Tai nghe', kw: 'tai nghe' }
+                  ].map(chip => (
+                    <button
+                      key={chip.label}
+                      type="button"
+                      onClick={() => setShopeeKeywords(chip.kw)}
+                      className="px-2.5 py-1 text-xs rounded-lg bg-stone-100 hover:bg-orange-100 hover:text-orange-700 text-stone-700 font-medium transition-colors"
+                    >
+                      {chip.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
@@ -1632,12 +1651,12 @@ export default function AdminDashboard({
                       {/* Image */}
                       <div className="relative aspect-square bg-stone-100 overflow-hidden">
                         <img
-                          src={product.images?.[0] || 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&auto=format&fit=crop&q=60'}
+                          src={product.images?.[0] || '/placeholder.svg'}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                           onError={(e) => {
-                            e.target.src = 'https://images.unsplash.com/photo-1544816155-12df9643f363?w=400&auto=format&fit=crop&q=60';
+                            e.target.src = '/placeholder.svg';
                           }}
                         />
                         
