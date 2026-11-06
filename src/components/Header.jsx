@@ -1,5 +1,5 @@
 import React from 'react';
-import { ShoppingBag, Search, Store, ShieldCheck, Sparkles, UserCheck, Heart, PackageCheck, User, LogOut } from 'lucide-react';
+import { ShoppingBag, Search, Store, ShieldCheck, Sparkles, UserCheck, Heart, PackageCheck, User, LogOut, Smartphone } from 'lucide-react';
 import { formatCurrency } from '../services/aiChatEngine.js';
 
 export default function Header({
@@ -10,6 +10,7 @@ export default function Header({
   onOpenWishlist,
   ordersCount,
   onOpenOrders,
+  onOpenDownload,
   searchQuery,
   setSearchQuery,
   isAdminView,
@@ -97,20 +98,16 @@ export default function Header({
           {/* Action Buttons */}
           <div className="flex items-center gap-2 sm:gap-2.5 flex-shrink-0">
             
-            {/* Customer Orders button */}
+            {/* Nút Cài App Trên Điện Thoại (Web App / PWA Install) */}
             {!isAdminView && (
               <button
-                onClick={onOpenOrders}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-semibold text-stone-700 bg-stone-100 hover:bg-stone-200 border border-stone-200 transition-colors"
-                title="Xem đơn hàng của bạn"
+                onClick={onOpenDownload}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-amber-900 bg-amber-50 hover:bg-amber-100 border border-amber-300 transition-all cursor-pointer shadow-xs active:scale-95"
+                title="Cài app Tiệm Nhà Nhỏ lên điện thoại hoặc máy tính (Web App)"
               >
-                <PackageCheck className="w-4 h-4 text-stone-600" />
-                <span className="hidden sm:inline">Đơn của tôi</span>
-                {ordersCount > 0 && (
-                  <span className="bg-amber-900 text-white text-[10px] px-1.5 py-0.2 rounded-full font-bold">
-                    {ordersCount}
-                  </span>
-                )}
+                <Smartphone className="w-4 h-4 text-amber-700 animate-pulse" />
+                <span className="hidden sm:inline">Cài App</span>
+                <span className="sm:hidden">Cài App</span>
               </button>
             )}
 

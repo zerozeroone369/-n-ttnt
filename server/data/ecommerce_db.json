@@ -39,6 +39,1706 @@
   ],
   "products": [
     {
+      "id": "sp-1793947371865-19",
+      "createdAt": "2026-11-06T06:42:51.865Z",
+      "name": "Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chống bụi để chạy xe đạp nam nữ",
+      "category": "fashion",
+      "price": 52920,
+      "originalPrice": 95040,
+      "stock": 0,
+      "rating": 4.7,
+      "reviewsCount": 600,
+      "soldCount": 5000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/40332720316.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chốn",
+      "desc": "Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chống bụi để chạy xe đạp nam nữ",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "40332720316",
+        "URL gốc": "https://shopee.vn/product/196261835/40332720316",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371844-18",
+      "createdAt": "2026-11-06T06:42:51.844Z",
+      "name": "PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Chống Ánh Sáng Xanh tongkhosi2",
+      "category": "fashion",
+      "price": 22840,
+      "originalPrice": 23000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1080,
+      "soldCount": 9000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/28158187572.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Ch",
+      "desc": "PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Chống Ánh Sáng Xanh tongkhosi2",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "28158187572",
+        "URL gốc": "https://shopee.vn/product/118645835/28158187572",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371830-17",
+      "createdAt": "2026-11-06T06:42:51.831Z",
+      "name": "Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+      "category": "fashion",
+      "price": 98000,
+      "originalPrice": 130000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25589817384.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+      "desc": "Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25589817384",
+        "URL gốc": "https://shopee.vn/product/431745854/25589817384",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371821-16",
+      "createdAt": "2026-11-06T06:42:51.821Z",
+      "name": "Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh gọng vuông độc đáo phong cách Hàn Quốc",
+      "category": "fashion",
+      "price": 42140,
+      "originalPrice": 60000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/29701524765.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh ",
+      "desc": "Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh gọng vuông độc đáo phong cách Hàn Quốc",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "29701524765",
+        "URL gốc": "https://shopee.vn/product/68362839/29701524765",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371809-15",
+      "createdAt": "2026-11-06T06:42:51.809Z",
+      "name": "Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quốc K07",
+      "category": "fashion",
+      "price": 23030,
+      "originalPrice": 32000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 2400,
+      "soldCount": 20000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/16655117249.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quố",
+      "desc": "Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quốc K07",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "16655117249",
+        "URL gốc": "https://shopee.vn/product/111519175/16655117249",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371791-14",
+      "createdAt": "2026-11-06T06:42:51.792Z",
+      "name": "Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -4.0 -4.5 -5.0 -5.5 -6.0 độ dành cho nam và nữ với tròng kính có thể tháo rời kính chống án",
+      "category": "fashion",
+      "price": 85071,
+      "originalPrice": 92000,
+      "stock": 0,
+      "rating": 4.6,
+      "reviewsCount": 3600,
+      "soldCount": 30000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/26551242939.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -",
+      "desc": "Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -4.0 -4.5 -5.0 -5.5 -6.0 độ dành cho nam và nữ với tròng kính có thể tháo rời kính chống án",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "26551242939",
+        "URL gốc": "https://shopee.vn/product/949804684/26551242939",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371765-13",
+      "createdAt": "2026-11-06T06:42:51.765Z",
+      "name": "Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang Hàn Quốc K118",
+      "category": "fashion",
+      "price": 27075,
+      "originalPrice": 75000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 960,
+      "soldCount": 8000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/19491707191.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang ",
+      "desc": "Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang Hàn Quốc K118",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19491707191",
+        "URL gốc": "https://shopee.vn/product/111519175/19491707191",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371752-12",
+      "createdAt": "2026-11-06T06:42:51.752Z",
+      "name": "Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách Hàn Quốc",
+      "category": "fashion",
+      "price": 20000,
+      "originalPrice": 35000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/27961442338.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách",
+      "desc": "Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách Hàn Quốc",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "27961442338",
+        "URL gốc": "https://shopee.vn/product/68362839/27961442338",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371739-11",
+      "createdAt": "2026-11-06T06:42:51.739Z",
+      "name": "Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vintage COD (San9) Cho Nam",
+      "category": "fashion",
+      "price": 82080,
+      "originalPrice": 118800,
+      "stock": 0,
+      "rating": 4.7,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/18666916512.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vi",
+      "desc": "Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vintage COD (San9) Cho Nam",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "18666916512",
+        "URL gốc": "https://shopee.vn/product/111715780/18666916512",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371725-10",
+      "createdAt": "2026-11-06T06:42:51.725Z",
+      "name": "Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong cách Hàn Quốc, cao cấp, kính nửa gọng.",
+      "category": "fashion",
+      "price": 54900,
+      "originalPrice": 69000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/23657710174.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong c",
+      "desc": "Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong cách Hàn Quốc, cao cấp, kính nửa gọng.",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "23657710174",
+        "URL gốc": "https://shopee.vn/product/183595172/23657710174",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371708-9",
+      "createdAt": "2026-11-06T06:42:51.708Z",
+      "name": "【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời trang mắt kính cận Hỗ trợ tùy chỉnh Cho nam và nữ K73",
+      "category": "fashion",
+      "price": 62370,
+      "originalPrice": 105840,
+      "stock": 0,
+      "rating": 4.2,
+      "reviewsCount": 81,
+      "soldCount": 681,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/29557806468.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - 【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời tr",
+      "desc": "【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời trang mắt kính cận Hỗ trợ tùy chỉnh Cho nam và nữ K73",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "29557806468",
+        "URL gốc": "https://shopee.vn/product/1324864525/29557806468",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371692-8",
+      "createdAt": "2026-11-06T06:42:51.693Z",
+      "name": "【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận thị chống bức xạ ,Kính gọng vuông ,phi giới tính kính mắt 1731",
+      "category": "fashion",
+      "price": 62442,
+      "originalPrice": 100000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 480,
+      "soldCount": 4000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/29193711372.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - 【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận th",
+      "desc": "【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận thị chống bức xạ ,Kính gọng vuông ,phi giới tính kính mắt 1731",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "29193711372",
+        "URL gốc": "https://shopee.vn/product/1649869410/29193711372",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371678-7",
+      "createdAt": "2026-11-06T06:42:51.678Z",
+      "name": "Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành cho nam nữ k78",
+      "category": "fashion",
+      "price": 24010,
+      "originalPrice": 32000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 6000,
+      "soldCount": 50000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/18887958068.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành c",
+      "desc": "Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành cho nam nữ k78",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "18887958068",
+        "URL gốc": "https://shopee.vn/product/111519175/18887958068",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371656-6",
+      "createdAt": "2026-11-06T06:42:51.656Z",
+      "name": "Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi Bẩn",
+      "category": "fashion",
+      "price": 68000,
+      "originalPrice": 109000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25330662526.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi B",
+      "desc": "Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi Bẩn",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25330662526",
+        "URL gốc": "https://shopee.vn/product/10323148/25330662526",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371638-5",
+      "createdAt": "2026-11-06T06:42:51.638Z",
+      "name": "Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ánh sáng xanh ,kính nữa viền cổ điển phong cách Hàn Trung",
+      "category": "fashion",
+      "price": 37000,
+      "originalPrice": 75000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/19996588913.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ",
+      "desc": "Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ánh sáng xanh ,kính nữa viền cổ điển phong cách Hàn Trung",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19996588913",
+        "URL gốc": "https://shopee.vn/product/68362839/19996588913",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371625-4",
+      "createdAt": "2026-11-06T06:42:51.625Z",
+      "name": "Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang gọng nửa viền kim loại titan cao cấp hiện đại MEME Y15.",
+      "category": "fashion",
+      "price": 96000,
+      "originalPrice": 200000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 3600,
+      "soldCount": 30000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/22978427690.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang g",
+      "desc": "Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang gọng nửa viền kim loại titan cao cấp hiện đại MEME Y15.",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "22978427690",
+        "URL gốc": "https://shopee.vn/product/998924637/22978427690",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371615-3",
+      "createdAt": "2026-11-06T06:42:51.616Z",
+      "name": "Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông nửa viền kim loại cao cấp thời trang Hàn Quốc kính mắt Y19.",
+      "category": "fashion",
+      "price": 96000,
+      "originalPrice": 180000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 240,
+      "soldCount": 2000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/28153611624.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông ",
+      "desc": "Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông nửa viền kim loại cao cấp thời trang Hàn Quốc kính mắt Y19.",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "28153611624",
+        "URL gốc": "https://shopee.vn/product/998924637/28153611624",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371601-2",
+      "createdAt": "2026-11-06T06:42:51.601Z",
+      "name": "Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để lái xe du lịch thời trang ngoài trời",
+      "category": "fashion",
+      "price": 114480,
+      "originalPrice": 177433,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 600,
+      "soldCount": 5000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/47770065516.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để",
+      "desc": "Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để lái xe du lịch thời trang ngoài trời",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "47770065516",
+        "URL gốc": "https://shopee.vn/product/196261835/47770065516",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371582-1",
+      "createdAt": "2026-11-06T06:42:51.582Z",
+      "name": "Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi xe đạp, xe máy, chống tiaUV400, chống mờ hơi,unisex, bảo hộ",
+      "category": "fashion",
+      "price": 90000,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 12000,
+      "soldCount": 100000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/19863212321.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi",
+      "desc": "Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi xe đạp, xe máy, chống tiaUV400, chống mờ hơi,unisex, bảo hộ",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19863212321",
+        "URL gốc": "https://shopee.vn/product/257024829/19863212321",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371560-0",
+      "createdAt": "2026-11-06T06:42:51.561Z",
+      "name": "Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản cao cấp nâng cấp ngoại hình kính mắt y15",
+      "category": "fashion",
+      "price": 41250,
+      "originalPrice": 150000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 2400,
+      "soldCount": 20000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25826776002.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản c",
+      "desc": "Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản cao cấp nâng cấp ngoại hình kính mắt y15",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25826776002",
+        "URL gốc": "https://shopee.vn/product/1234282309/25826776002",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235547-19",
+      "createdAt": "2026-11-06T06:40:35.548Z",
+      "name": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Mèo Summer In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "category": "fashion",
+      "price": 154000,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25375137228.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Mèo Summer In Hìn",
+      "desc": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Mèo Summer In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25375137228",
+        "URL gốc": "https://shopee.vn/product/27035917/25375137228",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235530-18",
+      "createdAt": "2026-11-06T06:40:35.530Z",
+      "name": "Áo polo thun nữ in hình mèo ngơ 100% cotton,mềm,mát-Áo polo nam nữ công sở 100% cotton in hình mèo ngơ Lenna D'amour",
+      "category": "fashion",
+      "price": 165599,
+      "originalPrice": 230000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 113,
+      "soldCount": 947,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/40262321589.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo polo thun nữ in hình mèo ngơ 100% cotton,mềm,mát-Áo polo ",
+      "desc": "Áo polo thun nữ in hình mèo ngơ 100% cotton,mềm,mát-Áo polo nam nữ công sở 100% cotton in hình mèo ngơ Lenna D'amour",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "40262321589",
+        "URL gốc": "https://shopee.vn/product/659260508/40262321589",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235509-17",
+      "createdAt": "2026-11-06T06:40:35.509Z",
+      "name": "Áo Thun Lưới Nữ RICXIE GIRL Số 80 Basic Tôn Dáng Co Giãn - Áo Thể Thao Nữ Hot Trend 14 Màu",
+      "category": "fashion",
+      "price": 134850,
+      "originalPrice": 200000,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 109,
+      "soldCount": 912,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/42683129618.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Lưới Nữ RICXIE GIRL Số 80 Basic Tôn Dáng Co Giãn - Á",
+      "desc": "Áo Thun Lưới Nữ RICXIE GIRL Số 80 Basic Tôn Dáng Co Giãn - Áo Thể Thao Nữ Hot Trend 14 Màu",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "42683129618",
+        "URL gốc": "https://shopee.vn/product/1904253191/42683129618",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235496-16",
+      "createdAt": "2026-11-06T06:40:35.496Z",
+      "name": "Áo Polo Nam Nữ PUERZSO NAD Unisex - Áo Cổ Bẻ có khoá kéo Tay Lỡ 2 sọc Chất Liệu Tổ Ong Dệt Trẻ Trung, Cá Tính.năng động",
+      "category": "fashion",
+      "price": 167200,
+      "originalPrice": 190000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1080,
+      "soldCount": 9000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/22472351227.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Polo Nam Nữ PUERZSO NAD Unisex - Áo Cổ Bẻ có khoá kéo Tay",
+      "desc": "Áo Polo Nam Nữ PUERZSO NAD Unisex - Áo Cổ Bẻ có khoá kéo Tay Lỡ 2 sọc Chất Liệu Tổ Ong Dệt Trẻ Trung, Cá Tính.năng động",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "22472351227",
+        "URL gốc": "https://shopee.vn/product/933190367/22472351227",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235487-15",
+      "createdAt": "2026-11-06T06:40:35.487Z",
+      "name": "Áo thun nữ nhiều màu tay ngắn 60344 dáng ngắn thiết kế bất đối xứng, nhún ly độc đáo, lạ mắt, mẫu mới hè thu 2026",
+      "category": "fashion",
+      "price": 135000,
+      "originalPrice": 170000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/41460639013.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo thun nữ nhiều màu tay ngắn 60344 dáng ngắn thiết kế bất đ",
+      "desc": "Áo thun nữ nhiều màu tay ngắn 60344 dáng ngắn thiết kế bất đối xứng, nhún ly độc đáo, lạ mắt, mẫu mới hè thu 2026",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "41460639013",
+        "URL gốc": "https://shopee.vn/product/10995214/41460639013",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235475-14",
+      "createdAt": "2026-11-06T06:40:35.475Z",
+      "name": "Mùa hè Pháp Xanh Draped Cổ Ngắn Tay Áo Nữ Slim Fit Tummy Kiểm Soát Đa Năng Áo Crop",
+      "category": "fashion",
+      "price": 123840,
+      "originalPrice": 210000,
+      "stock": 0,
+      "rating": 4.7,
+      "reviewsCount": 111,
+      "soldCount": 933,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/49909705875.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mùa hè Pháp Xanh Draped Cổ Ngắn Tay Áo Nữ Slim Fit Tummy Kiể",
+      "desc": "Mùa hè Pháp Xanh Draped Cổ Ngắn Tay Áo Nữ Slim Fit Tummy Kiểm Soát Đa Năng Áo Crop",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "49909705875",
+        "URL gốc": "https://shopee.vn/product/791050707/49909705875",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235455-13",
+      "createdAt": "2026-11-06T06:40:35.455Z",
+      "name": "[BST 2026] EAZY ⭑.ᐟ LONGSLEEVE BOXY  - Áo Thun Tay dài Raglan cổ tròn form rộng nam nữ unisex 🖤 Áo phông Jaystoree",
+      "category": "fashion",
+      "price": 227920,
+      "originalPrice": 498000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 480,
+      "soldCount": 4000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/42980126512.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - [BST 2026] EAZY ⭑.ᐟ LONGSLEEVE BOXY  - Áo Thun Tay dài Ragla",
+      "desc": "[BST 2026] EAZY ⭑.ᐟ LONGSLEEVE BOXY  - Áo Thun Tay dài Raglan cổ tròn form rộng nam nữ unisex 🖤 Áo phông Jaystoree",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "42980126512",
+        "URL gốc": "https://shopee.vn/product/27228264/42980126512",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235439-12",
+      "createdAt": "2026-11-06T06:40:35.439Z",
+      "name": "Áo Sơ Mi Nữ Kẻ Sọc Phong Cách Retro Đại Học Mỹ, Sơ Mi Kẻ Chuẩn Form Chất Lanh Mịn - MoDa Clothes",
+      "category": "fashion",
+      "price": 110000,
+      "originalPrice": 118000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/26735061172.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sơ Mi Nữ Kẻ Sọc Phong Cách Retro Đại Học Mỹ, Sơ Mi Kẻ Chu",
+      "desc": "Áo Sơ Mi Nữ Kẻ Sọc Phong Cách Retro Đại Học Mỹ, Sơ Mi Kẻ Chuẩn Form Chất Lanh Mịn - MoDa Clothes",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "26735061172",
+        "URL gốc": "https://shopee.vn/product/716489778/26735061172",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235419-11",
+      "createdAt": "2026-11-06T06:40:35.419Z",
+      "name": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Great Cat In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "category": "fashion",
+      "price": 148720,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 720,
+      "soldCount": 6000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25025166313.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Great Cat In Hình",
+      "desc": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Great Cat In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25025166313",
+        "URL gốc": "https://shopee.vn/product/27035917/25025166313",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235404-10",
+      "createdAt": "2026-11-06T06:40:35.404Z",
+      "name": "Áo Polo Cổ V Unisex, Áo Polo Nữ By JOLI Mã BST 03 Timid Chất Cotton Form Rộng Cá Tính",
+      "category": "fashion",
+      "price": 148720,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/26504281493.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Polo Cổ V Unisex, Áo Polo Nữ By JOLI Mã BST 03 Timid Chất",
+      "desc": "Áo Polo Cổ V Unisex, Áo Polo Nữ By JOLI Mã BST 03 Timid Chất Cotton Form Rộng Cá Tính",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "26504281493",
+        "URL gốc": "https://shopee.vn/product/27035917/26504281493",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235371-9",
+      "createdAt": "2026-11-06T06:40:35.372Z",
+      "name": "Áo Thun Bo Viền Tay Nam Nữ Unisex Tay Lỡ BST01 In Hình Basic Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "category": "fashion",
+      "price": 148720,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 840,
+      "soldCount": 7000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/28250634487.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Bo Viền Tay Nam Nữ Unisex Tay Lỡ BST01 In Hình Basic",
+      "desc": "Áo Thun Bo Viền Tay Nam Nữ Unisex Tay Lỡ BST01 In Hình Basic Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "28250634487",
+        "URL gốc": "https://shopee.vn/product/27035917/28250634487",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235334-8",
+      "createdAt": "2026-11-06T06:40:35.335Z",
+      "name": "(TẶNG KÈM KHĂN) Áo sơ mi dáng cộc tay dành cho nữ hàng QCCC hottrend mùa hè HMBOUTI SP477",
+      "category": "fashion",
+      "price": 148253,
+      "originalPrice": 298000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 105,
+      "soldCount": 877,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/56162279986.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - (TẶNG KÈM KHĂN) Áo sơ mi dáng cộc tay dành cho nữ hàng QCCC ",
+      "desc": "(TẶNG KÈM KHĂN) Áo sơ mi dáng cộc tay dành cho nữ hàng QCCC hottrend mùa hè HMBOUTI SP477",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "56162279986",
+        "URL gốc": "https://shopee.vn/product/624393230/56162279986",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235306-7",
+      "createdAt": "2026-11-06T06:40:35.307Z",
+      "name": "Áo Sơ Mi Boxy Nam Nữ Zgo AZG16 Tay Ngắn Thêu Túi Kẻ Sọc Form Rộng",
+      "category": "fashion",
+      "price": 175573,
+      "originalPrice": 258000,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 72,
+      "soldCount": 608,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/42103171008.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sơ Mi Boxy Nam Nữ Zgo AZG16 Tay Ngắn Thêu Túi Kẻ Sọc Form",
+      "desc": "Áo Sơ Mi Boxy Nam Nữ Zgo AZG16 Tay Ngắn Thêu Túi Kẻ Sọc Form Rộng",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "42103171008",
+        "URL gốc": "https://shopee.vn/product/1323582887/42103171008",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235285-6",
+      "createdAt": "2026-11-06T06:40:35.285Z",
+      "name": "[ DEAL MỞ BÁN ] Áo Sơ Mi Nữ Ngắn Tay Thêu Nổi Thời Trang Chất Vải Cao Cấp Form Đẹp",
+      "category": "fashion",
+      "price": 210390,
+      "originalPrice": 330000,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 50,
+      "soldCount": 181,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/52910045693.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - [ DEAL MỞ BÁN ] Áo Sơ Mi Nữ Ngắn Tay Thêu Nổi Thời Trang Chấ",
+      "desc": "[ DEAL MỞ BÁN ] Áo Sơ Mi Nữ Ngắn Tay Thêu Nổi Thời Trang Chất Vải Cao Cấp Form Đẹp",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "52910045693",
+        "URL gốc": "https://shopee.vn/product/68302424/52910045693",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235272-5",
+      "createdAt": "2026-11-06T06:40:35.272Z",
+      "name": "Áo Sơ Mi A3858 Phối Cardigan Nỉ Cộc Tay Phối Cổ Bèo Buộc Nơ Thanh Lịch MoLie",
+      "category": "fashion",
+      "price": 179379,
+      "originalPrice": 260000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/55856413412.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sơ Mi A3858 Phối Cardigan Nỉ Cộc Tay Phối Cổ Bèo Buộc Nơ ",
+      "desc": "Áo Sơ Mi A3858 Phối Cardigan Nỉ Cộc Tay Phối Cổ Bèo Buộc Nơ Thanh Lịch MoLie",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "55856413412",
+        "URL gốc": "https://shopee.vn/product/1273480603/55856413412",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235252-4",
+      "createdAt": "2026-11-06T06:40:35.252Z",
+      "name": "màu tương phản áo sơ mi polo có ve áo ngắn tay mùa hè nữ kẻ sọc khâu niche top",
+      "category": "fashion",
+      "price": 150000,
+      "originalPrice": 190000,
+      "stock": 0,
+      "rating": 4.5,
+      "reviewsCount": 50,
+      "soldCount": 357,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/46259562316.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - màu tương phản áo sơ mi polo có ve áo ngắn tay mùa hè nữ kẻ ",
+      "desc": "màu tương phản áo sơ mi polo có ve áo ngắn tay mùa hè nữ kẻ sọc khâu niche top",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "46259562316",
+        "URL gốc": "https://shopee.vn/product/1664076571/46259562316",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235234-3",
+      "createdAt": "2026-11-06T06:40:35.235Z",
+      "name": "Áo thun nam và nữ - Thiết kế đơn giản - 100% cotton - Phong cách và dễ phối đồ - Thoải mái và mềm mại - Dáng rộng-C473",
+      "category": "fashion",
+      "price": 116000,
+      "originalPrice": 260000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/55408266345.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo thun nam và nữ - Thiết kế đơn giản - 100% cotton - Phong ",
+      "desc": "Áo thun nam và nữ - Thiết kế đơn giản - 100% cotton - Phong cách và dễ phối đồ - Thoải mái và mềm mại - Dáng rộng-C473",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "55408266345",
+        "URL gốc": "https://shopee.vn/product/1599187206/55408266345",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235214-2",
+      "createdAt": "2026-11-06T06:40:35.214Z",
+      "name": "Áo Sweater Cổ V Chất Nỉ 2 Da BST 07 Luck Smile By JOLI Form Rộng Dáng Unisex Dành Cho Nam Nữ",
+      "category": "fashion",
+      "price": 157520,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/23487746543.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sweater Cổ V Chất Nỉ 2 Da BST 07 Luck Smile By JOLI Form ",
+      "desc": "Áo Sweater Cổ V Chất Nỉ 2 Da BST 07 Luck Smile By JOLI Form Rộng Dáng Unisex Dành Cho Nam Nữ",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "23487746543",
+        "URL gốc": "https://shopee.vn/product/27035917/23487746543",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235199-1",
+      "createdAt": "2026-11-06T06:40:35.199Z",
+      "name": "[ DEAL MỞ BÁN ] Áo Thun Polo Nữ Phối Cổ Sơ Mi TeeNee Phong Cách Thanh Lịch, Chất Vải Thoáng Thoáng Mát Co Giãn",
+      "category": "fashion",
+      "price": 154387,
+      "originalPrice": 229000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 600,
+      "soldCount": 5000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/45210361235.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - [ DEAL MỞ BÁN ] Áo Thun Polo Nữ Phối Cổ Sơ Mi TeeNee Phong C",
+      "desc": "[ DEAL MỞ BÁN ] Áo Thun Polo Nữ Phối Cổ Sơ Mi TeeNee Phong Cách Thanh Lịch, Chất Vải Thoáng Thoáng Mát Co Giãn",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "45210361235",
+        "URL gốc": "https://shopee.vn/product/68302424/45210361235",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235178-0",
+      "createdAt": "2026-11-06T06:40:35.182Z",
+      "name": "(M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép dày dặn mẫu phối viền có lô gô THÊU Đắp lô gô 46 , dữ ấm tố",
+      "category": "fashion",
+      "price": 149000,
+      "originalPrice": 298000,
+      "stock": 0,
+      "rating": 4.6,
+      "reviewsCount": 50,
+      "soldCount": 107,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/51868043018.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - (M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép",
+      "desc": "(M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép dày dặn mẫu phối viền có lô gô THÊU Đắp lô gô 46 , dữ ấm tố",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "51868043018",
+        "URL gốc": "https://shopee.vn/product/1188600728/51868043018",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
       "id": "sp-1793940578180-2",
       "createdAt": "2026-11-06T04:49:38.180Z",
       "name": "Bộ thể thao nam nữ JULIDO áo tay ngắn quần short dáng rộng dây rút",
@@ -5403,6 +7103,1666 @@
         "trang"
       ],
       "reviews": []
+    },
+    {
+      "id": "sp-1793947235178-0",
+      "name": "(M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép dày dặn mẫu phối viền có lô gô THÊU Đắp lô gô 46 , dữ ấm tố",
+      "category": "fashion",
+      "price": 149000,
+      "originalPrice": 298000,
+      "stock": 0,
+      "rating": 4.6,
+      "reviewsCount": 50,
+      "soldCount": 107,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/51868043018.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - (M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép",
+      "desc": "(M-82) DAGUL (LẺ QUẦN,LẺ ÁO) nam nữ thể thao chất liệu nỉ ép dày dặn mẫu phối viền có lô gô THÊU Đắp lô gô 46 , dữ ấm tố",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "51868043018",
+        "URL gốc": "https://shopee.vn/product/1188600728/51868043018",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235199-1",
+      "name": "[ DEAL MỞ BÁN ] Áo Thun Polo Nữ Phối Cổ Sơ Mi TeeNee Phong Cách Thanh Lịch, Chất Vải Thoáng Thoáng Mát Co Giãn",
+      "category": "fashion",
+      "price": 154387,
+      "originalPrice": 229000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 600,
+      "soldCount": 5000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/45210361235.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - [ DEAL MỞ BÁN ] Áo Thun Polo Nữ Phối Cổ Sơ Mi TeeNee Phong C",
+      "desc": "[ DEAL MỞ BÁN ] Áo Thun Polo Nữ Phối Cổ Sơ Mi TeeNee Phong Cách Thanh Lịch, Chất Vải Thoáng Thoáng Mát Co Giãn",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "45210361235",
+        "URL gốc": "https://shopee.vn/product/68302424/45210361235",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235214-2",
+      "name": "Áo Sweater Cổ V Chất Nỉ 2 Da BST 07 Luck Smile By JOLI Form Rộng Dáng Unisex Dành Cho Nam Nữ",
+      "category": "fashion",
+      "price": 157520,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/23487746543.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sweater Cổ V Chất Nỉ 2 Da BST 07 Luck Smile By JOLI Form ",
+      "desc": "Áo Sweater Cổ V Chất Nỉ 2 Da BST 07 Luck Smile By JOLI Form Rộng Dáng Unisex Dành Cho Nam Nữ",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "23487746543",
+        "URL gốc": "https://shopee.vn/product/27035917/23487746543",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235234-3",
+      "name": "Áo thun nam và nữ - Thiết kế đơn giản - 100% cotton - Phong cách và dễ phối đồ - Thoải mái và mềm mại - Dáng rộng-C473",
+      "category": "fashion",
+      "price": 116000,
+      "originalPrice": 260000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/55408266345.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo thun nam và nữ - Thiết kế đơn giản - 100% cotton - Phong ",
+      "desc": "Áo thun nam và nữ - Thiết kế đơn giản - 100% cotton - Phong cách và dễ phối đồ - Thoải mái và mềm mại - Dáng rộng-C473",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "55408266345",
+        "URL gốc": "https://shopee.vn/product/1599187206/55408266345",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235252-4",
+      "name": "màu tương phản áo sơ mi polo có ve áo ngắn tay mùa hè nữ kẻ sọc khâu niche top",
+      "category": "fashion",
+      "price": 150000,
+      "originalPrice": 190000,
+      "stock": 0,
+      "rating": 4.5,
+      "reviewsCount": 50,
+      "soldCount": 357,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/46259562316.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - màu tương phản áo sơ mi polo có ve áo ngắn tay mùa hè nữ kẻ ",
+      "desc": "màu tương phản áo sơ mi polo có ve áo ngắn tay mùa hè nữ kẻ sọc khâu niche top",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "46259562316",
+        "URL gốc": "https://shopee.vn/product/1664076571/46259562316",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235272-5",
+      "name": "Áo Sơ Mi A3858 Phối Cardigan Nỉ Cộc Tay Phối Cổ Bèo Buộc Nơ Thanh Lịch MoLie",
+      "category": "fashion",
+      "price": 179379,
+      "originalPrice": 260000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/55856413412.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sơ Mi A3858 Phối Cardigan Nỉ Cộc Tay Phối Cổ Bèo Buộc Nơ ",
+      "desc": "Áo Sơ Mi A3858 Phối Cardigan Nỉ Cộc Tay Phối Cổ Bèo Buộc Nơ Thanh Lịch MoLie",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "55856413412",
+        "URL gốc": "https://shopee.vn/product/1273480603/55856413412",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235285-6",
+      "name": "[ DEAL MỞ BÁN ] Áo Sơ Mi Nữ Ngắn Tay Thêu Nổi Thời Trang Chất Vải Cao Cấp Form Đẹp",
+      "category": "fashion",
+      "price": 210390,
+      "originalPrice": 330000,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 50,
+      "soldCount": 181,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/52910045693.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - [ DEAL MỞ BÁN ] Áo Sơ Mi Nữ Ngắn Tay Thêu Nổi Thời Trang Chấ",
+      "desc": "[ DEAL MỞ BÁN ] Áo Sơ Mi Nữ Ngắn Tay Thêu Nổi Thời Trang Chất Vải Cao Cấp Form Đẹp",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "52910045693",
+        "URL gốc": "https://shopee.vn/product/68302424/52910045693",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235306-7",
+      "name": "Áo Sơ Mi Boxy Nam Nữ Zgo AZG16 Tay Ngắn Thêu Túi Kẻ Sọc Form Rộng",
+      "category": "fashion",
+      "price": 175573,
+      "originalPrice": 258000,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 72,
+      "soldCount": 608,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/42103171008.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sơ Mi Boxy Nam Nữ Zgo AZG16 Tay Ngắn Thêu Túi Kẻ Sọc Form",
+      "desc": "Áo Sơ Mi Boxy Nam Nữ Zgo AZG16 Tay Ngắn Thêu Túi Kẻ Sọc Form Rộng",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "42103171008",
+        "URL gốc": "https://shopee.vn/product/1323582887/42103171008",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235334-8",
+      "name": "(TẶNG KÈM KHĂN) Áo sơ mi dáng cộc tay dành cho nữ hàng QCCC hottrend mùa hè HMBOUTI SP477",
+      "category": "fashion",
+      "price": 148253,
+      "originalPrice": 298000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 105,
+      "soldCount": 877,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/56162279986.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - (TẶNG KÈM KHĂN) Áo sơ mi dáng cộc tay dành cho nữ hàng QCCC ",
+      "desc": "(TẶNG KÈM KHĂN) Áo sơ mi dáng cộc tay dành cho nữ hàng QCCC hottrend mùa hè HMBOUTI SP477",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "56162279986",
+        "URL gốc": "https://shopee.vn/product/624393230/56162279986",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235371-9",
+      "name": "Áo Thun Bo Viền Tay Nam Nữ Unisex Tay Lỡ BST01 In Hình Basic Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "category": "fashion",
+      "price": 148720,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 840,
+      "soldCount": 7000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/28250634487.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Bo Viền Tay Nam Nữ Unisex Tay Lỡ BST01 In Hình Basic",
+      "desc": "Áo Thun Bo Viền Tay Nam Nữ Unisex Tay Lỡ BST01 In Hình Basic Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "28250634487",
+        "URL gốc": "https://shopee.vn/product/27035917/28250634487",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235404-10",
+      "name": "Áo Polo Cổ V Unisex, Áo Polo Nữ By JOLI Mã BST 03 Timid Chất Cotton Form Rộng Cá Tính",
+      "category": "fashion",
+      "price": 148720,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/26504281493.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Polo Cổ V Unisex, Áo Polo Nữ By JOLI Mã BST 03 Timid Chất",
+      "desc": "Áo Polo Cổ V Unisex, Áo Polo Nữ By JOLI Mã BST 03 Timid Chất Cotton Form Rộng Cá Tính",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "26504281493",
+        "URL gốc": "https://shopee.vn/product/27035917/26504281493",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235419-11",
+      "name": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Great Cat In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "category": "fashion",
+      "price": 148720,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 720,
+      "soldCount": 6000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25025166313.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Great Cat In Hình",
+      "desc": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Great Cat In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25025166313",
+        "URL gốc": "https://shopee.vn/product/27035917/25025166313",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235439-12",
+      "name": "Áo Sơ Mi Nữ Kẻ Sọc Phong Cách Retro Đại Học Mỹ, Sơ Mi Kẻ Chuẩn Form Chất Lanh Mịn - MoDa Clothes",
+      "category": "fashion",
+      "price": 110000,
+      "originalPrice": 118000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/26735061172.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Sơ Mi Nữ Kẻ Sọc Phong Cách Retro Đại Học Mỹ, Sơ Mi Kẻ Chu",
+      "desc": "Áo Sơ Mi Nữ Kẻ Sọc Phong Cách Retro Đại Học Mỹ, Sơ Mi Kẻ Chuẩn Form Chất Lanh Mịn - MoDa Clothes",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "26735061172",
+        "URL gốc": "https://shopee.vn/product/716489778/26735061172",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235455-13",
+      "name": "[BST 2026] EAZY ⭑.ᐟ LONGSLEEVE BOXY  - Áo Thun Tay dài Raglan cổ tròn form rộng nam nữ unisex 🖤 Áo phông Jaystoree",
+      "category": "fashion",
+      "price": 227920,
+      "originalPrice": 498000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 480,
+      "soldCount": 4000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/42980126512.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - [BST 2026] EAZY ⭑.ᐟ LONGSLEEVE BOXY  - Áo Thun Tay dài Ragla",
+      "desc": "[BST 2026] EAZY ⭑.ᐟ LONGSLEEVE BOXY  - Áo Thun Tay dài Raglan cổ tròn form rộng nam nữ unisex 🖤 Áo phông Jaystoree",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "42980126512",
+        "URL gốc": "https://shopee.vn/product/27228264/42980126512",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235475-14",
+      "name": "Mùa hè Pháp Xanh Draped Cổ Ngắn Tay Áo Nữ Slim Fit Tummy Kiểm Soát Đa Năng Áo Crop",
+      "category": "fashion",
+      "price": 123840,
+      "originalPrice": 210000,
+      "stock": 0,
+      "rating": 4.7,
+      "reviewsCount": 111,
+      "soldCount": 933,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/49909705875.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mùa hè Pháp Xanh Draped Cổ Ngắn Tay Áo Nữ Slim Fit Tummy Kiể",
+      "desc": "Mùa hè Pháp Xanh Draped Cổ Ngắn Tay Áo Nữ Slim Fit Tummy Kiểm Soát Đa Năng Áo Crop",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "49909705875",
+        "URL gốc": "https://shopee.vn/product/791050707/49909705875",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235487-15",
+      "name": "Áo thun nữ nhiều màu tay ngắn 60344 dáng ngắn thiết kế bất đối xứng, nhún ly độc đáo, lạ mắt, mẫu mới hè thu 2026",
+      "category": "fashion",
+      "price": 135000,
+      "originalPrice": 170000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/41460639013.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo thun nữ nhiều màu tay ngắn 60344 dáng ngắn thiết kế bất đ",
+      "desc": "Áo thun nữ nhiều màu tay ngắn 60344 dáng ngắn thiết kế bất đối xứng, nhún ly độc đáo, lạ mắt, mẫu mới hè thu 2026",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "41460639013",
+        "URL gốc": "https://shopee.vn/product/10995214/41460639013",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235496-16",
+      "name": "Áo Polo Nam Nữ PUERZSO NAD Unisex - Áo Cổ Bẻ có khoá kéo Tay Lỡ 2 sọc Chất Liệu Tổ Ong Dệt Trẻ Trung, Cá Tính.năng động",
+      "category": "fashion",
+      "price": 167200,
+      "originalPrice": 190000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1080,
+      "soldCount": 9000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/22472351227.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Polo Nam Nữ PUERZSO NAD Unisex - Áo Cổ Bẻ có khoá kéo Tay",
+      "desc": "Áo Polo Nam Nữ PUERZSO NAD Unisex - Áo Cổ Bẻ có khoá kéo Tay Lỡ 2 sọc Chất Liệu Tổ Ong Dệt Trẻ Trung, Cá Tính.năng động",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "22472351227",
+        "URL gốc": "https://shopee.vn/product/933190367/22472351227",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235509-17",
+      "name": "Áo Thun Lưới Nữ RICXIE GIRL Số 80 Basic Tôn Dáng Co Giãn - Áo Thể Thao Nữ Hot Trend 14 Màu",
+      "category": "fashion",
+      "price": 134850,
+      "originalPrice": 200000,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 109,
+      "soldCount": 912,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/42683129618.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Lưới Nữ RICXIE GIRL Số 80 Basic Tôn Dáng Co Giãn - Á",
+      "desc": "Áo Thun Lưới Nữ RICXIE GIRL Số 80 Basic Tôn Dáng Co Giãn - Áo Thể Thao Nữ Hot Trend 14 Màu",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "42683129618",
+        "URL gốc": "https://shopee.vn/product/1904253191/42683129618",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235530-18",
+      "name": "Áo polo thun nữ in hình mèo ngơ 100% cotton,mềm,mát-Áo polo nam nữ công sở 100% cotton in hình mèo ngơ Lenna D'amour",
+      "category": "fashion",
+      "price": 165599,
+      "originalPrice": 230000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 113,
+      "soldCount": 947,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/40262321589.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo polo thun nữ in hình mèo ngơ 100% cotton,mềm,mát-Áo polo ",
+      "desc": "Áo polo thun nữ in hình mèo ngơ 100% cotton,mềm,mát-Áo polo nam nữ công sở 100% cotton in hình mèo ngơ Lenna D'amour",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "40262321589",
+        "URL gốc": "https://shopee.vn/product/659260508/40262321589",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947235547-19",
+      "name": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Mèo Summer In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "category": "fashion",
+      "price": 154000,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25375137228.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Mèo Summer In Hìn",
+      "desc": "Áo Thun Nam Nữ Unisex Tay Lỡ By JOLI Mã TN Mèo Summer In Hình Chất Cotton Form Rộng Phong Cách Ulzzang J Joli Trendy",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25375137228",
+        "URL gốc": "https://shopee.vn/product/27035917/25375137228",
+        "Từ khóa": "áo nữ",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371560-0",
+      "name": "Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản cao cấp nâng cấp ngoại hình kính mắt y15",
+      "category": "fashion",
+      "price": 41250,
+      "originalPrice": 150000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 2400,
+      "soldCount": 20000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25826776002.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản c",
+      "desc": "Gọng kính nam đổi màu phong cách tinh tế lịch lãm đơn giản cao cấp nâng cấp ngoại hình kính mắt y15",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25826776002",
+        "URL gốc": "https://shopee.vn/product/1234282309/25826776002",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371582-1",
+      "name": "Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi xe đạp, xe máy, chống tiaUV400, chống mờ hơi,unisex, bảo hộ",
+      "category": "fashion",
+      "price": 90000,
+      "originalPrice": 199000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 12000,
+      "soldCount": 100000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/19863212321.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi",
+      "desc": "Kính chống bụi đi đường DOKCRAZY FOGLY cản gió, cho người đi xe đạp, xe máy, chống tiaUV400, chống mờ hơi,unisex, bảo hộ",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19863212321",
+        "URL gốc": "https://shopee.vn/product/257024829/19863212321",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371601-2",
+      "name": "Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để lái xe du lịch thời trang ngoài trời",
+      "category": "fashion",
+      "price": 114480,
+      "originalPrice": 177433,
+      "stock": 0,
+      "rating": 5,
+      "reviewsCount": 600,
+      "soldCount": 5000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/47770065516.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để",
+      "desc": "Kính râm ống kính Tac vuông lớn Unisex Bảo vệ tia cực tím để lái xe du lịch thời trang ngoài trời",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "47770065516",
+        "URL gốc": "https://shopee.vn/product/196261835/47770065516",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371615-3",
+      "name": "Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông nửa viền kim loại cao cấp thời trang Hàn Quốc kính mắt Y19.",
+      "category": "fashion",
+      "price": 96000,
+      "originalPrice": 180000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 240,
+      "soldCount": 2000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/28153611624.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông ",
+      "desc": "Mắt kính nam đổi màu chống ánh sáng xanh uv gọng kính vuông nửa viền kim loại cao cấp thời trang Hàn Quốc kính mắt Y19.",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "28153611624",
+        "URL gốc": "https://shopee.vn/product/998924637/28153611624",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371625-4",
+      "name": "Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang gọng nửa viền kim loại titan cao cấp hiện đại MEME Y15.",
+      "category": "fashion",
+      "price": 96000,
+      "originalPrice": 200000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 3600,
+      "soldCount": 30000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/22978427690.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang g",
+      "desc": "Mắt kính nam đổi màu cận chống ánh sáng xanh UV thời trang gọng nửa viền kim loại titan cao cấp hiện đại MEME Y15.",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "22978427690",
+        "URL gốc": "https://shopee.vn/product/998924637/22978427690",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371638-5",
+      "name": "Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ánh sáng xanh ,kính nữa viền cổ điển phong cách Hàn Trung",
+      "category": "fashion",
+      "price": 37000,
+      "originalPrice": 75000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/19996588913.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ",
+      "desc": "Kính râm nam nữ Seisen Kr10 kính mát đổi màu hottrend chống ánh sáng xanh ,kính nữa viền cổ điển phong cách Hàn Trung",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19996588913",
+        "URL gốc": "https://shopee.vn/product/68362839/19996588913",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371656-6",
+      "name": "Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi Bẩn",
+      "category": "fashion",
+      "price": 68000,
+      "originalPrice": 109000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25330662526.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi B",
+      "desc": "Mắt Kính Đổi Màu Thời Trang 794 Chống UV Tia Phân Cực, Bụi Bẩn",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25330662526",
+        "URL gốc": "https://shopee.vn/product/10323148/25330662526",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371678-7",
+      "name": "Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành cho nam nữ k78",
+      "category": "fashion",
+      "price": 24010,
+      "originalPrice": 32000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 6000,
+      "soldCount": 50000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/18887958068.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành c",
+      "desc": "Mắt kính giả cận phong cách retro thời trang Hàn Quốc dành cho nam nữ k78",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "18887958068",
+        "URL gốc": "https://shopee.vn/product/111519175/18887958068",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371692-8",
+      "name": "【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận thị chống bức xạ ,Kính gọng vuông ,phi giới tính kính mắt 1731",
+      "category": "fashion",
+      "price": 62442,
+      "originalPrice": 100000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 480,
+      "soldCount": 4000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/29193711372.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - 【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận th",
+      "desc": "【COD】0~ - 6.00 độ kính cận thị , ánh sáng xanh , kính cận thị chống bức xạ ,Kính gọng vuông ,phi giới tính kính mắt 1731",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "29193711372",
+        "URL gốc": "https://shopee.vn/product/1649869410/29193711372",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371708-9",
+      "name": "【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời trang mắt kính cận Hỗ trợ tùy chỉnh Cho nam và nữ K73",
+      "category": "fashion",
+      "price": 62370,
+      "originalPrice": 105840,
+      "stock": 0,
+      "rating": 4.2,
+      "reviewsCount": 81,
+      "soldCount": 681,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/29557806468.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - 【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời tr",
+      "desc": "【-0°~-6.0°】Kính cận thị chống ánh sáng xanh Và bức xạThời trang mắt kính cận Hỗ trợ tùy chỉnh Cho nam và nữ K73",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "29557806468",
+        "URL gốc": "https://shopee.vn/product/1324864525/29557806468",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371725-10",
+      "name": "Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong cách Hàn Quốc, cao cấp, kính nửa gọng.",
+      "category": "fashion",
+      "price": 54900,
+      "originalPrice": 69000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 360,
+      "soldCount": 3000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/23657710174.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong c",
+      "desc": "Kính cận thị clubmaster (0-4 độ) nam nữ đeo đều hợp, phong cách Hàn Quốc, cao cấp, kính nửa gọng.",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "23657710174",
+        "URL gốc": "https://shopee.vn/product/183595172/23657710174",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371739-11",
+      "name": "Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vintage COD (San9) Cho Nam",
+      "category": "fashion",
+      "price": 82080,
+      "originalPrice": 118800,
+      "stock": 0,
+      "rating": 4.7,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/18666916512.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vi",
+      "desc": "Mắt Kính Nửa Gọng Kim Loại Chống Ánh Sáng Xanh Phong Cách Vintage COD (San9) Cho Nam",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "18666916512",
+        "URL gốc": "https://shopee.vn/product/111715780/18666916512",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371752-12",
+      "name": "Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách Hàn Quốc",
+      "category": "fashion",
+      "price": 20000,
+      "originalPrice": 35000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1200,
+      "soldCount": 10000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/27961442338.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách",
+      "desc": "Kính râm nữ KR28 chống tia UV kính mát thời trang phong cách Hàn Quốc",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "27961442338",
+        "URL gốc": "https://shopee.vn/product/68362839/27961442338",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371765-13",
+      "name": "Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang Hàn Quốc K118",
+      "category": "fashion",
+      "price": 27075,
+      "originalPrice": 75000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 960,
+      "soldCount": 8000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/19491707191.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang ",
+      "desc": "Mắt kính gọng chữ nhật nửa viền phong cách retro thời trang Hàn Quốc K118",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "19491707191",
+        "URL gốc": "https://shopee.vn/product/111519175/19491707191",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371791-14",
+      "name": "Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -4.0 -4.5 -5.0 -5.5 -6.0 độ dành cho nam và nữ với tròng kính có thể tháo rời kính chống án",
+      "category": "fashion",
+      "price": 85071,
+      "originalPrice": 92000,
+      "stock": 0,
+      "rating": 4.6,
+      "reviewsCount": 3600,
+      "soldCount": 30000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/26551242939.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -",
+      "desc": "Kính cận thị thời trang -0.5 -1.0 -1.5 -2.0 -2.5 -3.0 -3.5 -4.0 -4.5 -5.0 -5.5 -6.0 độ dành cho nam và nữ với tròng kính có thể tháo rời kính chống án",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "26551242939",
+        "URL gốc": "https://shopee.vn/product/949804684/26551242939",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371809-15",
+      "name": "Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quốc K07",
+      "category": "fashion",
+      "price": 23030,
+      "originalPrice": 32000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 2400,
+      "soldCount": 20000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/16655117249.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quố",
+      "desc": "Mắt kính giả cận nửa viền chống tia UV400 thời trang Hàn Quốc K07",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "16655117249",
+        "URL gốc": "https://shopee.vn/product/111519175/16655117249",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371821-16",
+      "name": "Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh gọng vuông độc đáo phong cách Hàn Quốc",
+      "category": "fashion",
+      "price": 42140,
+      "originalPrice": 60000,
+      "stock": 0,
+      "rating": 4.8,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/29701524765.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh ",
+      "desc": "Mắt kinh thời trang nam nữ Madeline KM8 chống ánh sáng xanh gọng vuông độc đáo phong cách Hàn Quốc",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "29701524765",
+        "URL gốc": "https://shopee.vn/product/68362839/29701524765",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371830-17",
+      "name": "Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+      "category": "fashion",
+      "price": 98000,
+      "originalPrice": 130000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 120,
+      "soldCount": 1000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/25589817384.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+      "desc": "Kính râm thời trang SCVCN Nam Nữ UV400 Kính đi xe đạp",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "25589817384",
+        "URL gốc": "https://shopee.vn/product/431745854/25589817384",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371844-18",
+      "name": "PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Chống Ánh Sáng Xanh tongkhosi2",
+      "category": "fashion",
+      "price": 22840,
+      "originalPrice": 23000,
+      "stock": 0,
+      "rating": 4.9,
+      "reviewsCount": 1080,
+      "soldCount": 9000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/28158187572.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Ch",
+      "desc": "PVN65760 Mắt Kính Gọng Lớn Trong Suốt Chống Ánh Sáng Xanh Chống Ánh Sáng Xanh tongkhosi2",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "28158187572",
+        "URL gốc": "https://shopee.vn/product/118645835/28158187572",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
+    },
+    {
+      "id": "sp-1793947371865-19",
+      "name": "Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chống bụi để chạy xe đạp nam nữ",
+      "category": "fashion",
+      "price": 52920,
+      "originalPrice": 95040,
+      "stock": 0,
+      "rating": 4.7,
+      "reviewsCount": 600,
+      "soldCount": 5000,
+      "isFeatured": false,
+      "isNew": true,
+      "isFlashSale": false,
+      "isDraft": true,
+      "status": "draft",
+      "images": [
+        "/products/shopee_live/40332720316.jpg"
+      ],
+      "variants": {
+        "colors": [
+          "Mặc định"
+        ],
+        "sizes": [
+          "Tiêu chuẩn"
+        ]
+      },
+      "shortDesc": "Sản phẩm tham khảo Shopee - Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chốn",
+      "desc": "Kính râm Photochromic UV400 Kính mắt thể thao chống mưa chống bụi để chạy xe đạp nam nữ",
+      "specs": {
+        "Nguồn gốc": "Shopee",
+        "Mã Shopee": "40332720316",
+        "URL gốc": "https://shopee.vn/product/196261835/40332720316",
+        "Từ khóa": "kính",
+        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+      },
+      "tags": [
+        "fashion",
+        "shopee",
+        "kính"
+      ],
+      "reviews": []
     }
   ],
   "orders": [
@@ -5802,6 +9162,36 @@
     }
   ],
   "audit_logs": [
+    {
+      "id": "log_1793947371880_0zig",
+      "timestamp": "2026-11-06T06:42:51.880Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "SHOPEE_IMPORT",
+      "targetId": "batch",
+      "details": "Nhập 20 sản phẩm từ Shopee (Bỏ qua 0 sản phẩm trùng lặp)"
+    },
+    {
+      "id": "log_1793947235564_1bbo",
+      "timestamp": "2026-11-06T06:40:35.564Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "SHOPEE_IMPORT",
+      "targetId": "batch",
+      "details": "Nhập 20 sản phẩm từ Shopee (Bỏ qua 0 sản phẩm trùng lặp)"
+    },
+    {
+      "id": "log_1793947176545_llzi",
+      "timestamp": "2026-11-06T06:39:36.545Z",
+      "userId": "usr_admin",
+      "userName": "Chủ Tiệm (Admin)",
+      "userRole": "admin",
+      "action": "LOGIN",
+      "targetId": "usr_admin",
+      "details": "Đăng nhập thành công vào hệ thống với vai trò admin"
+    },
     {
       "id": "log_1793945944603_5y4a",
       "timestamp": "2026-11-06T06:19:04.603Z",

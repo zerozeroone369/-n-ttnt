@@ -11,6 +11,7 @@ import InvoicePrintModal from './components/InvoicePrintModal';
 import Chatbot from './components/Chatbot';
 import AdminDashboard from './components/AdminDashboard';
 import AuthModal from './components/AuthModal';
+import AppDownloadModal from './components/AppDownloadModal';
 import { StorageService } from './services/storage';
 import { ApiClient } from './services/api';
 import { getOrdersForUser } from './services/aiChatEngine';
@@ -47,6 +48,7 @@ export default function App() {
   // PWA Install State
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
+  const [isAppDownloadOpen, setIsAppDownloadOpen] = useState(false);
 
   // PWA install prompt handler (Đã gộp listener duy nhất, tối ưu kiểm tra thiết bị)
   useEffect(() => {
@@ -341,6 +343,7 @@ export default function App() {
         onOpenWishlist={() => setIsWishlistOpen(true)}
         ordersCount={orders.length}
         onOpenOrders={() => setIsCustomerOrdersOpen(true)}
+        onOpenDownload={() => setIsAppDownloadOpen(true)}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
         isAdminView={isAdminView}
@@ -607,6 +610,18 @@ export default function App() {
         isOpen={isAuthModalOpen}
         onClose={() => setIsAuthModalOpen(false)}
         onAuthSuccess={handleAuthSuccess}
+      />
+
+      {/* Cài App / Web-to-App Install Modal */}
+      <AppDownloadModal
+        isOpen={isAppDownloadOpen}
+        onClose={() => setIsAppDownloadOpen(false)}
+        deferredPrompt={deferredPrompt}
+        onInstallSuccess={() => {
+          setDeferredPrompt(null);
+          setShowInstallBanner(false);
+          showToast('🎉 Chúc mừng bạn đã cài đặt ứng dụng Tiệm Nhà Nhỏ thành công!');
+        }}
       />
 
     </div>
