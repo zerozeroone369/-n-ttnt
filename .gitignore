@@ -7,6 +7,9 @@ dist/
 # Scraper & security sensitive files
 shopee_profile/
 tools/edge_profile/
+*cookie*.txt
+*cookies*.txt
+shopee_cookie.txt
 debug*.json
 raw_*.json
 shopee_scraped.json
