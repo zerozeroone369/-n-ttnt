@@ -34,14 +34,134 @@ function containsWholePhrase(normText, normPhrase) {
 }
 
 /**
- * Score how well a product matches a search keyword:
- * 3 = exact normalized phrase match
+ * Parse a specific Shopee Product Detail URL (`.../product/<shopId>/<itemId>` or `...-<slug>-i.<shopId>.<itemId>`).
+ * Returns null if input is a plain keyword or non-Shopee URL.
+ */
+export function parseShopeeProductUrl(input) {
+  const cleaned = String(input || '').trim().replace(/^[<"']+|[>"']+$/g, '');
+  if (!cleaned) return null;
+
+  let candidate = cleaned;
+  if (/^(?:www\.)?shopee\.vn\//i.test(candidate)) {
+    candidate = `https://${candidate}`;
+  }
+  if (!/^https?:\/\//i.test(candidate) || /\s/.test(candidate)) return null;
+
+  let u;
+  try {
+    u = new URL(candidate);
+  } catch {
+    return null;
+  }
+
+  const host = u.hostname.toLowerCase();
+  if (host !== 'shopee.vn' && !host.endsWith('.shopee.vn')) return null;
+
+  const m = u.pathname.match(/(?:-i\.(\d+)\.(\d+)|^\/product\/(\d+)\/(\d+))\/?$/i) ||
+    u.pathname.match(/(?:-i\.(\d+)\.(\d+)|^\/product\/(\d+)\/(\d+))/i);
+  if (!m) return null;
+
+  const shopId = m[1] || m[3] || '';
+  const itemId = m[2] || m[4] || '';
+  if (!shopId || !itemId) return null;
+
+  return {
+    isUrl: true,
+    shopId,
+    itemId,
+    canonicalUrl: `https://shopee.vn/product/${shopId}/${itemId}`,
+    targetUrl: `https://shopee.vn${u.pathname}`
+  };
+}
+
+/**
+ * Parse a Shopee search page URL (`https://shopee.vn/search?keyword=...`).
+ * Returns null if not a valid shopee.vn search URL.
+ */
+export function parseShopeeSearchUrl(input) {
+  const cleaned = String(input || '').trim().replace(/^[<"']+|[>"']+$/g, '');
+  if (!cleaned || /\s/.test(cleaned)) return null;
+
+  let candidate = cleaned;
+  if (/^(?:www\.)?shopee\.vn\//i.test(candidate)) {
+    candidate = `https://${candidate}`;
+  }
+  if (!/^https?:\/\//i.test(candidate)) return null;
+
+  let u;
+  try {
+    u = new URL(candidate);
+  } catch {
+    return null;
+  }
+
+  const host = u.hostname.toLowerCase();
+  if (host !== 'shopee.vn' && !host.endsWith('.shopee.vn')) return null;
+  if (u.pathname !== '/search' && !u.pathname.startsWith('/search/')) return null;
+
+  const keyword = (u.searchParams.get('keyword') || '').trim();
+  return {
+    isUrl: true,
+    keyword,
+    targetUrl: `https://shopee.vn${u.pathname}${u.search}`
+  };
+}
+
+/**
+ * Split user input into keywords and/or direct Shopee URLs without breaking commas inside URL slugs.
+ */
+export function splitScrapeInputs(rawText) {
+  const out = [];
+  for (const rawLine of String(rawText || '').split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line) continue;
+    const segments = line.split(',');
+    const merged = [];
+    for (const seg of segments) {
+      const part = seg.trim();
+      if (!part) continue;
+      const prev = merged[merged.length - 1];
+      if (
+        prev &&
+        /^https?:\/\/[^\s]*shopee\.vn\//i.test(prev) &&
+        !parseShopeeProductUrl(prev) &&
+        !/^https?:\/\//i.test(part)
+      ) {
+        merged[merged.length - 1] = `${prev},${part}`;
+      } else {
+        merged.push(part);
+      }
+    }
+    out.push(...merged);
+  }
+  return out;
+}
+
+/**
+ * Score how well a product matches a search keyword or Shopee product URL:
+ * 3 = exact normalized phrase match OR exact Shopee itemId match for product URL
  * 2 = all words in keyword appear in item text
  * 1 = key non-stopword core term(s) match
  * 0 = no match
  */
 export function scoreProductMatch(item, rawKeyword) {
-  const normKw = normalizeText(rawKeyword);
+  const productUrlInfo = parseShopeeProductUrl(rawKeyword);
+  if (productUrlInfo) {
+    const itemShopeeId = String(item?.shopee_id || '').trim();
+    const itemSourceUrl = String(item?.source_url || '').trim();
+    if (
+      (itemShopeeId && itemShopeeId === productUrlInfo.itemId) ||
+      (itemSourceUrl && itemSourceUrl.includes(productUrlInfo.itemId))
+    ) {
+      return 3;
+    }
+    return 0;
+  }
+
+  const searchUrlInfo = parseShopeeSearchUrl(rawKeyword);
+  const effectiveKeyword = searchUrlInfo ? searchUrlInfo.keyword : rawKeyword;
+
+  const normKw = normalizeText(effectiveKeyword);
   if (!normKw) return 0;
 
   // Match strictly against real product identity text (NEVER auto-stamped item.keyword / guessed item.category)

@@ -6,7 +6,7 @@ import {
 import { formatCurrency, AIChatEngine } from '../services/aiChatEngine';
 import { StorageService } from '../services/storage';
 import { ApiClient, resolveMediaUrl } from '../services/api';
-import { filterShopeeCatalog } from '../utils/shopeeFilter.js';
+import { filterShopeeCatalog, splitScrapeInputs } from '../utils/shopeeFilter.js';
 import { STORE_INFO } from '../data/initialData';
 
 export default function AdminDashboard({
@@ -228,7 +228,7 @@ export default function AdminDashboard({
   };
 
   const pollScrapeSession = async (activeSessionId, keywords, limitVal) => {
-    const maxDeadline = Date.now() + 320 * 1000;
+    const maxDeadline = Date.now() + 360 * 1000;
     let finalState = null;
 
     while (isMountedRef.current && Date.now() < maxDeadline) {
@@ -686,13 +686,10 @@ export default function AdminDashboard({
     setScraperConfigFeedback(null);
 
     try {
-      const keywords = shopeeKeywords
-        .split(',')
-        .map(k => k.trim())
-        .filter(k => k.length > 0);
+      const keywords = splitScrapeInputs(shopeeKeywords);
 
       if (keywords.length === 0) {
-        setShopeeError('Vui lòng nhập ít nhất 1 từ khóa để tìm kiếm và cào dữ liệu.');
+        setShopeeError('Vui lòng nhập ít nhất 1 từ khóa hoặc link sản phẩm Shopee hợp lệ để cào dữ liệu.');
         setShopeeLoading(false);
         return;
       }
@@ -2293,16 +2290,16 @@ export default function AdminDashboard({
             <div className="bg-white rounded-2xl border border-stone-200 shadow-xs p-6">
               <h3 className="text-base font-bold text-stone-900 mb-1 flex items-center gap-2">
                 <Search className="w-4 h-4 text-orange-600" />
-                Nhập Từ Khóa Tìm Kiếm
+                Nhập Từ Khóa Hoặc Link Sản Phẩm Shopee
               </h3>
-              <p className="text-xs text-stone-500 mb-4">Nhập các từ khóa sản phẩm cần tìm, phân tách bằng dấu phẩy. Tổng số lượng sẽ được phân bổ cân bằng qua tất cả từ khóa.</p>
+              <p className="text-xs text-stone-500 mb-4">Nhập từ khóa (phân tách bằng dấu phẩy hoặc xuống dòng) hoặc dán Link chi tiết 1 sản phẩm Shopee (ví dụ <code className="bg-stone-100 px-1 rounded">https://shopee.vn/...-i.shop.item</code> hoặc <code className="bg-stone-100 px-1 rounded">/product/shop/item</code>).</p>
               
               <textarea
                 value={shopeeKeywords}
                 onChange={(e) => setShopeeKeywords(e.target.value)}
                 rows={3}
                 className="w-full border border-stone-300 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-500 resize-none transition-all"
-                placeholder="Ví dụ: áo thun nam, nến thơm, cà phê arabica, tai nghe bluetooth..."
+                placeholder="Ví dụ: quần nữ, áo thun nam, nến thơm hoặc link https://shopee.vn/product/123456/7890123..."
                 disabled={shopeeLoading}
               />
               
@@ -2357,6 +2354,7 @@ export default function AdminDashboard({
                 <div className="flex flex-wrap items-center gap-1.5 ml-auto">
                   <span className="text-xs font-semibold text-stone-500 mr-1">Gợi ý từ khóa:</span>
                   {[
+                    { label: 'Quần nữ', kw: 'quần nữ' },
                     { label: 'Áo khoác', kw: 'áo khoác' },
                     { label: 'Áo thun', kw: 'áo thun' },
                     { label: 'Áo polo', kw: 'áo polo' },

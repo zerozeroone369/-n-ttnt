@@ -24,7 +24,7 @@ const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
 const GEMINI_MAX_OUTPUT_TOKENS = Math.max(1024, Number(process.env.GEMINI_MAX_OUTPUT_TOKENS) || 4096);
 const GEMINI_REQUEST_TIMEOUT_MS = 60 * 1000;
 const PYTHON_BIN = process.env.PYTHON_BIN || 'python';
-const SCRAPE_TIMEOUT_MS = 300 * 1000; // 5 phút cho Scraping API render JS đa từ khóa
+const SCRAPE_TIMEOUT_MS = 360 * 1000; // 6 phút cho Scraping API render JS & dự phòng retry
 
 const SCRAPING_PROVIDERS = ['zenrows', 'scraperapi', 'crawlbase'];
 
@@ -1366,7 +1366,13 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
         'Từ khóa': product.keyword || '',
         'Trạng thái kiểm duyệt': 'Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán'
       },
-      tags: [product.category || 'decor', 'shopee', ...(product.keyword || '').split(' ').filter(w => w.length > 2)],
+      tags: [
+        product.category || 'decor',
+        'shopee',
+        ...(/^https?:\/\//i.test(String(product.keyword || '').trim())
+          ? []
+          : String(product.keyword || '').split(/\s+/).filter(w => w.length > 2))
+      ],
       reviews: []
     };
     
