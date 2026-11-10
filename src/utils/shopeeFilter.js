@@ -44,8 +44,10 @@ export function scoreProductMatch(item, rawKeyword) {
   const normKw = normalizeText(rawKeyword);
   if (!normKw) return 0;
 
+  // Match strictly against real product identity text (NEVER auto-stamped item.keyword / guessed item.category)
+  const itemTags = Array.isArray(item?.tags) ? item.tags.join(' ') : '';
   const itemNormText = normalizeText(
-    `${item?.name || ''} ${item?.category || ''} ${item?.keyword || ''} ${item?.shortDesc || ''}`
+    `${item?.name || ''} ${item?.shortDesc || ''} ${itemTags}`
   );
   if (!itemNormText) return 0;
 
@@ -70,10 +72,14 @@ export function scoreProductMatch(item, rawKeyword) {
     return 2;
   }
 
-  // Tier 3: Core non-stopword terms match (requires at least one meaningful domain term)
+  // Tier 3: For multi-word queries, require at least min(2, majorWords.length) core domain tokens
+  // so searching "áo khoác" does not accept unrelated "áo thun" / "mini pc"
   const majorWords = kwWords.filter(w => !STOP_WORDS.has(w));
-  if (majorWords.length > 0 && majorWords.some(matchesWord)) {
-    return 1;
+  if (majorWords.length > 0) {
+    const matchedMajorCount = majorWords.filter(matchesWord).length;
+    if (matchedMajorCount >= Math.min(2, majorWords.length)) {
+      return 1;
+    }
   }
 
   return 0;

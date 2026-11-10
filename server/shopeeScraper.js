@@ -17,6 +17,7 @@ import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
 import { normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
+import { scoreProductMatch } from '../src/utils/shopeeFilter.js';
 
 export const SUPPORTED_PROVIDERS = ['zenrows', 'scraperapi', 'crawlbase'];
 
@@ -233,12 +234,12 @@ export function parseShopeeItem(rawItem, kw) {
     sold = parseSoldCount(ib.historical_sold || ib.sold);
   }
 
-  const imageId = String(asset.image || ib.image || '').trim();
   const allImages = Array.isArray(asset.images)
     ? asset.images
     : Array.isArray(ib.images)
       ? ib.images
       : [];
+  const imageId = String(asset.image || ib.image || allImages[0] || '').trim();
 
   const itemId = String(rawItem.itemid || rawItem.item_id || ib.itemid || ib.item_id || '').trim();
   const shopId = String(rawItem.shopid || rawItem.shop_id || ib.shopid || ib.shop_id || '').trim();
@@ -578,10 +579,12 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
 
   const parsed = [];
   const seenIds = new Set();
+  // Exclude header/nav/footer chrome so mini-cart popovers or user menu links are never harvested
+  const mainHtml = html.replace(/<(header|nav|footer)\b[\s\S]*?<\/\1>/gi, ' ');
   const anchorRe = /<a\b[^>]*href=(["'])([^"']+)\1[^>]*>([\s\S]*?)<\/a>/gi;
   let match;
 
-  while ((match = anchorRe.exec(html)) !== null && parsed.length < maxItems) {
+  while ((match = anchorRe.exec(mainHtml)) !== null && parsed.length < maxItems) {
     const href = decodeHtmlEntities(match[2]);
     const hrefM = href.match(SHOPEE_HREF_RE);
     if (!hrefM) continue;
@@ -590,7 +593,7 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
     const itemId = hrefM[2] || hrefM[4] || '';
     if (!itemId || seenIds.has(itemId)) continue;
 
-    const fragment = findCardFragmentAroundAnchor(html, match.index, match.index + match[0].length);
+    const fragment = findCardFragmentAroundAnchor(mainHtml, match.index, match.index + match[0].length);
     const name = extractCardName(fragment);
     if (!name || name.length < 3) continue;
 
@@ -643,16 +646,21 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
   if (parsed.length === 0) {
     const blocked = isAntibotChallengeHtml(html, finalUrl);
     const loginRequired = isLoginRedirectHtml(html, finalUrl);
-    return { items: [], blocked, loginRequired, domStats };
+    return { items: [], blocked, loginRequired, domStats, itemSources: [] };
   }
 
-  return { items: parsed, blocked: false, loginRequired: false, domStats };
+  return { items: parsed, blocked: false, loginRequired: false, domStats, itemSources: ['DOM'] };
 }
 
 export function extractHtmlTitle(html) {
   const m = String(html || '').match(/<title[^>]*>([\s\S]*?)<\/title>/i);
   return m ? stripTags(m[1]).slice(0, 100) : '';
 }
+
+const EXCLUDED_NON_CATALOG_XHR_RE =
+  /(\/subcart|\/cart\/|\/cart\b|checkout|\/account\/|\/user\/|\/buyer\/|\/login|notification|\/chat\/|voucher|wallet|\/coin|\/order|event_batch|\/metrics|stm-sg-live|\/vi\.col\d+|\/tracking|\/log\b|recently_viewed|get_payment_info|mini_cart)/i;
+const PRIMARY_SEARCH_XHR_RE =
+  /(search_items|global_search|search_page|recommend_search|\/search\/|search\?|get_category_tree)/i;
 
 export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
   if (!payload || typeof payload !== 'object') {
@@ -661,14 +669,19 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       blocked: false,
       loginRequired: false,
       xhrSummary: [],
+      itemSources: [],
       finalUrl: '',
       bodySnippet: '',
       domStats: { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 }
     };
   }
 
-  const xhrItems = [];
-  const seenIds = new Set();
+  const primarySearchItems = [];
+  const primarySeenIds = new Set();
+  const secondaryXhrItems = [];
+  const secondarySeenIds = new Set();
+  const primarySources = [];
+  const secondarySources = [];
   let xhrBlocked = false;
   let xhrLoginRequired = false;
   const xhrSummary = [];
@@ -707,30 +720,42 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       xhrSummary.push(`${redactUrlForLogs(rawUrl)}(${status ?? '?'}${errTag}${keysTag})`);
     }
 
-    if (lowUrl.includes('event_batch') || lowUrl.includes('metrics') || lowUrl.includes('/subcart')) {
-      continue;
-    }
-
     if (status === 401 || lowUrl.includes('/buyer/login')) {
       xhrLoginRequired = true;
     }
+
+    if (EXCLUDED_NON_CATALOG_XHR_RE.test(lowUrl)) {
+      continue;
+    }
+
     if (!bodyJson || typeof bodyJson !== 'object') continue;
 
     if (bodyJson.error && bodyJson.error !== 0) {
       xhrBlocked = true;
-      if (bodyJson.error === 90309999) xhrBlocked = true;
     }
 
-    collectShopeeItemsFromObject(bodyJson, kw, seenIds, xhrItems, maxItems);
-    if (xhrItems.length >= maxItems) break;
+    if (PRIMARY_SEARCH_XHR_RE.test(lowUrl)) {
+      const before = primarySearchItems.length;
+      collectShopeeItemsFromObject(bodyJson, kw, primarySeenIds, primarySearchItems, maxItems);
+      if (primarySearchItems.length > before) {
+        primarySources.push(redactUrlForLogs(rawUrl));
+      }
+    } else {
+      const before = secondaryXhrItems.length;
+      collectShopeeItemsFromObject(bodyJson, kw, secondarySeenIds, secondaryXhrItems, maxItems);
+      if (secondaryXhrItems.length > before) {
+        secondarySources.push(redactUrlForLogs(rawUrl));
+      }
+    }
   }
 
-  if (xhrItems.length > 0) {
+  if (primarySearchItems.length > 0) {
     return {
-      items: xhrItems.slice(0, maxItems),
+      items: primarySearchItems.slice(0, maxItems),
       blocked: false,
       loginRequired: false,
       xhrSummary,
+      itemSources: primarySources,
       finalUrl,
       bodySnippet: '',
       domStats: inspectHtmlDomStats(String(payload.html || ''))
@@ -745,8 +770,22 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       blocked: false,
       loginRequired: false,
       xhrSummary,
+      itemSources: htmlRes.itemSources || ['DOM'],
       finalUrl,
       bodySnippet: '',
+      domStats: htmlRes.domStats
+    };
+  }
+
+  if (secondaryXhrItems.length > 0) {
+    return {
+      items: secondaryXhrItems.slice(0, maxItems),
+      blocked: false,
+      loginRequired: false,
+      xhrSummary,
+      itemSources: secondarySources,
+      finalUrl,
+      bodySnippet: extractVisibleBodySnippet(rawHtml, 200),
       domStats: htmlRes.domStats
     };
   }
@@ -756,6 +795,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
     blocked: Boolean(xhrBlocked || htmlRes.blocked),
     loginRequired: Boolean(xhrLoginRequired || htmlRes.loginRequired),
     xhrSummary,
+    itemSources: [],
     finalUrl,
     bodySnippet: extractVisibleBodySnippet(rawHtml, 200),
     domStats: htmlRes.domStats
@@ -964,6 +1004,21 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       return { items: [], blocked: false, loginRequired: false, code: String(resp.status) };
     }
 
+    const keepMatchingOnly = (itemsList, sourceList = []) => {
+      const raw = Array.isArray(itemsList) ? itemsList : [];
+      const matched = raw.filter((item) => scoreProductMatch(item, kw) > 0);
+      if (raw.length > 0 && matched.length === 0) {
+        const sampleNames = raw.slice(0, 2).map((x) => String(x?.name || '').slice(0, 35)).join(' | ');
+        log(
+          `    [!] [${attemptLabel}] Bỏ qua ${raw.length} item lệch chủ đề/giỏ hàng không khớp '${kw}'` +
+            ` (nguồn=${sourceList.join(', ') || 'DOM'}; vd="${sanitizeErrorText(sampleNames)}")`
+        );
+      } else if (matched.length > 0 && sourceList.length > 0) {
+        log(`    [i] [${attemptLabel}] Khớp ${matched.length}/${raw.length} item cho '${kw}' từ: ${sourceList.slice(0, 4).join(', ')}`);
+      }
+      return { matched, rawCount: raw.length };
+    };
+
     if (resp.jsonBody && (Array.isArray(resp.jsonBody.xhr) || typeof resp.jsonBody.html === 'string')) {
       const htmlLen = String(resp.jsonBody.html || '').length;
       const title = extractHtmlTitle(resp.jsonBody.html || '');
@@ -972,7 +1027,8 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       if (parsed.blocked) anyBlocked = true;
       if (parsed.loginRequired) anyLoginRequired = true;
 
-      if (parsed.items.length === 0) {
+      const { matched } = keepMatchingOnly(parsed.items, parsed.itemSources || []);
+      if (matched.length === 0) {
         const ds = parsed.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
         log(
           `    [i] [${attemptLabel}] HTTP 200 · url=${parsed.finalUrl ? redactUrlForLogs(parsed.finalUrl) : '?'} · HTML=${htmlLen}B · title="${title || 'n/a'}"` +
@@ -983,7 +1039,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
             `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
         );
       }
-      return { ...parsed, code: '200' };
+      return { ...parsed, items: matched, code: '200' };
     }
 
     if (resp.jsonBody && typeof resp.jsonBody === 'object') {
@@ -993,13 +1049,15 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         anyBlocked = true;
         log(`    [!] [${attemptLabel}] Shopee JSON error=${resp.jsonBody.error}`);
       }
-      return { items, blocked: Boolean(resp.jsonBody.error), loginRequired: false, code: '200' };
+      const { matched } = keepMatchingOnly(items, ['JSON']);
+      return { items: matched, blocked: Boolean(resp.jsonBody.error), loginRequired: false, code: '200' };
     }
 
     const htmlRes = parseShopeeHtml(resp.text, kw, maxItems);
     if (htmlRes.blocked) anyBlocked = true;
     if (htmlRes.loginRequired) anyLoginRequired = true;
-    if (htmlRes.items.length === 0) {
+    const { matched } = keepMatchingOnly(htmlRes.items, htmlRes.itemSources || ['HTML']);
+    if (matched.length === 0) {
       const title = extractHtmlTitle(resp.text);
       const snippet = extractVisibleBodySnippet(resp.text, 160);
       log(
@@ -1009,7 +1067,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
           `${htmlRes.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
       );
     }
-    return { ...htmlRes, code: '200' };
+    return { ...htmlRes, items: matched, code: '200' };
   };
 
   // Attempt 1: Primary ZenRows JS Render + Residential VN Proxy + XHR capture (+ Cookie if configured)
