@@ -258,7 +258,24 @@ function pickNumericPriceCandidate(val) {
   if (typeof val === 'number') return Number.isFinite(val) && val > 0 ? val : 0;
   if (typeof val === 'string') return parseVndPrice(val);
   if (typeof val === 'object') {
-    const keys = ['single_value', 'range_min', 'min_price', 'min', 'price', 'value', 'current_price', 'final_price', 'lowPrice', 'range_max'];
+    const keys = [
+      'single_value',
+      'singleValue',
+      'range_min',
+      'rangeMin',
+      'min_price',
+      'minPrice',
+      'min',
+      'price',
+      'value',
+      'current_price',
+      'currentPrice',
+      'final_price',
+      'finalPrice',
+      'lowPrice',
+      'range_max',
+      'rangeMax'
+    ];
     for (const k of keys) {
       const c = val[k];
       if (typeof c === 'number' && Number.isFinite(c) && c > 0) return c;
@@ -275,7 +292,7 @@ function pickImageStringFromEntry(entry) {
   if (!entry) return '';
   if (typeof entry === 'string') return entry.trim();
   if (typeof entry === 'object') {
-    return String(entry.image_id || entry.id || entry.hash || entry.url || entry.src || entry.image || '').trim();
+    return String(entry.image_id || entry.imageId || entry.id || entry.hash || entry.url || entry.src || entry.image || '').trim();
   }
   return '';
 }
@@ -296,12 +313,15 @@ export function parseShopeeItem(rawItem, kw) {
     ib.name ||
     ib.title ||
     ib.item_name ||
+    ib.itemName ||
     card.name ||
     card.title ||
     card.item_name ||
+    card.itemName ||
     rawItem.name ||
     rawItem.title ||
     rawItem.item_name ||
+    rawItem.itemName ||
     '';
   const name = String(rawName).trim();
   if (!name || name.length < 3) return null;
@@ -318,12 +338,17 @@ export function parseShopeeItem(rawItem, kw) {
     pickNumericPriceCandidate(rawItem?.price_info) ||
     pickNumericPriceCandidate(ib.price) ||
     pickNumericPriceCandidate(ib.price_min) ||
+    pickNumericPriceCandidate(ib.priceMin) ||
     pickNumericPriceCandidate(ib.min_price) ||
+    pickNumericPriceCandidate(ib.minPrice) ||
     pickNumericPriceCandidate(ib.current_price) ||
+    pickNumericPriceCandidate(ib.currentPrice) ||
     pickNumericPriceCandidate(card.price) ||
     pickNumericPriceCandidate(card.price_min) ||
+    pickNumericPriceCandidate(card.priceMin) ||
     pickNumericPriceCandidate(rawItem.price) ||
     pickNumericPriceCandidate(rawItem.price_min) ||
+    pickNumericPriceCandidate(rawItem.priceMin) ||
     pickNumericPriceCandidate(firstIbModel?.price) ||
     0;
   let priceRaw = Number(rawPriceCand);
@@ -337,10 +362,14 @@ export function parseShopeeItem(rawItem, kw) {
     pickNumericPriceCandidate(card?.item_card_display_price?.strikethrough_price) ||
     pickNumericPriceCandidate(ib?.display_price?.strikethrough_price) ||
     pickNumericPriceCandidate(ib.price_before_discount) ||
+    pickNumericPriceCandidate(ib.priceBeforeDiscount) ||
     pickNumericPriceCandidate(ib.price_max_before_discount) ||
     pickNumericPriceCandidate(card.price_before_discount) ||
+    pickNumericPriceCandidate(card.priceBeforeDiscount) ||
     pickNumericPriceCandidate(rawItem.price_before_discount) ||
+    pickNumericPriceCandidate(rawItem.priceBeforeDiscount) ||
     pickNumericPriceCandidate(firstIbModel?.price_before_discount) ||
+    pickNumericPriceCandidate(firstIbModel?.priceBeforeDiscount) ||
     0;
   let origRaw = Number(origCand);
   let orig = origRaw >= 100_000_000 ? Math.trunc(origRaw / 100000) : Math.trunc(origRaw);
@@ -386,23 +415,31 @@ export function parseShopeeItem(rawItem, kw) {
   const itemId = String(
     rawItem.itemid ||
       rawItem.item_id ||
+      rawItem.itemId ||
       card.itemid ||
       card.item_id ||
+      card.itemId ||
       ib.itemid ||
       ib.item_id ||
+      ib.itemId ||
       asset.itemid ||
       asset.item_id ||
+      asset.itemId ||
       ''
   ).trim();
   const shopId = String(
     rawItem.shopid ||
       rawItem.shop_id ||
+      rawItem.shopId ||
       card.shopid ||
       card.shop_id ||
+      card.shopId ||
       ib.shopid ||
       ib.shop_id ||
+      ib.shopId ||
       asset.shopid ||
       asset.shop_id ||
+      asset.shopId ||
       ''
   ).trim();
   if (!itemId || !/^\d+$/.test(itemId)) return null;
@@ -623,14 +660,14 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
       ? dp.item
       : dp.item_basic && typeof dp.item_basic === 'object'
         ? dp.item_basic
-        : dp.item_id || dp.itemid
+        : dp.item_id || dp.itemid || dp.itemId
           ? dp
           : null;
 
-  if (it && (it.item_id || it.itemid)) {
-    const pPrice = dp.product_price || root.product_price || {};
-    const pImages = dp.product_images || root.product_images || {};
-    const pReview = dp.product_review || root.product_review || {};
+  if (it && (it.item_id || it.itemid || it.itemId)) {
+    const pPrice = dp.product_price || dp.productPrice || root.product_price || root.productPrice || {};
+    const pImages = dp.product_images || dp.productImages || root.product_images || root.productImages || {};
+    const pReview = dp.product_review || dp.productReview || root.product_review || root.productReview || {};
     const firstModel = Array.isArray(it.models)
       ? it.models[0]
       : Array.isArray(dp.models)
@@ -639,8 +676,11 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
     const priceVal =
       pickNumericPriceCandidate(it.price) ||
       pickNumericPriceCandidate(it.price_min) ||
+      pickNumericPriceCandidate(it.priceMin) ||
       pickNumericPriceCandidate(it.min_price) ||
+      pickNumericPriceCandidate(it.minPrice) ||
       pickNumericPriceCandidate(it.current_price) ||
+      pickNumericPriceCandidate(it.currentPrice) ||
       pickNumericPriceCandidate(it.price_info) ||
       pickNumericPriceCandidate(pPrice?.price) ||
       pickNumericPriceCandidate(pPrice?.discount_price) ||
@@ -651,12 +691,19 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
       0;
     const origVal =
       pickNumericPriceCandidate(it.price_before_discount) ||
+      pickNumericPriceCandidate(it.priceBeforeDiscount) ||
       pickNumericPriceCandidate(it.price_max_before_discount) ||
       pickNumericPriceCandidate(pPrice?.price_before_discount) ||
+      pickNumericPriceCandidate(pPrice?.priceBeforeDiscount) ||
       pickNumericPriceCandidate(pPrice?.origin_price) ||
       pickNumericPriceCandidate(firstModel?.price_before_discount) ||
+      pickNumericPriceCandidate(firstModel?.priceBeforeDiscount) ||
       0;
-    const tierImgs = Array.isArray(it.tier_variations?.[0]?.images) ? it.tier_variations[0].images : [];
+    const tierImgs = Array.isArray(it.tier_variations?.[0]?.images)
+      ? it.tier_variations[0].images
+      : Array.isArray(it.tierVariations?.[0]?.images)
+        ? it.tierVariations[0].images
+        : [];
     const imgListRaw = Array.isArray(it.images) && it.images.length > 0
       ? it.images
       : Array.isArray(pImages?.images) && pImages.images.length > 0
@@ -670,12 +717,16 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
     const shopFallback =
       it.shop_id ||
       it.shopid ||
+      it.shopId ||
       dp.shop_detailed?.shopid ||
       dp.shop_detailed?.shop_id ||
+      dp.shopDetailed?.shopId ||
       dp.shop?.shopid ||
       dp.shop?.shop_id ||
+      dp.shop?.shopId ||
       dp.shopid ||
       dp.shop_id ||
+      dp.shopId ||
       '';
     const pdpTitle =
       it.name ||
@@ -694,7 +745,7 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
       images: imgList,
       image: pickImageStringFromEntry(it.image) || imgList[0] || '',
       historical_sold:
-        it.historical_sold || it.sold || pReview?.historical_sold || pReview?.sold || dp.item_sold || dp.historical_sold || 0,
+        it.historical_sold || it.historicalSold || it.sold || pReview?.historical_sold || pReview?.sold || dp.item_sold || dp.historical_sold || 0,
       item_rating:
         it.item_rating || (pReview?.rating_star ? { rating_star: pReview.rating_star } : undefined)
     };
@@ -706,7 +757,7 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
     }
   }
 
-  if (dp.itemid || dp.item_id) {
+  if (dp.itemid || dp.item_id || dp.itemId) {
     const parsedDirect = parseShopeeItem(dp, kw);
     if (parsedDirect && !seenIds.has(parsedDirect.shopee_id)) {
       seenIds.add(parsedDirect.shopee_id);
@@ -817,6 +868,21 @@ function findEnclosingBraceStarts(str, targetIdx, maxLookback = 120_000, maxAnce
   return starts;
 }
 
+function tryJsonParseSafe(sliceStr) {
+  try {
+    return JSON.parse(sliceStr);
+  } catch {
+    if (sliceStr.includes('undefined')) {
+      try {
+        return JSON.parse(sliceStr.replace(/:\s*undefined\b/g, ':null'));
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
 function parseBalancedObjectsAroundMatch(html, matchIdx, kw, seenIds, items, maxItems, { preferParent = true } = {}) {
   const rawStarts = findEnclosingBraceStarts(html, matchIdx, 120_000, 4);
   if (rawStarts.length === 0) return false;
@@ -828,15 +894,11 @@ function parseBalancedObjectsAroundMatch(html, matchIdx, kw, seenIds, items, max
     if (items.length >= maxItems) break;
     const endIdx = findMatchingDelimiterEnd(html, startIdx, '{', '}', 350_000);
     if (endIdx === -1 || endIdx < matchIdx) continue;
-    try {
-      const parsedObj = JSON.parse(html.slice(startIdx, endIdx + 1));
-      if (parsedObj && typeof parsedObj === 'object') {
-        const before = items.length;
-        collectShopeeItemsFromObject(parsedObj, kw, seenIds, items, maxItems);
-        if (items.length > before) return true;
-      }
-    } catch {
-      // Try next ancestor enclosing object
+    const parsedObj = tryJsonParseSafe(html.slice(startIdx, endIdx + 1));
+    if (parsedObj && typeof parsedObj === 'object') {
+      const before = items.length;
+      collectShopeeItemsFromObject(parsedObj, kw, seenIds, items, maxItems);
+      if (items.length > before) return true;
     }
   }
   return false;
@@ -851,14 +913,19 @@ export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
   const hasTargetMatch = () =>
     directProduct ? items.some((it) => scoreProductMatch(it, kw) > 0) : items.length > 0;
 
-  // Priority Pass 0: Target exact direct product ID inside hydrated JSON (never skipped by recommend arrays)
+  // Priority Pass 0: Target exact direct product ID inside hydrated JSON (scan all matches w/ price/title hint)
   if (directProduct?.itemId) {
     const escapedId = directProduct.itemId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const directRe = new RegExp(`"(?:itemid|item_id|itemId)"\\s*:\\s*"?${escapedId}"?(?!\\d)`, 'g');
+    const directRe = new RegExp(`"(?:itemid|item_id|itemId)"\\s*:\\s*"?${escapedId}"?(?!\\d)`, 'gi');
+    const hintRe = /"(?:price|price_min|min_price|product_price|productPrice|name|title|images|models)"\s*:/i;
     let dm;
-    let tries = 0;
-    while ((dm = directRe.exec(html)) !== null && tries < 15) {
-      tries++;
+    let totalSeen = 0;
+    let parsedTries = 0;
+    while ((dm = directRe.exec(html)) !== null && totalSeen < 500 && parsedTries < 80) {
+      totalSeen++;
+      const win = html.slice(Math.max(0, dm.index - 600), Math.min(html.length, dm.index + 1800));
+      if (totalSeen > 20 && !hintRe.test(win)) continue;
+      parsedTries++;
       parseBalancedObjectsAroundMatch(html, dm.index, kw, seenIds, items, maxItems, { preferParent: true });
       if (hasTargetMatch()) {
         const matchedWithImg = items.find((it) => scoreProductMatch(it, kw) > 0 && it.image_url);
@@ -866,16 +933,16 @@ export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
       }
     }
 
-    // Check serialized JSON inside JS strings (\"item_id\":...) or entity-encoded JSON (&quot;item_id&quot;:)
+    // Check serialized JSON inside JS strings (\"item_id\":...)
     if (!hasTargetMatch()) {
-      const escapedMatchRe = new RegExp(`\\\\"(?:itemid|item_id|itemId)\\\\"\\s*:\\s*(?:\\\\")?${escapedId}(?!\\d)`, 'g');
+      const escapedMatchRe = new RegExp(`\\\\"(?:itemid|item_id|itemId)\\\\"\\s*:\\s*(?:\\\\")?${escapedId}(?!\\d)`, 'gi');
       let em;
       let eTries = 0;
-      while ((em = escapedMatchRe.exec(html)) !== null && eTries < 5 && !hasTargetMatch()) {
+      while ((em = escapedMatchRe.exec(html)) !== null && eTries < 15 && !hasTargetMatch()) {
         eTries++;
         const slice = html.slice(Math.max(0, em.index - 45_000), Math.min(html.length, em.index + 45_000));
         const unescaped = slice.replace(/\\"/g, '"').replace(/\\\//g, '/').replace(/\\\\/g, '\\');
-        const subRe = new RegExp(`"(?:itemid|item_id|itemId)"\\s*:\\s*"?${escapedId}"?(?!\\d)`, 'g');
+        const subRe = new RegExp(`"(?:itemid|item_id|itemId)"\\s*:\\s*"?${escapedId}"?(?!\\d)`, 'gi');
         let sm;
         while ((sm = subRe.exec(unescaped)) !== null && !hasTargetMatch()) {
           parseBalancedObjectsAroundMatch(unescaped, sm.index, kw, seenIds, items, maxItems, { preferParent: true });
@@ -1433,19 +1500,30 @@ function extractPdpHtmlDiag(html, directProduct = null) {
     (html.match(/<meta[^>]+itemprop=["']price["'][^>]+content=["']([^"']+)["']/i)?.[1] || '');
   const ogImg = extractMetaPropertyContent(html, 'og:image') ? 'y' : 'n';
   const embIds = (html.match(/"(?:itemid|item_id)"\s*:/gi) || []).length;
-  let extra = '';
+  const domains = [...new Set(html.match(/"DOMAIN_[A-Z0-9_]+"/g) || [])]
+    .map((d) => d.replace(/"/g, ''))
+    .slice(0, 10);
+  let extra = domains.length ? `,domains=[${domains.join('|')}]` : '';
   if (directProduct?.itemId) {
-    const tMatches = html.match(new RegExp(directProduct.itemId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || [];
-    const tPos = html.indexOf(directProduct.itemId);
-    const tCtx = tPos !== -1 ? sanitizeErrorText(html.slice(Math.max(0, tPos - 80), tPos + 140).replace(/\s+/g, ' ')) : '';
-    extra += `,tId=${tMatches.length}${tCtx ? `,ctx="${tCtx.slice(0, 140)}"` : ''}`;
-  }
-  if (embIds > 0) {
-    const firstEmb = html.search(/"(?:itemid|item_id)"\s*:/i);
-    if (firstEmb !== -1) {
-      const eCtx = sanitizeErrorText(html.slice(Math.max(0, firstEmb - 60), firstEmb + 160).replace(/\s+/g, ' '));
-      extra += `,emb="${eCtx.slice(0, 140)}"`;
+    const idRe = new RegExp(directProduct.itemId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g');
+    let m;
+    let totalCnt = 0;
+    let pricedCnt = 0;
+    let bestCtx = '';
+    while ((m = idRe.exec(html)) !== null && totalCnt < 600) {
+      totalCnt++;
+      const win = html.slice(Math.max(0, m.index - 200), m.index + 500);
+      if (/"(?:price|price_min|product_price|productPrice|title|name|image)"\s*:/i.test(win)) {
+        pricedCnt++;
+        if (!bestCtx) {
+          bestCtx = sanitizeErrorText(win.replace(/\s+/g, ' '));
+        }
+      }
     }
+    const mainClean = stripTags(stripTagBlocks(html, ['header', 'nav', 'footer', 'script', 'style', 'svg', 'noscript']));
+    const domPriceHits = (mainClean.match(/(?:₫\s*[\d.,]+|[\d.,]+\s*[₫đ]|\b\d{1,3}(?:\.\d{3}){1,2}\b)/g) || []).slice(0, 4);
+    extra += `,tId=${totalCnt}(wP=${pricedCnt}),domP=[${domPriceHits.join('|')}]`;
+    if (bestCtx) extra += `,ctx="${bestCtx.slice(0, 160)}"`;
   }
   return `pdpDiag(ld=${ldMatches.length}${ldInfo.length ? `[${ldInfo.join(',')}]` : ''},mPrice=${metaP || '-'},ogImg=${ogImg},embIds=${embIds}${extra})`;
 }
@@ -2122,7 +2200,7 @@ function buildZenrowsDomEvalScript({ includePdp = false } = {}) {
   if (includePdp) {
     return (
       "(()=>{const D=document,L=location,E='data-sr-eval',T=s=>(''+(s||'')).replace(/\\s+/g,' ').trim();try{" +
-      "const Q=(e,s)=>e.querySelector(s),QA=s=>[...D.querySelectorAll(s)],A=(e,k)=>e.getAttribute(k)||''," +
+      "const Q=(e,s)=>e?.querySelector(s),QA=s=>[...D.querySelectorAll(s)],A=(e,k)=>e?.getAttribute(k)||''," +
       "R=/(?:-i\\.(\\d+)\\.(\\d+)|\\/product\\/(\\d+)\\/(\\d+))/i,M=p=>Q(D,`meta[property='${p}']`)?.content||''," +
       "IU=x=>x.currentSrc||x.src||A(x,'data-src')||A(x,'data-lazy-src')||A(x,'srcset').split(/[\\s,]/)[0]||''," +
       "C=window.__c||window.__sr_cap,cp=Array.isArray(C)?C.slice(0,3):[]," +
@@ -2336,7 +2414,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     const { matched } = keepMatchingOnly(htmlRes.items, htmlRes.itemSources || ['HTML']);
     if (matched.length === 0) {
       const title = extractHtmlTitle(resp.text);
-      const snippet = extractVisibleBodySnippet(resp.text, 160);
+      const snippet = extractVisibleBodySnippet(resp.text, 550);
       const ds = htmlRes.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
       const directTarget = parseShopeeProductUrl(kw);
       const pdpDiagTag = resp.text.length > 50000 ? ` · ${extractPdpHtmlDiag(resp.text, directTarget)}` : '';
