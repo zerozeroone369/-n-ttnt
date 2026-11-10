@@ -1415,6 +1415,20 @@ app.get('/api/shopee/status', (req, res) => {
 
 function getShopeeCookieMetadata() {
   if (!existsSync(SHOPEE_COOKIE_PATH)) {
+    const envRaw = String(process.env.SHOPEE_COOKIE || '').trim();
+    if (envRaw) {
+      const parsedEnv = normalizeShopeeCookieHeader(envRaw);
+      if (parsedEnv.ok && parsedEnv.cookieCount > 0) {
+        return {
+          hasCookie: true,
+          cookieCount: parsedEnv.cookieCount,
+          hasAuthToken: Boolean(parsedEnv.hasAuthToken),
+          updatedAt: null,
+          ageHours: null,
+          source: 'env'
+        };
+      }
+    }
     return {
       hasCookie: false,
       cookieCount: 0,
@@ -1436,7 +1450,8 @@ function getShopeeCookieMetadata() {
       cookieCount: parsed.cookieCount,
       hasAuthToken: Boolean(parsed.hasAuthToken),
       updatedAt,
-      ageHours
+      ageHours,
+      source: 'file'
     };
   } catch {
     return {

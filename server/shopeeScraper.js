@@ -240,8 +240,8 @@ export function parseShopeeItem(rawItem, kw) {
       ? ib.images
       : [];
 
-  const itemId = String(rawItem.itemid || ib.itemid || '').trim();
-  const shopId = String(rawItem.shopid || ib.shopid || '').trim();
+  const itemId = String(rawItem.itemid || rawItem.item_id || ib.itemid || ib.item_id || '').trim();
+  const shopId = String(rawItem.shopid || rawItem.shop_id || ib.shopid || ib.shop_id || '').trim();
   if (!itemId || !/^\d+$/.test(itemId)) return null;
 
   const sourceUrl = shopId
@@ -275,42 +275,78 @@ export function parseShopeeItem(rawItem, kw) {
   };
 }
 
-export function isLoginRedirectHtml(html) {
-  if (!html || typeof html !== 'string') return false;
-  if (SHOPEE_HREF_RE.test(html)) return false;
-  const low = html.toLowerCase();
-  return (
-    low.includes('/buyer/login') ||
-    low.includes('shopee.vn/buyer/login') ||
-    /<title[^>]*>[^<]*(đăng nhập|login)[^<]*<\/title>/i.test(html) ||
-    (low.includes('đăng nhập') && low.includes('mật khẩu') && !low.includes('data-sqe="item"'))
-  );
+export function extractVisibleBodySnippet(html, maxChars = 220) {
+  if (!html || typeof html !== 'string') return '';
+  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
+  const region = bodyMatch ? bodyMatch[1] : html;
+  const cleaned = region
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
+    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, ' ')
+    .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, ' ');
+  const text = stripTags(cleaned);
+  return sanitizeErrorText(text).slice(0, maxChars);
 }
 
-export function isAntibotChallengeHtml(html) {
+export function isLoginRedirectHtml(html, finalUrl = '') {
   if (!html || typeof html !== 'string') return false;
   if (SHOPEE_HREF_RE.test(html)) return false;
+  const lowUrl = String(finalUrl || '').toLowerCase();
+  if (lowUrl.includes('/buyer/login') || lowUrl.includes('shopee.vn/buyer/login')) {
+    return true;
+  }
+  if (/<title[^>]*>[^<]*(đăng nhập|login)[^<]*<\/title>/i.test(html)) {
+    return true;
+  }
+  if (/<(?:link|meta)[^>]*(?:rel=["']canonical["']|property=["']og:url["'])[^>]*\/buyer\/login/i.test(html)) {
+    return true;
+  }
+  const visibleLow = extractVisibleBodySnippet(html, 4000).toLowerCase();
+  if (
+    visibleLow.includes('đăng nhập bằng mã qr') ||
+    visibleLow.includes('quét mã qr để đăng nhập') ||
+    (visibleLow.includes('đăng nhập') &&
+      (visibleLow.includes('mật khẩu') || visibleLow.includes('số điện thoại/email') || visibleLow.includes('tên đăng nhập')) &&
+      !visibleLow.includes('đã bán'))
+  ) {
+    return true;
+  }
+  return false;
+}
+
+export function isAntibotChallengeHtml(html, finalUrl = '') {
+  if (!html || typeof html !== 'string') return false;
+  if (SHOPEE_HREF_RE.test(html)) return false;
+  const lowUrl = String(finalUrl || '').toLowerCase();
+  if (lowUrl.includes('/verify/') || lowUrl.includes('shopee.vn/verify')) {
+    return true;
+  }
   const low = html.toLowerCase();
-  const markers = [
-    '"error":90309999',
-    '"redirect_to_error_page":true',
-    'shopee.vn/verify',
-    '/verify/traffic',
-    'just a moment...',
-    'access denied',
-    'captcha-delivery',
+  const visibleLow = extractVisibleBodySnippet(html, 4000).toLowerCase();
+  const bodyMarkers = [
     'xác minh bảo mật',
     'hệ thống phát hiện truy cập bất thường',
+    'truy cập của bạn tạm thời bị hạn chế',
     'are you a robot',
-    'enable javascript and cookies'
+    'enable javascript and cookies',
+    'just a moment...',
+    'access denied'
   ];
-  return markers.some((m) => low.includes(m));
+  if (bodyMarkers.some((m) => visibleLow.includes(m))) return true;
+  const rawMarkers = [
+    '"error":90309999',
+    '"redirect_to_error_page":true',
+    '/verify/traffic',
+    'captcha-delivery'
+  ];
+  return rawMarkers.some((m) => low.includes(m));
 }
 
 function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems) {
   if (!root || typeof root !== 'object' || outItems.length >= maxItems) return;
   const queue = [{ node: root, depth: 0 }];
   const visited = new Set();
+  const MAX_DEPTH = 10;
 
   while (queue.length > 0 && outItems.length < maxItems) {
     const { node, depth } = queue.shift();
@@ -327,13 +363,13 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems) {
             outItems.push(parsed);
             continue;
           }
-          if (depth < 6) queue.push({ node: el, depth: depth + 1 });
-        } else if (Array.isArray(el) && depth < 6) {
+          if (depth < MAX_DEPTH) queue.push({ node: el, depth: depth + 1 });
+        } else if (Array.isArray(el) && depth < MAX_DEPTH) {
           queue.push({ node: el, depth: depth + 1 });
         }
       }
     } else {
-      if (depth < 6) {
+      if (depth < MAX_DEPTH) {
         for (const val of Object.values(node)) {
           if (val && typeof val === 'object') {
             queue.push({ node: val, depth: depth + 1 });
@@ -349,7 +385,7 @@ export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
   const seenIds = new Set();
   if (!html || typeof html !== 'string') return items;
 
-  const markerRe = /"(?:items|item)"\s*:\s*\[/g;
+  const markerRe = /"(?:items|item|item_list|units)"\s*:\s*\[/g;
   let m;
   while ((m = markerRe.exec(html)) !== null && items.length < maxItems) {
     const startIdx = m.index + m[0].length - 1;
@@ -460,9 +496,10 @@ function extractCardPrices(cardHtml) {
     price = parseVndPrice(stripTags(sqePrice[1]));
   }
 
+  const withoutDel = cardHtml.replace(/<del[\s\S]*?<\/del>/gi, ' ');
+  const plain = stripTags(withoutDel);
+
   if (price <= 0) {
-    const withoutDel = cardHtml.replace(/<del[\s\S]*?<\/del>/gi, ' ');
-    const plain = stripTags(withoutDel);
     const priceTokens = plain.match(/(?:₫\s*[\d.,]+|[\d.,]+\s*[₫đ])/g) || [];
     for (const tok of priceTokens) {
       const cand = parseVndPrice(tok);
@@ -472,6 +509,21 @@ function extractCardPrices(cardHtml) {
       }
       if (cand > 0 && price <= 0) {
         price = cand;
+      }
+    }
+  }
+
+  // Fallback for icons/CSS pseudo-elements where ₫ isn't in text nodes: look for dotted VND values (e.g. 58.000, 1.290.000)
+  if (price <= 0) {
+    const withoutNoise = plain
+      .replace(/đã bán\s*[\d.,kK+]+/gi, ' ')
+      .replace(/[\d.,]+\s*%/g, ' ');
+    const dotNumbers = withoutNoise.match(/\b\d{1,3}(?:\.\d{3}){1,2}\b/g) || [];
+    for (const tok of dotNumbers) {
+      const cand = parseVndPrice(tok);
+      if (cand >= 1000 && cand !== orig) {
+        price = cand;
+        break;
       }
     }
   }
@@ -505,14 +557,23 @@ function extractCardImage(cardHtml) {
   return ['', ''];
 }
 
-export function parseShopeeHtml(html, kw, maxItems = 40) {
+export function inspectHtmlDomStats(html) {
+  const s = String(html || '');
+  const hrefMatches = (s.match(SHOPEE_HREF_GLOBAL_RE) || []).length;
+  const sqeItems = (s.match(/data-sqe=["']item["']/gi) || []).length;
+  const cdnImgs = (s.match(/susercontent\.com\/file\//gi) || []).length;
+  return { hrefMatches, sqeItems, cdnImgs };
+}
+
+export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
   if (!html || typeof html !== 'string') {
-    return { items: [], blocked: false, loginRequired: false };
+    return { items: [], blocked: false, loginRequired: false, domStats: { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 } };
   }
 
+  const domStats = inspectHtmlDomStats(html);
   const embedded = extractEmbeddedJsonItems(html, kw, maxItems);
   if (embedded.length > 0) {
-    return { items: embedded, blocked: false, loginRequired: false };
+    return { items: embedded, blocked: false, loginRequired: false, domStats };
   }
 
   const parsed = [];
@@ -580,12 +641,12 @@ export function parseShopeeHtml(html, kw, maxItems = 40) {
   }
 
   if (parsed.length === 0) {
-    const blocked = isAntibotChallengeHtml(html);
-    const loginRequired = isLoginRedirectHtml(html);
-    return { items: [], blocked, loginRequired };
+    const blocked = isAntibotChallengeHtml(html, finalUrl);
+    const loginRequired = isLoginRedirectHtml(html, finalUrl);
+    return { items: [], blocked, loginRequired, domStats };
   }
 
-  return { items: parsed, blocked: false, loginRequired: false };
+  return { items: parsed, blocked: false, loginRequired: false, domStats };
 }
 
 export function extractHtmlTitle(html) {
@@ -595,42 +656,69 @@ export function extractHtmlTitle(html) {
 
 export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
   if (!payload || typeof payload !== 'object') {
-    return { items: [], blocked: false, loginRequired: false, xhrSummary: [] };
+    return {
+      items: [],
+      blocked: false,
+      loginRequired: false,
+      xhrSummary: [],
+      finalUrl: '',
+      bodySnippet: '',
+      domStats: { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 }
+    };
   }
 
   const xhrItems = [];
   const seenIds = new Set();
   let xhrBlocked = false;
+  let xhrLoginRequired = false;
   const xhrSummary = [];
+  const finalUrl = String(payload.url || payload.final_url || '');
 
   const xhrEntries = Array.isArray(payload.xhr) ? payload.xhr : [];
   for (const entry of xhrEntries) {
     if (!entry || typeof entry !== 'object') continue;
     const rawUrl = String(entry.url || '');
     const lowUrl = rawUrl.toLowerCase();
-    const status = entry.status ?? entry.statusCode ?? null;
+    const status = entry.status_code ?? entry.status ?? entry.statusCode ?? null;
+    const isNoiseTranslation =
+      lowUrl.includes('stm-sg-live') ||
+      /\/vi\.col\d+/i.test(lowUrl) ||
+      lowUrl.includes('event_batch') ||
+      lowUrl.includes('/metrics');
 
-    if (xhrSummary.length < 8 && (lowUrl.includes('shopee') || lowUrl.includes('/api/'))) {
-      xhrSummary.push(`${redactUrlForLogs(rawUrl)}(${status ?? '?'})`);
+    let bodyJson = null;
+    const bodyRaw = entry.body;
+    if (bodyRaw && typeof bodyRaw === 'object') {
+      bodyJson = bodyRaw;
+    } else if (typeof bodyRaw === 'string' && bodyRaw.trim()) {
+      try {
+        bodyJson = JSON.parse(bodyRaw);
+      } catch {
+        bodyJson = null;
+      }
+    }
+
+    if (!isNoiseTranslation && xhrSummary.length < 15 && (lowUrl.includes('shopee') || lowUrl.includes('/api/'))) {
+      const errTag = bodyJson?.error && bodyJson.error !== 0 ? ` err=${bodyJson.error}` : '';
+      const keysTag =
+        bodyJson && typeof bodyJson === 'object'
+          ? ` keys=${Object.keys(bodyJson).slice(0, 4).join('|')}`
+          : '';
+      xhrSummary.push(`${redactUrlForLogs(rawUrl)}(${status ?? '?'}${errTag}${keysTag})`);
     }
 
     if (lowUrl.includes('event_batch') || lowUrl.includes('metrics') || lowUrl.includes('/subcart')) {
       continue;
     }
 
-    const bodyRaw = entry.body;
-    if (!bodyRaw || typeof bodyRaw !== 'string') continue;
-
-    let bodyJson = null;
-    try {
-      bodyJson = JSON.parse(bodyRaw);
-    } catch {
-      continue;
+    if (status === 401 || lowUrl.includes('/buyer/login')) {
+      xhrLoginRequired = true;
     }
     if (!bodyJson || typeof bodyJson !== 'object') continue;
 
     if (bodyJson.error && bodyJson.error !== 0) {
       xhrBlocked = true;
+      if (bodyJson.error === 90309999) xhrBlocked = true;
     }
 
     collectShopeeItemsFromObject(bodyJson, kw, seenIds, xhrItems, maxItems);
@@ -642,25 +730,35 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       items: xhrItems.slice(0, maxItems),
       blocked: false,
       loginRequired: false,
-      xhrSummary
+      xhrSummary,
+      finalUrl,
+      bodySnippet: '',
+      domStats: inspectHtmlDomStats(String(payload.html || ''))
     };
   }
 
-  const htmlRes = parseShopeeHtml(String(payload.html || ''), kw, maxItems);
+  const rawHtml = String(payload.html || '');
+  const htmlRes = parseShopeeHtml(rawHtml, kw, maxItems, finalUrl);
   if (htmlRes.items.length > 0) {
     return {
       items: htmlRes.items,
       blocked: false,
       loginRequired: false,
-      xhrSummary
+      xhrSummary,
+      finalUrl,
+      bodySnippet: '',
+      domStats: htmlRes.domStats
     };
   }
 
   return {
     items: [],
     blocked: Boolean(xhrBlocked || htmlRes.blocked),
-    loginRequired: Boolean(htmlRes.loginRequired),
-    xhrSummary
+    loginRequired: Boolean(xhrLoginRequired || htmlRes.loginRequired),
+    xhrSummary,
+    finalUrl,
+    bodySnippet: extractVisibleBodySnippet(rawHtml, 200),
+    domStats: htmlRes.domStats
   };
 }
 
@@ -828,10 +926,17 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
 
   const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const searchUrl = `https://shopee.vn/search?keyword=${encodeURIComponent(kw)}`;
-  const jsInstructions = JSON.stringify([
+  const jsInstructionsStd = JSON.stringify([
+    { wait: 4500 },
+    { scroll_y: 900 },
+    { wait: 2500 }
+  ]);
+  const jsInstructionsDeep = JSON.stringify([
+    { wait: 5500 },
+    { scroll_y: 1000 },
     { wait: 3500 },
-    { scroll_y: 1200 },
-    { wait: 2000 }
+    { scroll_y: 1800 },
+    { wait: 2500 }
   ]);
 
   let anyBlocked = false;
@@ -868,9 +973,12 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       if (parsed.loginRequired) anyLoginRequired = true;
 
       if (parsed.items.length === 0) {
+        const ds = parsed.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
         log(
-          `    [i] [${attemptLabel}] HTTP 200 · HTML=${htmlLen}B · title="${title || 'n/a'}" · xhr=${xhrLen}` +
-            `${parsed.xhrSummary.length ? ` [${parsed.xhrSummary.slice(0, 4).join(', ')}]` : ''}` +
+          `    [i] [${attemptLabel}] HTTP 200 · url=${parsed.finalUrl ? redactUrlForLogs(parsed.finalUrl) : '?'} · HTML=${htmlLen}B · title="${title || 'n/a'}"` +
+            ` · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs}) · xhr=${xhrLen}` +
+            `${parsed.xhrSummary.length ? ` [${parsed.xhrSummary.slice(0, 10).join(', ')}]` : ''}` +
+            `${parsed.bodySnippet ? ` · body="${parsed.bodySnippet}"` : ''}` +
             `${parsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL (/buyer/login)' : ''}` +
             `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
         );
@@ -893,8 +1001,10 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     if (htmlRes.loginRequired) anyLoginRequired = true;
     if (htmlRes.items.length === 0) {
       const title = extractHtmlTitle(resp.text);
+      const snippet = extractVisibleBodySnippet(resp.text, 160);
       log(
         `    [i] [${attemptLabel}] HTTP 200 HTML=${resp.text.length}B · title="${title || 'n/a'}"` +
+          `${snippet ? ` · body="${snippet}"` : ''}` +
           `${htmlRes.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
           `${htmlRes.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
       );
@@ -902,7 +1012,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { ...htmlRes, code: '200' };
   };
 
-  // Attempt 1: Primary ZenRows JS Render + Residential VN Proxy + XHR capture
+  // Attempt 1: Primary ZenRows JS Render + Residential VN Proxy + XHR capture (+ Cookie if configured)
   const r1 = await callZenrowsOnce({
     apiKey,
     paramsObj: {
@@ -911,8 +1021,13 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       premium_proxy: 'true',
       proxy_country: 'vn',
       json_response: 'true',
-      js_instructions: jsInstructions
+      window_width: '1366',
+      window_height: '900',
+      ...(cookieHeader ? { custom_headers: 'true' } : {}),
+      js_instructions: jsInstructionsStd
     },
+    extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
+    timeoutMs: 85000,
     fetchImpl
   });
   const p1 = inspectAndParse('ZenRows #1 Standard', r1);
@@ -920,7 +1035,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { items: p1.items.slice(0, maxItems), blocked: false, loginRequired: false };
   }
 
-  // Attempt 2: Escalate to antibot=true (plus custom Cookie header if Admin provided one)
+  // Attempt 2: Escalate to antibot=true with extended scroll/wait timing (+ custom Cookie header if available)
   log(`    [*] Leo thang ZenRows #2 (antibot=true${cookieHeader ? ' + Cookie Shopee' : ''}) cho '${kw}'...`);
   const attempt2Params = {
     url: searchUrl,
@@ -929,15 +1044,16 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     proxy_country: 'vn',
     antibot: 'true',
     json_response: 'true',
-    wait: '5000',
+    window_width: '1366',
+    window_height: '900',
     ...(cookieHeader ? { custom_headers: 'true' } : {}),
-    ...(p1.code === '400' ? {} : { js_instructions: JSON.stringify([{ scroll_y: 1200 }, { wait: 2000 }]) })
+    ...(p1.code === '400' ? { wait: '6000' } : { js_instructions: jsInstructionsDeep })
   };
   const r2 = await callZenrowsOnce({
     apiKey,
     paramsObj: attempt2Params,
     extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
-    timeoutMs: 90000,
+    timeoutMs: 95000,
     fetchImpl
   });
   const p2 = inspectAndParse('ZenRows #2 Antibot', r2);
@@ -945,31 +1061,32 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { items: p2.items.slice(0, maxItems), blocked: false, loginRequired: false };
   }
 
-  // Attempt 3: Direct Shopee search_items v4 JSON endpoint via ZenRows antibot + VN proxy
-  log(`    [*] Thu ZenRows #3 (Shopee search_items API + antibot=true) cho '${kw}'...`);
-  const searchApiUrl =
-    `https://shopee.vn/api/v4/search/search_items?by=relevancy&keyword=${encodeURIComponent(kw)}` +
-    '&limit=30&newest=0&order=desc&page_type=search&scenario=PAGE_GLOBAL_SEARCH&version=2';
-  const r3 = await callZenrowsOnce({
-    apiKey,
-    paramsObj: {
-      url: searchApiUrl,
-      premium_proxy: 'true',
-      proxy_country: 'vn',
-      antibot: 'true',
-      custom_headers: 'true'
-    },
-    extraHeaders: {
-      Accept: 'application/json',
-      Referer: searchUrl,
-      ...(cookieHeader ? { Cookie: cookieHeader } : {})
-    },
-    timeoutMs: 85000,
-    fetchImpl
-  });
-  const p3 = inspectAndParse('ZenRows #3 APIv4', r3);
-  if (p3.items.length > 0) {
-    return { items: p3.items.slice(0, maxItems), blocked: false, loginRequired: false };
+  // Attempt 3: Wait explicitly for Shopee search item selector via antibot + VN proxy
+  if (!p2.loginRequired) {
+    log(`    [*] Thu ZenRows #3 (antibot=true + wait_for item cards) cho '${kw}'...`);
+    const sortedSearchUrl = `${searchUrl}&page=0&sortBy=relevancy`;
+    const r3 = await callZenrowsOnce({
+      apiKey,
+      paramsObj: {
+        url: sortedSearchUrl,
+        js_render: 'true',
+        premium_proxy: 'true',
+        proxy_country: 'vn',
+        antibot: 'true',
+        json_response: 'true',
+        window_width: '1366',
+        window_height: '900',
+        wait_for: '[data-sqe="item"], a[href*="-i."], a[href*="/product/"]',
+        ...(cookieHeader ? { custom_headers: 'true' } : {})
+      },
+      extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
+      timeoutMs: 95000,
+      fetchImpl
+    });
+    const p3 = inspectAndParse('ZenRows #3 WaitFor', r3);
+    if (p3.items.length > 0) {
+      return { items: p3.items.slice(0, maxItems), blocked: false, loginRequired: false };
+    }
   }
 
   return {
