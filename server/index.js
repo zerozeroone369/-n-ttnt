@@ -1,24 +1,137 @@
 import 'dotenv/config';
 import express from 'express';
 import cors from 'cors';
+import crypto from 'crypto';
 import { db, hashPassword, verifyPassword } from './db.js';
 import { createSession, destroySession, authenticateUser, requireAuth, requireRole } from './auth.js';
+import { filterShopeeCatalog } from '../src/utils/shopeeFilter.js';
+import { normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
 import { spawn } from 'child_process';
-import { readFileSync, existsSync } from 'fs';
+import { readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 const PROJECT_ROOT = join(__dirname, '..');
+const SHOPEE_COOKIE_PATH = process.env.SHOPEE_COOKIE_FILE || join(PROJECT_ROOT, 'shopee_cookie.txt');
+const SCRAPER_CONFIG_LOCAL_PATH = process.env.SCRAPER_CONFIG_FILE || join(PROJECT_ROOT, 'server', 'data', 'scraper_config.local.json');
 
-// Kiểm tra Gemini API Key khi khởi động
+// Shared AI & Scraper Configuration (Single Source of Truth)
+const GEMINI_API_VERSION = 'v1';
+const GEMINI_MODEL = process.env.GEMINI_MODEL || 'gemini-3.5-flash-lite';
+const GEMINI_MAX_OUTPUT_TOKENS = Math.max(1024, Number(process.env.GEMINI_MAX_OUTPUT_TOKENS) || 4096);
+const GEMINI_REQUEST_TIMEOUT_MS = 60 * 1000;
+const PYTHON_BIN = process.env.PYTHON_BIN || 'python';
+const SCRAPE_TIMEOUT_MS = 300 * 1000; // 5 phút cho Scraping API render JS đa từ khóa
+
+const SCRAPING_PROVIDERS = ['zenrows', 'scraperapi', 'crawlbase'];
+
+function maskSecretValue(raw) {
+  const s = String(raw || '').trim();
+  if (!s) return null;
+  if (s.length <= 10) return '********';
+  return `${s.substring(0, 6)}...${s.slice(-4)}`;
+}
+
+function loadLocalScraperOverride() {
+  if (!existsSync(SCRAPER_CONFIG_LOCAL_PATH)) {
+    return { selectedProvider: null, keys: {}, updatedAt: null };
+  }
+  try {
+    const raw = readFileSync(SCRAPER_CONFIG_LOCAL_PATH, 'utf8').replace(/^\uFEFF/, '');
+    const parsed = JSON.parse(raw);
+    return {
+      selectedProvider: parsed?.selectedProvider || null,
+      keys: typeof parsed?.keys === 'object' && parsed.keys ? parsed.keys : {},
+      updatedAt: parsed?.updatedAt || null
+    };
+  } catch {
+    return { selectedProvider: null, keys: {}, updatedAt: null };
+  }
+}
+
+function getEffectiveScraperConfig() {
+  const local = loadLocalScraperOverride();
+  const envSelected = String(process.env.SCRAPING_PROVIDER || 'auto').trim().toLowerCase();
+  const selectedProvider = ['auto', ...SCRAPING_PROVIDERS].includes(local.selectedProvider)
+    ? local.selectedProvider
+    : (['auto', ...SCRAPING_PROVIDERS].includes(envSelected) ? envSelected : 'auto');
+
+  const resolveKey = (prov, envKey, altEnvKey) => {
+    const localVal = String(local.keys?.[prov] || '').trim();
+    if (localVal) return { key: localVal, source: 'admin_runtime' };
+    const envVal = String(process.env[envKey] || (altEnvKey ? process.env[altEnvKey] : '') || '').trim();
+    if (envVal) return { key: envVal, source: 'env' };
+    return { key: '', source: null };
+  };
+
+  const resolvedMap = {
+    zenrows: resolveKey('zenrows', 'ZENROWS_API_KEY'),
+    scraperapi: resolveKey('scraperapi', 'SCRAPERAPI_KEY'),
+    crawlbase: resolveKey('crawlbase', 'CRAWLBASE_TOKEN', 'CRAWLBASE_API_KEY')
+  };
+
+  let activeProvider = null;
+  if (selectedProvider !== 'auto') {
+    if (resolvedMap[selectedProvider]?.key) {
+      activeProvider = selectedProvider;
+    }
+  } else {
+    activeProvider = SCRAPING_PROVIDERS.find(p => Boolean(resolvedMap[p]?.key)) || null;
+  }
+
+  return {
+    configured: Boolean(activeProvider),
+    selectedProvider,
+    activeProvider,
+    envVars: {
+      SCRAPING_PROVIDER: selectedProvider,
+      ...(resolvedMap.zenrows.key ? { ZENROWS_API_KEY: resolvedMap.zenrows.key } : {}),
+      ...(resolvedMap.scraperapi.key ? { SCRAPERAPI_KEY: resolvedMap.scraperapi.key } : {}),
+      ...(resolvedMap.crawlbase.key ? { CRAWLBASE_TOKEN: resolvedMap.crawlbase.key } : {})
+    },
+    publicMeta: {
+      configured: Boolean(activeProvider),
+      selectedProvider,
+      activeProvider,
+      updatedAt: local.updatedAt || null,
+      providers: {
+        zenrows: {
+          configured: Boolean(resolvedMap.zenrows.key),
+          keyMasked: maskSecretValue(resolvedMap.zenrows.key),
+          source: resolvedMap.zenrows.source
+        },
+        scraperapi: {
+          configured: Boolean(resolvedMap.scraperapi.key),
+          keyMasked: maskSecretValue(resolvedMap.scraperapi.key),
+          source: resolvedMap.scraperapi.source
+        },
+        crawlbase: {
+          configured: Boolean(resolvedMap.crawlbase.key),
+          keyMasked: maskSecretValue(resolvedMap.crawlbase.key),
+          source: resolvedMap.crawlbase.source
+        }
+      }
+    }
+  };
+}
+
+// Kiểm tra Gemini & Scraping API Key khi khởi động
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const GEMINI_CONFIGURED = !!GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here';
 if (GEMINI_CONFIGURED) {
-  console.log(`✨ [Gemini] API Key đã cấu hình (${GEMINI_API_KEY.substring(0, 8)}...)`);
+  console.log(`✨ [Gemini] API Key đã cấu hình (${GEMINI_API_KEY.substring(0, 6)}...) · Model: ${GEMINI_MODEL}`);
 } else {
-  console.log('⚠️  [Gemini] Chưa cấu hình API Key — chatbot dùng bộ máy cục bộ làm fallback');
+  console.log('⚠️  [Gemini] Chưa cấu hình API Key — chatbot sẽ báo trạng thái chưa cấu hình hoặc dùng chế độ cục bộ khi người dùng chọn');
+}
+
+const startupScraperCfg = getEffectiveScraperConfig();
+if (startupScraperCfg.configured) {
+  const activeMeta = startupScraperCfg.publicMeta.providers[startupScraperCfg.activeProvider];
+  console.log(`🛒 [Shopee Option B] Scraping API sẵn sàng: ${startupScraperCfg.activeProvider.toUpperCase()} (${activeMeta?.keyMasked})`);
+} else {
+  console.log('⚠️  [Shopee Option B] Chưa cấu hình Scraping API Key (ZENROWS_API_KEY / SCRAPERAPI_KEY / CRAWLBASE_TOKEN).');
 }
 
 const app = express();
@@ -26,7 +139,7 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json());
+app.use(express.json({ limit: '2mb' }));
 app.use(authenticateUser);
 
 // ============================================================================
@@ -35,13 +148,26 @@ app.use(authenticateUser);
 
 // Register new customer account
 app.post('/api/auth/register', (req, res) => {
-  const { email, password, name, phone, address, city } = req.body;
+  const { email, password, name, phone, address, city } = req.body || {};
 
   if (!email || !password || !name) {
     return res.status(400).json({ error: 'Vui lòng điền đầy đủ Email, Mật khẩu và Họ tên.' });
   }
 
-  const normalizedEmail = email.trim().toLowerCase();
+  const normalizedEmail = String(email).trim().toLowerCase();
+  if (!/^\S+@\S+\.\S+$/.test(normalizedEmail)) {
+    return res.status(400).json({ error: 'Định dạng email không hợp lệ.' });
+  }
+
+  const trimmedName = String(name).trim();
+  if (trimmedName.length < 2) {
+    return res.status(400).json({ error: 'Họ tên phải có ít nhất 2 ký tự.' });
+  }
+
+  if (typeof password !== 'string' || password.length < 6) {
+    return res.status(400).json({ error: 'Mật khẩu phải có ít nhất 6 ký tự.' });
+  }
+
   const existingUser = db.findOne('users', u => u.email.toLowerCase() === normalizedEmail);
   if (existingUser) {
     return res.status(409).json({ error: 'Email này đã được đăng ký tài khoản.' });
@@ -53,7 +179,7 @@ app.post('/api/auth/register', (req, res) => {
     email: normalizedEmail,
     passwordHash: hash,
     salt,
-    name: name.trim(),
+    name: trimmedName,
     phone: phone?.trim() || '',
     address: address?.trim() || '',
     city: city?.trim() || 'Hà Nội',
@@ -495,6 +621,91 @@ app.get('/api/audit-logs', requireRole(['admin']), (req, res) => {
 // 6. GEMINI AI CHAT ENDPOINT (API Key ẩn hoàn toàn trên server)
 // ============================================================================
 
+function extractGeminiCandidateText(candidate) {
+  const parts = candidate?.content?.parts;
+  if (!Array.isArray(parts)) return '';
+  return parts
+    .filter(part => typeof part?.text === 'string' && !part?.thought)
+    .map(part => part.text)
+    .join('')
+    .trim();
+}
+
+function buildNormalizedGeminiContents(history = [], currentMessage = '') {
+  const turns = [];
+  const boundedHistory = Array.isArray(history) ? history.slice(-10) : [];
+
+  for (const item of boundedHistory) {
+    const rawText = typeof item?.text === 'string' ? item.text.trim() : '';
+    if (!rawText) continue;
+    const role = item?.role === 'model' || item?.sender === 'bot' ? 'model' : 'user';
+    const clampedText = rawText.slice(0, 1500);
+
+    // Gemini requires conversations to start with a user turn
+    if (turns.length === 0 && role === 'model') continue;
+
+    const lastTurn = turns[turns.length - 1];
+    if (lastTurn && lastTurn.role === role) {
+      lastTurn.parts[0].text += `\n${clampedText}`;
+    } else {
+      turns.push({ role, parts: [{ text: clampedText }] });
+    }
+  }
+
+  const currentText = String(currentMessage).trim();
+  const lastTurn = turns[turns.length - 1];
+  if (lastTurn && lastTurn.role === 'user') {
+    lastTurn.parts[0].text += `\n${currentText}`;
+  } else {
+    turns.push({ role: 'user', parts: [{ text: currentText }] });
+  }
+
+  return turns;
+}
+
+async function callGeminiGenerate({ systemInstruction, contents, maxOutputTokens = GEMINI_MAX_OUTPUT_TOKENS, temperature = 0.7 }) {
+  const url = `https://generativelanguage.googleapis.com/${GEMINI_API_VERSION}/models/${GEMINI_MODEL}:generateContent`;
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), GEMINI_REQUEST_TIMEOUT_MS);
+
+  try {
+    const t0 = Date.now();
+    const requestBody = {
+      ...(systemInstruction ? { system_instruction: { parts: [{ text: systemInstruction }] } } : {}),
+      contents,
+      generationConfig: {
+        temperature,
+        maxOutputTokens
+      }
+    };
+
+    const response = await fetch(url, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+        'x-goog-api-key': GEMINI_API_KEY
+      },
+      body: JSON.stringify(requestBody)
+    });
+
+    if (!response.ok) {
+      const errBody = await response.text().catch(() => response.statusText);
+      const err = new Error(`Gemini API ${response.status}: ${errBody}`);
+      err.httpStatus = response.status;
+      throw err;
+    }
+
+    const data = await response.json();
+    return {
+      data,
+      latencyMs: Date.now() - t0
+    };
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
 /**
  * GET /api/chat/status
  * Kiểm tra Gemini đã được cấu hình chưa (không lộ key ra ngoài)
@@ -502,33 +713,93 @@ app.get('/api/audit-logs', requireRole(['admin']), (req, res) => {
 app.get('/api/chat/status', (req, res) => {
   res.json({
     configured: GEMINI_CONFIGURED,
-    model: 'gemini-3.5-flash',
-    keyMasked: process.env.GEMINI_API_KEY
-      ? `${process.env.GEMINI_API_KEY.substring(0, 6)}...${process.env.GEMINI_API_KEY.slice(-4)}`
+    model: GEMINI_MODEL,
+    apiVersion: GEMINI_API_VERSION,
+    maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS,
+    keyMasked: GEMINI_CONFIGURED
+      ? `${GEMINI_API_KEY.substring(0, 6)}...${GEMINI_API_KEY.slice(-4)}`
       : null
   });
 });
 
 /**
+ * POST /api/chat/test
+ * Gửi một prompt kiểm tra trực tiếp tới GEMINI_MODEL thực tế để xác nhận hoạt động
+ */
+app.post('/api/chat/test', async (req, res) => {
+  if (!GEMINI_CONFIGURED) {
+    return res.status(503).json({
+      ok: false,
+      configured: false,
+      model: GEMINI_MODEL,
+      error: 'Server chưa cấu hình GEMINI_API_KEY trong file .env.'
+    });
+  }
+
+  try {
+    const { data, latencyMs } = await callGeminiGenerate({
+      systemInstruction: 'Bạn là trợ lý AI của Tiệm Nhà Nhỏ. Hãy trả lời cực kỳ ngắn gọn.',
+      contents: [{ role: 'user', parts: [{ text: 'Chào bạn, hãy xác nhận kết nối thành công bằng một câu ngắn tiếng Việt.' }] }],
+      maxOutputTokens: 1024,
+      temperature: 0.3
+    });
+
+    const candidate = data.candidates?.[0];
+    const text = extractGeminiCandidateText(candidate);
+    if (!candidate || !text) {
+      return res.status(502).json({
+        ok: false,
+        configured: true,
+        model: GEMINI_MODEL,
+        finishReason: candidate?.finishReason || 'EMPTY',
+        error: `Gemini phản hồi trống (finishReason=${candidate?.finishReason || 'UNKNOWN'}).`
+      });
+    }
+
+    return res.json({
+      ok: true,
+      configured: true,
+      model: GEMINI_MODEL,
+      latencyMs,
+      finishReason: candidate.finishReason || 'STOP',
+      preview: text.substring(0, 120)
+    });
+  } catch (err) {
+    const status = err.httpStatus === 429 ? 429 : (err.httpStatus === 400 || err.httpStatus === 401 ? 401 : 502);
+    return res.status(status).json({
+      ok: false,
+      configured: true,
+      model: GEMINI_MODEL,
+      error: err.message
+    });
+  }
+});
+
+/**
  * POST /api/chat
- * Body: { message, products[], orders[], storeInfo{}, userRole? }
- * Gọi Gemini 2.5 Flash với system prompt đầy đủ, trả về { text, recommendedIds[] }
+ * Body: { message, scope?: 'store' | 'general', history?: [], products[], orders[], storeInfo{} }
+ * Gọi GEMINI_MODEL thống nhất với system prompt theo chế độ và lịch sử hội thoại nhiều lượt.
  */
 app.post('/api/chat', async (req, res) => {
   if (!GEMINI_CONFIGURED) {
     return res.status(503).json({
-      error: 'Gemini AI chưa được cấu hình. Vui lòng thêm GEMINI_API_KEY vào file .env và khởi động lại server.'
+      error: 'Gemini AI chưa được cấu hình. Vui lòng thêm GEMINI_API_KEY vào file .env và khởi động lại server.',
+      model: GEMINI_MODEL
     });
   }
 
-  const { message, products = [], orders = [], storeInfo = {} } = req.body;
+  const { message, scope = 'store', history = [], products = [], storeInfo = {} } = req.body || {};
 
   if (!message || typeof message !== 'string' || message.trim().length === 0) {
     return res.status(400).json({ error: 'Thiếu nội dung tin nhắn.' });
   }
 
-  // ── Build catalog theo nhóm danh mục ──
-  const inStock = products.filter(p => Number(p.stock) > 0);
+  const normalizedScope = scope === 'general' ? 'general' : 'store';
+  const vnd = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
+
+  const inStock = Array.isArray(products) && products.length > 0
+    ? products.filter(p => Number(p.stock) > 0)
+    : (db.get('products') || []).filter(p => Number(p.stock) > 0);
 
   const catLabels = {
     fashion: '👕 Thời Trang & Phụ Kiện',
@@ -539,48 +810,79 @@ app.post('/api/chat', async (req, res) => {
 
   const byCategory = {};
   inStock.forEach(p => {
-    if (!byCategory[p.category]) byCategory[p.category] = [];
-    byCategory[p.category].push(p);
+    const cat = p.category || 'other';
+    if (!byCategory[cat]) byCategory[cat] = [];
+    byCategory[cat].push(p);
   });
-
-  const vnd = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 
   const catalogText = Object.entries(byCategory).map(([cat, items]) => {
     const label = catLabels[cat] || cat;
-    const rows = items.map(p =>
-      `  • [${p.id}] ${p.name} — ${vnd(p.price)}${p.originalPrice > p.price ? ` (gốc ${vnd(p.originalPrice)})` : ''} — Còn ${p.stock} — ${p.shortDesc || ''}`
+    const maxPerCat = normalizedScope === 'general' ? 4 : 18;
+    const rows = items.slice(0, maxPerCat).map(p =>
+      normalizedScope === 'general'
+        ? `  • [${p.id}] ${p.name} — ${vnd(p.price)} (còn ${p.stock})`
+        : `  • [${p.id}] ${p.name} — ${vnd(p.price)}${p.originalPrice > p.price ? ` (gốc ${vnd(p.originalPrice)})` : ''} — Còn ${p.stock} — ${p.shortDesc || ''}`
     ).join('\n');
     return `${label} (${items.length} sp):\n${rows}`;
   }).join('\n\n');
 
-  // ── 5 đơn hàng gần nhất ──
-  const recentOrders = orders.slice(0, 5);
-  const ordersText = recentOrders.length > 0
-    ? recentOrders.map(o =>
-        `  • ${o.id} | ${o.customer?.name} (${o.customer?.phone}) | ${o.orderStatus} | ${vnd(o.total)} | ${o.trackingCarrier || 'GHTK'} ${o.trackingCode || ''}`
-      ).join('\n')
-    : '  (Chưa có đơn hàng)';
+  // Protect PII: only inject server-verified orders belonging to req.user (never unauthenticated client-supplied PII)
+  let ordersText = '  (Khách chưa đăng nhập — nếu hỏi đơn hàng cá nhân, nhắc khách đăng nhập hoặc cung cấp Mã đơn + SĐT để tra cứu)';
+  if (req.user) {
+    const allDbOrders = db.get('orders') || [];
+    const scopedOrders = (req.user.role === 'admin' || req.user.role === 'staff')
+      ? allDbOrders.slice(0, 5)
+      : allDbOrders.filter(o => o.customerId === req.user.id || (req.user.email && o.customer?.email?.toLowerCase() === req.user.email.toLowerCase())).slice(0, 5);
 
-  const store = storeInfo;
+    ordersText = scopedOrders.length > 0
+      ? scopedOrders.map(o =>
+          `  • ${o.id} | Trạng thái: ${o.orderStatus} | Tổng: ${vnd(o.total)} | ${o.trackingCarrier || 'GHTK'} ${o.trackingCode || ''}`
+        ).join('\n')
+      : '  (Tài khoản hiện chưa có đơn hàng nào)';
+  }
 
-  const systemInstruction = `Bạn là **Nhân Viên Tư Vấn Bán Hàng Thông Minh** của **"${store.name || 'Tiệm Nhà Nhỏ'}"** — boutique thủ công tại Hà Nội.
+  const store = storeInfo || {};
+  let systemInstruction = '';
 
-🎯 NHIỆM VỤ: Hỗ trợ khách trong phạm vi thương mại của tiệm:
+  if (normalizedScope === 'general') {
+    systemInstruction = `Bạn là **Trợ Lý AI Thông Minh Tổng Quát** tích hợp trong nền tảng **${store.name || 'Tiệm Nhà Nhỏ'}**.
+
+🧠 VAI TRÒ & NĂNG LỰC (CHẾ ĐỘ TỔNG QUÁT):
+  • Trả lời toàn diện, chính xác và có chiều sâu cho mọi chủ đề: lập trình, toán học, khoa học, công nghệ, phân tích kinh doanh, marketing, viết lách, học tập, đời sống...
+  • KHÔNG từ chối các câu hỏi học thuật, kỹ thuật hay phân tích phức tạp chỉ vì chúng nằm ngoài phạm vi bán lẻ.
+
+📐 PHƯƠNG PHÁP GIẢI QUYẾT CÂU HỎI PHỨC TẠP:
+  1. Phân tích vấn đề rõ ràng theo từng bước logic.
+  2. Nếu câu hỏi có chỗ mơ hồ hoặc thiếu dữ kiện, nêu rõ **giả định đang dùng** trước khi giải.
+  3. Nếu thông tin phụ thuộc thời gian thực mà bạn không có truy cập trực tiếp (như giá thị trường hôm nay), hãy **nêu rõ giới hạn dữ liệu** thay vì đoán bừa số liệu.
+  4. Tuân thủ an toàn: từ chối hướng dẫn gây hại hoặc vi phạm pháp luật.
+
+🏪 NGỮ CẢNH CỬA HÀNG (chỉ sử dụng khi người dùng nhắc đến mua sắm hoặc Tiệm Nhà Nhỏ):
+  • Cửa hàng: ${store.name || 'Tiệm Nhà Nhỏ'} — ${store.address || '48 Ngõ 12 Đặng Thai Mai, Tây Hồ, Hà Nội'}
+  • Freeship từ ${vnd(store.freeshipThreshold || 450000)} | Đổi trả 1 đổi 1 trong 7 ngày.
+  • Tổng sản phẩm còn hàng: ${inStock.length} sản phẩm.
+${inStock.length > 0 ? `\n📦 TÓM TẮT SẢN PHẨM HIỆN CÓ (nếu khách hỏi mua):\n${catalogText}\n📌 Nếu gợi ý cụ thể sản phẩm từ danh mục trên, đặt [RECOMMENDED_IDS: id1, id2] ở cuối câu trả lời.` : ''}
+
+💬 PHONG CÁCH: Tiếng Việt tự nhiên, mạch lạc, có cấu trúc markdown dễ đọc.`;
+  } else {
+    systemInstruction = `Bạn là **Nhân Viên Tư Vấn Bán Hàng Thông Minh** của **"${store.name || 'Tiệm Nhà Nhỏ'}"** — boutique thủ công & lifestyle tại Hà Nội.
+
+🎯 NHIỆM VỤ (CHẾ ĐỘ TƯ VẤN CỬA HÀNG): Hỗ trợ khách trong phạm vi thương mại của tiệm:
   1. Tư vấn & gợi ý sản phẩm phù hợp ngân sách / nhu cầu / phong cách
   2. Tư vấn chọn size quần áo (chiều cao / cân nặng)
   3. Chính sách bán sỉ, quà tặng doanh nghiệp, xuất hóa đơn VAT
-  4. Tra cứu tiến độ đơn hàng
+  4. Tra cứu tiến độ đơn hàng (chỉ dựa trên đơn được xác thực bên dưới)
   5. Chính sách đổi trả, vận chuyển, thanh toán
   6. Hướng dẫn sử dụng và bảo quản sản phẩm
 
-❌ TỪ CHỐI lịch sự mọi câu hỏi ngoài phạm vi thương mại (lập trình, toán học, thời tiết, tin tức, chính trị, y tế, crypto...).
+🛡️ PHẠM VI: Nếu câu hỏi hoàn toàn không liên quan đến mua sắm/kinh doanh của tiệm (ví dụ code, giải toán, thời tiết...), hãy lịch sự nhắc khách chuyển sang chế độ **"Trợ lý AI tổng quát"** ngay trên khung chat để được hỗ trợ đầy đủ.
 
-💬 PHONG CÁCH: Lịch thiệp, thân thiện, thông thái. Xưng "em" / "bạn". Ngắn gọn súc tích, dùng emoji nhẹ nhàng.
+💬 PHONG CÁCH: Lịch thiệp, thân thiện, thông thái. Xưng "em" / "bạn". Giải thích rõ ràng, không bịa thông số hay tồn kho không có trong danh mục.
 
 📦 DANH MỤC SẢN PHẨM (${inStock.length} sản phẩm còn hàng):
 ${catalogText}
 
-📋 ĐƠN HÀNG GẦN ĐÂY:
+📋 ĐƠN HÀNG ĐƯỢC PHÉP TRA CỨU:
 ${ordersText}
 
 🏪 THÔNG TIN TIỆM:
@@ -598,220 +900,330 @@ ${ordersText}
 💼 BÁN SỈ: 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25%+freeship | ≥100 món: giảm 30–35%+hợp đồng. Hỗ trợ xuất hóa đơn VAT, khắc logo.
 
 📌 KHI GỢI Ý SẢN PHẨM: Luôn đặt [RECOMMENDED_IDS: sp-xx, sp-yy] ở CUỐI câu trả lời (tối đa 4 ID từ danh mục trên, không bịa ID).`;
+  }
 
   try {
-    const GEMINI_MODEL = 'gemini-1.5-flash';
-    // Dùng header x-goog-api-key + /v1 (hỗ trợ key dạng AQ. lẫn AIzaSy...)
-    const url = `https://generativelanguage.googleapis.com/v1/models/${GEMINI_MODEL}:generateContent`;
-
-    const requestBody = {
-      system_instruction: { parts: [{ text: systemInstruction }] },
-      contents: [{ role: 'user', parts: [{ text: message.trim() }] }],
-      generationConfig: {
-        temperature: 0.7,
-        maxOutputTokens: 1024,
-      }
-    };
-
-    const response = await fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-goog-api-key': GEMINI_API_KEY
-      },
-      body: JSON.stringify(requestBody)
+    const contents = buildNormalizedGeminiContents(history, message);
+    const { data } = await callGeminiGenerate({
+      systemInstruction,
+      contents,
+      maxOutputTokens: GEMINI_MAX_OUTPUT_TOKENS,
+      temperature: 0.7
     });
 
-    if (!response.ok) {
-      const errBody = await response.text().catch(() => response.statusText);
-      throw new Error(`Gemini API ${response.status}: ${errBody}`);
-    }
-
-    const data = await response.json();
-
-    // Handle blocked / empty response
     const candidate = data.candidates?.[0];
-    if (!candidate || candidate.finishReason === 'SAFETY') {
+    const finishReason = candidate?.finishReason || 'STOP';
+
+    if (!candidate || ['SAFETY', 'RECITATION', 'PROHIBITED_CONTENT', 'BLOCKLIST'].includes(finishReason)) {
       return res.json({
-        text: 'Dạ em xin lỗi, em không thể xử lý yêu cầu này. Bạn vui lòng thử lại nhé! 🌿',
-        recommendedIds: []
+        text: 'Dạ xin lỗi bạn, yêu cầu này không thể được xử lý do giới hạn an toàn nội dung. Bạn vui lòng diễn đạt lại câu hỏi nhé!',
+        recommendedIds: [],
+        model: GEMINI_MODEL,
+        scope: normalizedScope,
+        finishReason,
+        truncated: false
       });
     }
 
-    let text = candidate.content?.parts?.[0]?.text || '';
+    let text = extractGeminiCandidateText(candidate);
+    if (!text) {
+      if (finishReason === 'MAX_TOKENS') {
+        return res.status(502).json({
+          error: 'Câu trả lời vượt quá giới hạn token xử lý nội bộ trước khi xuất văn bản. Vui lòng thử câu hỏi ngắn gọn hoặc chia nhỏ hơn.',
+          model: GEMINI_MODEL,
+          finishReason
+        });
+      }
+      return res.status(502).json({
+        error: `Gemini trả về phản hồi trống (finishReason=${finishReason}).`,
+        model: GEMINI_MODEL,
+        finishReason
+      });
+    }
 
-    // Extract recommended product IDs
+    // Extract recommended product IDs cleanly
     const idMatch = text.match(/\[RECOMMENDED_IDS:\s*([^\]]+)\]/i);
     const recommendedIds = idMatch
       ? idMatch[1].split(',').map(s => s.trim()).filter(Boolean).slice(0, 4)
       : [];
 
-    // Remove the tag from displayed text
     text = text.replace(/\[RECOMMENDED_IDS:[^\]]+\]/gi, '').trim();
 
-    return res.json({ text, recommendedIds });
+    return res.json({
+      text,
+      recommendedIds,
+      model: GEMINI_MODEL,
+      scope: normalizedScope,
+      finishReason,
+      truncated: finishReason === 'MAX_TOKENS',
+      usage: data.usageMetadata || null
+    });
 
   } catch (err) {
     console.error('[/api/chat] Gemini error:', err.message);
 
-    // Phân biệt lỗi quota / key không hợp lệ
-    if (err.message?.includes('API_KEY_INVALID') || err.message?.includes('400')) {
-      return res.status(401).json({ error: 'API Key không hợp lệ. Vui lòng kiểm tra lại GEMINI_API_KEY trong file .env.' });
+    if (err.name === 'AbortError') {
+      return res.status(504).json({ error: 'Gemini phản hồi quá thời gian chờ (timeout). Vui lòng thử lại.', model: GEMINI_MODEL });
     }
-    if (err.message?.includes('429') || err.message?.includes('RESOURCE_EXHAUSTED')) {
-      return res.status(429).json({ error: 'Đã vượt giới hạn miễn phí Gemini. Vui lòng thử lại sau 1 phút.' });
+    if (err.httpStatus === 400 || err.httpStatus === 401 || err.message?.includes('API_KEY_INVALID')) {
+      return res.status(401).json({ error: 'API Key không hợp lệ hoặc yêu cầu bị từ chối. Vui lòng kiểm tra GEMINI_API_KEY trong .env.', model: GEMINI_MODEL });
+    }
+    if (err.httpStatus === 429 || err.message?.includes('RESOURCE_EXHAUSTED')) {
+      return res.status(429).json({ error: 'Đã vượt giới hạn miễn phí Gemini (429). Vui lòng thử lại sau 1 phút.', model: GEMINI_MODEL });
+    }
+    if (err.httpStatus === 503) {
+      return res.status(503).json({ error: 'Máy chủ Google Gemini đang quá tải tạm thời (503). Bạn có thể bấm thử lại ngay.', model: GEMINI_MODEL });
     }
 
-    return res.status(500).json({ error: `Lỗi AI: ${err.message}` });
+    return res.status(500).json({ error: `Lỗi AI: ${err.message}`, model: GEMINI_MODEL });
   }
 });
 
 // ============================================================================
-// 10. SHOPEE SCRAPING & IMPORT API
+// 10. SHOPEE SCRAPING & IMPORT API (Async Session Jobs + Strict Filtering)
 // ============================================================================
 
-let scrapeState = { running: false, progress: '', error: null };
+let scrapeState = {
+  running: false,
+  sessionId: null,
+  status: 'idle', // idle | running | completed | empty | blocked | failed
+  requestedKeywords: [],
+  limit: 20,
+  startedAt: null,
+  finishedAt: null,
+  progress: '',
+  message: '',
+  error: null,
+  noNewData: false,
+  count: 0,
+  results: []
+};
 
-// Trigger the Python scraper with keywords from request
+const scrapeSessions = new Map();
+
+function saveSessionSnapshot(state) {
+  if (!state?.sessionId) return;
+  scrapeSessions.set(state.sessionId, { ...state });
+  // Keep latest 20 sessions
+  if (scrapeSessions.size > 20) {
+    const oldestKey = scrapeSessions.keys().next().value;
+    if (oldestKey) scrapeSessions.delete(oldestKey);
+  }
+}
+
+// Trigger the Python scraper asynchronously with session tracking (Option B: Scraping API)
 app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   if (scrapeState.running) {
-    return res.status(400).json({ error: 'Tiến trình cào dữ liệu đang chạy. Vui lòng chờ đợt trước hoàn tất.' });
+    return res.status(409).json({
+      error: 'Tiến trình cào dữ liệu đang chạy. Vui lòng chờ đợt trước hoàn tất.',
+      sessionId: scrapeState.sessionId
+    });
   }
 
-  const { keywords, limit } = req.body;
-  const kwList = Array.isArray(keywords) && keywords.length > 0 
+  const { keywords, limit, provider } = req.body || {};
+  const kwList = Array.isArray(keywords)
     ? keywords.map(k => String(k).trim()).filter(Boolean)
     : [];
-  const numLimit = Math.min(Math.max(parseInt(limit) || 20, 5), 60);
 
-  scrapeState = { running: true, progress: 'Đang khởi động cào dữ liệu thật từ Shopee...', error: null };
+  if (kwList.length === 0) {
+    return res.status(400).json({ error: 'Vui lòng cung cấp ít nhất 1 từ khóa để cào dữ liệu Shopee.' });
+  }
+
+  const scraperCfg = getEffectiveScraperConfig();
+  const requestedProv = provider && SCRAPING_PROVIDERS.includes(String(provider).toLowerCase())
+    ? String(provider).toLowerCase()
+    : null;
+  const hasRequestedKey = requestedProv
+    ? Boolean(scraperCfg.publicMeta.providers[requestedProv]?.configured)
+    : scraperCfg.configured;
+
+  if (!hasRequestedKey && process.env.SCRAPING_ALLOW_DIRECT_FALLBACK !== '1') {
+    return res.status(400).json({
+      code: 'SCRAPER_CONFIG_REQUIRED',
+      error: requestedProv
+        ? `Chưa cấu hình API Key cho ${requestedProv.toUpperCase()}. Vui lòng nhập key trong bảng Cấu Hình Scraping API hoặc biến môi trường trên máy chủ.`
+        : 'Chưa cấu hình Scraping API Key (Phương án B: ZenRows / ScraperAPI / Crawlbase). Vui lòng nhập API Key ngay phía trên hoặc thiết lập ZENROWS_API_KEY / SCRAPERAPI_KEY / CRAWLBASE_TOKEN trên Render/.env.'
+    });
+  }
+
+  const numLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 5), 60);
   const scraperPath = join(PROJECT_ROOT, 'shopee_scraper.py');
   const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
 
   if (!existsSync(scraperPath)) {
-    scrapeState = { running: false, progress: 'Thất bại', error: 'Không tìm thấy script shopee_scraper.py' };
-    return res.status(500).json({ error: 'Không tìm thấy script cào dữ liệu' });
+    return res.status(500).json({ error: 'Không tìm thấy script shopee_scraper.py trên máy chủ.' });
   }
 
-  // Chuẩn bị tham số dòng lệnh truyền từ khóa động và số lượng sản phẩm
-  const scriptArgs = [scraperPath, '--limit', String(numLimit)];
-  if (kwList.length > 0) {
-    scriptArgs.push('--keywords', ...kwList);
-  }
+  const activeProvLabel = (requestedProv || scraperCfg.activeProvider || 'auto').toUpperCase();
+  const sessionId = `scrape_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+  scrapeState = {
+    running: true,
+    sessionId,
+    status: 'running',
+    provider: requestedProv || scraperCfg.activeProvider || null,
+    requestedKeywords: kwList,
+    limit: numLimit,
+    startedAt: new Date().toISOString(),
+    finishedAt: null,
+    progress: `Đang kết nối Scraping API (${activeProvLabel} · Phương án B) để lấy dữ liệu Shopee...\n`,
+    message: `Đang thu thập sản phẩm qua ${activeProvLabel}...`,
+    error: null,
+    configRequired: false,
+    noNewData: false,
+    count: 0,
+    results: []
+  };
+  saveSessionSnapshot(scrapeState);
 
-  console.log(`[Shopee Scrape] Nhận yêu cầu cào sản phẩm: keywords=${JSON.stringify(kwList)}, limit=${numLimit}`);
+  const scriptArgs = [
+    scraperPath,
+    '--session-id', sessionId,
+    '--output', outputPath,
+    '--limit', String(numLimit),
+    ...(requestedProv ? ['--provider', requestedProv] : []),
+    '--keywords', ...kwList
+  ];
 
-  const pythonProcess = spawn('python', scriptArgs, {
+  console.log(`[Shopee Scrape] Bắt đầu phiên ${sessionId} (${activeProvLabel}): keywords=${JSON.stringify(kwList)}, limit=${numLimit}`);
+
+  const pythonProcess = spawn(PYTHON_BIN, scriptArgs, {
     cwd: PROJECT_ROOT,
-    timeout: 90 * 1000, // 90 giây timeout tối đa, tránh treo vô hạn
-    env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+    timeout: SCRAPE_TIMEOUT_MS,
+    env: {
+      ...process.env,
+      ...scraperCfg.envVars,
+      PYTHONIOENCODING: 'utf-8',
+      PYTHONUNBUFFERED: '1',
+      SHOPEE_COOKIE_FILE: SHOPEE_COOKIE_PATH
+    }
   });
 
   pythonProcess.stdout.on('data', (data) => {
     const text = data.toString();
-    console.log(`[Scraper stdout]: ${text.trim()}`);
+    console.log(`[Scraper stdout][${sessionId}]: ${text.trim()}`);
     scrapeState.progress += text;
+    saveSessionSnapshot(scrapeState);
   });
 
   pythonProcess.stderr.on('data', (data) => {
-    console.error(`[Scraper Log]: ${data}`);
+    const text = data.toString();
+    console.error(`[Scraper stderr][${sessionId}]: ${text.trim()}`);
+    scrapeState.progress += `[stderr] ${text}`;
+    saveSessionSnapshot(scrapeState);
   });
 
-  pythonProcess.on('close', (code) => {
+  pythonProcess.on('close', (code, signal) => {
     scrapeState.running = false;
-    
+    scrapeState.finishedAt = new Date().toISOString();
+
     if (code !== 0) {
-      scrapeState.error = `Tiến trình cào thoát với mã lỗi ${code}`;
-      scrapeState.progress += `\nThất bại.`;
-      if (!res.headersSent) {
-        return res.status(500).json({ error: scrapeState.error, progress: scrapeState.progress });
-      }
-    } else {
-      scrapeState.progress += `\nHoàn thành cào dữ liệu thành công.`;
-      if (!res.headersSent) {
-        if (existsSync(outputPath)) {
-          try {
-            let results = JSON.parse(readFileSync(outputPath, 'utf8'));
-            if (!Array.isArray(results) || results.length === 0) {
-              // Luôn lọc kết quả thông minh chuẩn xác theo đúng từ khóa người dùng yêu cầu
-              const cleanKeywords = kwList.map(k => String(k).trim().toLowerCase()).filter(Boolean);
-              if (cleanKeywords.length > 0 && Array.isArray(results) && results.length > 0) {
-                const limitPerKw = Math.max(1, Math.ceil(numLimit / cleanKeywords.length));
-                const selected = [];
-                const seenIds = new Set();
+      const reason = signal === 'SIGTERM'
+        ? `Tiến trình cào vượt quá giới hạn ${Math.round(SCRAPE_TIMEOUT_MS / 1000)} giây.`
+        : `Tiến trình cào thoát với mã lỗi ${code}.`;
+      scrapeState.status = 'failed';
+      scrapeState.error = reason;
+      scrapeState.message = reason;
+      scrapeState.results = [];
+      scrapeState.count = 0;
+      scrapeState.progress += `\n[ERROR] ${reason}`;
+      saveSessionSnapshot(scrapeState);
+      return;
+    }
 
-                for (const rawKw of cleanKeywords) {
-                  const kwWords = rawKw.split(/\s+/).filter(w => w.length > 1);
-                  // Tier 1: Khớp chuỗi chính xác
-                  let matches = results.filter(item => {
-                    const id = item.id || item.shopee_id;
-                    if (seenIds.has(id)) return false;
-                    const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
-                    return text.includes(rawKw);
-                  });
-                  // Tier 2: Khớp tất cả các từ
-                  if (matches.length === 0 && kwWords.length > 0) {
-                    matches = results.filter(item => {
-                      const id = item.id || item.shopee_id;
-                      if (seenIds.has(id)) return false;
-                      const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
-                      return kwWords.every(w => text.includes(w));
-                    });
-                  }
-                  // Tier 3: Khớp từ khóa quan trọng
-                  if (matches.length === 0 && kwWords.length > 0) {
-                    const stopWords = new Set(['cho', 'và', 'của', 'các', 'loại', 'mẫu', 'decor', 'phòng', 'ngủ']);
-                    const majorWords = kwWords.filter(w => !stopWords.has(w));
-                    const targetWords = majorWords.length > 0 ? majorWords : kwWords;
-                    matches = results.filter(item => {
-                      const id = item.id || item.shopee_id;
-                      if (seenIds.has(id)) return false;
-                      const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
-                      return targetWords.some(w => text.includes(w));
-                    });
-                  }
-                  for (const it of matches.slice(0, limitPerKw)) {
-                    selected.push({ ...it, keyword: rawKw });
-                    seenIds.add(it.id || it.shopee_id);
-                  }
-                }
-                if (selected.length < numLimit) {
-                  for (const it of results) {
-                    if (selected.length >= numLimit) break;
-                    const id = it.id || it.shopee_id;
-                    if (!seenIds.has(id)) {
-                      selected.push(it);
-                      seenIds.add(id);
-                    }
-                  }
-                }
-                results = selected.slice(0, numLimit);
-              }
-            }
+    if (!existsSync(outputPath)) {
+      scrapeState.status = 'failed';
+      scrapeState.error = 'Không tìm thấy file kết quả sau khi cào.';
+      scrapeState.message = scrapeState.error;
+      scrapeState.results = [];
+      scrapeState.count = 0;
+      saveSessionSnapshot(scrapeState);
+      return;
+    }
 
-            // Trả về cả products và results để tương thích tuyệt đối mọi giao diện
-            return res.json({ 
-              success: true, 
-              count: Array.isArray(results) ? results.length : 0,
-              products: results,
-              results: results 
-            });
-          } catch (e) {
-            return res.status(500).json({ error: 'Không thể đọc file kết quả JSON của scraper' });
-          }
-        } else {
-          return res.status(500).json({ error: 'Không tìm thấy file kết quả sau khi cào' });
-        }
+    try {
+      const rawContent = JSON.parse(readFileSync(outputPath, 'utf8'));
+
+      // Xác thực đúng file kết quả thuộc phiên cào hiện tại (ngăn đọc nhầm dữ liệu cũ)
+      if (!rawContent || Array.isArray(rawContent) || rawContent.sessionId !== sessionId) {
+        scrapeState.status = 'failed';
+        scrapeState.noNewData = true;
+        scrapeState.error = 'File kết quả không thuộc phiên cào hiện tại — bỏ qua dữ liệu cũ để tránh hiển thị sai.';
+        scrapeState.message = scrapeState.error;
+        scrapeState.results = [];
+        scrapeState.count = 0;
+        saveSessionSnapshot(scrapeState);
+        return;
       }
+
+      if (rawContent.provider) {
+        scrapeState.provider = rawContent.provider;
+      }
+
+      if (rawContent.status === 'config_required' || rawContent.status === 'failed') {
+        scrapeState.status = rawContent.status;
+        scrapeState.configRequired = Boolean(rawContent.configRequired);
+        scrapeState.noNewData = true;
+        scrapeState.error = rawContent.message || 'Phiên cào Shopee qua Scraping API thất bại.';
+        scrapeState.message = scrapeState.error;
+        scrapeState.results = [];
+        scrapeState.count = 0;
+        scrapeState.progress += `\n[ERROR] ${scrapeState.message}`;
+        saveSessionSnapshot(scrapeState);
+        return;
+      }
+
+      const rawProducts = Array.isArray(rawContent.products) ? rawContent.products : [];
+      // Áp dụng bộ lọc chuẩn xác trên dữ liệu vừa cào (NGOÀI điều kiện kiểm tra rỗng)
+      const filteredResults = rawProducts.length > 0
+        ? filterShopeeCatalog(rawProducts, kwList, numLimit)
+        : [];
+
+      if (filteredResults.length === 0) {
+        scrapeState.status = rawContent.status === 'blocked' ? 'blocked' : 'empty';
+        scrapeState.noNewData = true;
+        scrapeState.results = [];
+        scrapeState.count = 0;
+        scrapeState.message = rawContent.message
+          || `Không tìm thấy sản phẩm mới nào khớp với từ khóa "${kwList.join(', ')}" trong phiên này.`;
+        scrapeState.error = null;
+        scrapeState.progress += `\n[DONE] ${scrapeState.message}`;
+      } else {
+        scrapeState.status = 'completed';
+        scrapeState.noNewData = false;
+        scrapeState.results = filteredResults;
+        scrapeState.count = filteredResults.length;
+        scrapeState.error = null;
+        scrapeState.message = `Đã cào và lọc thành công ${filteredResults.length} sản phẩm khớp từ khóa từ Shopee.`;
+        scrapeState.progress += `\n[DONE] ${scrapeState.message}`;
+      }
+      saveSessionSnapshot(scrapeState);
+    } catch (e) {
+      scrapeState.status = 'failed';
+      scrapeState.error = `Không thể đọc kết quả JSON của scraper: ${e.message}`;
+      scrapeState.message = scrapeState.error;
+      scrapeState.results = [];
+      scrapeState.count = 0;
+      saveSessionSnapshot(scrapeState);
     }
   });
 
   pythonProcess.on('error', (err) => {
     scrapeState.running = false;
-    scrapeState.error = `Không thể khởi chạy tiến trình Python: ${err.message}`;
-    if (!res.headersSent) {
-      return res.status(500).json({ error: scrapeState.error });
-    }
+    scrapeState.finishedAt = new Date().toISOString();
+    scrapeState.status = 'failed';
+    scrapeState.error = `Không thể khởi chạy tiến trình Python (${PYTHON_BIN}): ${err.message}`;
+    scrapeState.message = scrapeState.error;
+    scrapeState.results = [];
+    scrapeState.count = 0;
+    saveSessionSnapshot(scrapeState);
+  });
+
+  return res.status(202).json({
+    started: true,
+    sessionId,
+    status: 'running',
+    requestedKeywords: kwList,
+    limit: numLimit
   });
 });
 
@@ -899,20 +1311,166 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
   });
 });
 
-// GET scraping status
+// GET scraping status by sessionId (or latest session state in memory — never stale disk leakage)
 app.get('/api/shopee/status', (req, res) => {
-  let results = null;
-  const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
-  
-  if (!scrapeState.running && existsSync(outputPath)) {
-    try {
-      results = JSON.parse(readFileSync(outputPath, 'utf8'));
-    } catch (e) {
-      // Ignored
+  const requestedSessionId = req.query.sessionId ? String(req.query.sessionId).trim() : '';
+
+  if (requestedSessionId) {
+    if (scrapeState.sessionId === requestedSessionId) {
+      return res.json(scrapeState);
     }
+    const found = scrapeSessions.get(requestedSessionId);
+    if (found) {
+      return res.json(found);
+    }
+    return res.status(404).json({
+      error: 'Không tìm thấy phiên cào này trên máy chủ.',
+      sessionId: requestedSessionId
+    });
   }
 
-  res.json({ ...scrapeState, results });
+  return res.json(scrapeState);
+});
+
+function getShopeeCookieMetadata() {
+  if (!existsSync(SHOPEE_COOKIE_PATH)) {
+    return {
+      hasCookie: false,
+      cookieCount: 0,
+      hasAuthToken: false,
+      updatedAt: null,
+      ageHours: null
+    };
+  }
+
+  try {
+    const raw = readFileSync(SHOPEE_COOKIE_PATH, 'utf8');
+    const parsed = normalizeShopeeCookieHeader(raw);
+    const stats = statSync(SHOPEE_COOKIE_PATH);
+    const updatedAt = stats.mtime.toISOString();
+    const ageHours = Math.max(0, Math.round(((Date.now() - stats.mtimeMs) / 36e5) * 10) / 10);
+
+    return {
+      hasCookie: Boolean(parsed.ok && parsed.cookieCount > 0),
+      cookieCount: parsed.cookieCount,
+      hasAuthToken: Boolean(parsed.hasAuthToken),
+      updatedAt,
+      ageHours
+    };
+  } catch {
+    return {
+      hasCookie: false,
+      cookieCount: 0,
+      hasAuthToken: false,
+      updatedAt: null,
+      ageHours: null
+    };
+  }
+}
+
+// GET cookie metadata ONLY (Admin only — never exposes raw cookie string or tokens)
+app.get('/api/shopee/cookie-status', requireRole('admin'), (req, res) => {
+  return res.json(getShopeeCookieMetadata());
+});
+
+// PUT fresh Shopee cookie obtained by Admin after verifying in their own browser
+app.put('/api/shopee/cookie', requireRole('admin'), (req, res) => {
+  const { cookie } = req.body || {};
+  const parsed = normalizeShopeeCookieHeader(cookie);
+
+  if (!parsed.ok) {
+    return res.status(400).json({ error: parsed.error || 'Chuỗi cookie không hợp lệ.' });
+  }
+
+  try {
+    writeFileSync(SHOPEE_COOKIE_PATH, parsed.normalizedHeader, 'utf8');
+    const stats = statSync(SHOPEE_COOKIE_PATH);
+    const updatedAt = stats.mtime.toISOString();
+
+    db.logAudit(
+      req.user?.id || 'admin',
+      req.user?.name || 'Admin',
+      req.user?.role || 'admin',
+      'SHOPEE_COOKIE_UPDATE',
+      'shopee_cookie.txt',
+      `Cập nhật cookie phiên Shopee (${parsed.cookieCount} cookie · ${parsed.hasAuthToken ? 'có token đăng nhập SPC' : 'chưa thấy SPC_ST'})`
+    );
+
+    return res.json({
+      ok: true,
+      hasCookie: true,
+      cookieCount: parsed.cookieCount,
+      hasAuthToken: parsed.hasAuthToken,
+      updatedAt,
+      ageHours: 0
+    });
+  } catch (err) {
+    return res.status(500).json({ error: `Không thể ghi file cookie trên máy chủ: ${err.message}` });
+  }
+});
+
+// GET Scraping API config metadata ONLY (Admin only — never exposes plaintext API keys)
+app.get('/api/shopee/scraper-config', requireRole('admin'), (req, res) => {
+  return res.json(getEffectiveScraperConfig().publicMeta);
+});
+
+// PUT Scraping API provider / API key runtime config (saved to gitignored local file)
+app.put('/api/shopee/scraper-config', requireRole('admin'), (req, res) => {
+  const { provider = 'auto', apiKey, clearKey = false } = req.body || {};
+  const normalizedProv = String(provider || 'auto').trim().toLowerCase();
+
+  if (!['auto', ...SCRAPING_PROVIDERS].includes(normalizedProv)) {
+    return res.status(400).json({ error: 'Nhà cung cấp Scraping API không hợp lệ (hỗ trợ: auto, zenrows, scraperapi, crawlbase).' });
+  }
+
+  const currentLocal = loadLocalScraperOverride();
+  const nextKeys = { ...(currentLocal.keys || {}) };
+
+  if (clearKey) {
+    if (normalizedProv === 'auto') {
+      SCRAPING_PROVIDERS.forEach(p => { delete nextKeys[p]; });
+    } else {
+      delete nextKeys[normalizedProv];
+    }
+  } else if (typeof apiKey === 'string' && apiKey.trim().length > 0) {
+    if (normalizedProv === 'auto') {
+      return res.status(400).json({ error: 'Vui lòng chọn cụ thể ZenRows, ScraperAPI hoặc Crawlbase trước khi lưu API Key.' });
+    }
+    const cleanedKey = apiKey.trim();
+    if (cleanedKey.length < 8 || /\s/.test(cleanedKey)) {
+      return res.status(400).json({ error: 'API Key không hợp lệ (cần tối thiểu 8 ký tự và không chứa khoảng trắng).' });
+    }
+    nextKeys[normalizedProv] = cleanedKey;
+  }
+
+  const nextPayload = {
+    selectedProvider: normalizedProv,
+    keys: nextKeys,
+    updatedAt: new Date().toISOString()
+  };
+
+  try {
+    mkdirSync(dirname(SCRAPER_CONFIG_LOCAL_PATH), { recursive: true });
+    writeFileSync(SCRAPER_CONFIG_LOCAL_PATH, JSON.stringify(nextPayload, null, 2), 'utf8');
+
+    const effective = getEffectiveScraperConfig();
+    const provMeta = normalizedProv !== 'auto' ? effective.publicMeta.providers[normalizedProv] : null;
+    db.logAudit(
+      req.user?.id || 'admin',
+      req.user?.name || 'Admin',
+      req.user?.role || 'admin',
+      'SHOPEE_SCRAPER_CONFIG',
+      'scraper_config.local.json',
+      `Cập nhật Scraping API (${normalizedProv.toUpperCase()}${provMeta?.keyMasked ? ` · ${provMeta.keyMasked}` : ''})`
+    );
+
+    return res.json({
+      ok: true,
+      ...effective.publicMeta
+    });
+  } catch (err) {
+    return res.status(500).json({ error: `Không thể lưu cấu hình Scraping API: ${err.message}` });
+  }
 });
 
 // Health check
@@ -920,6 +1478,10 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     timestamp: new Date().toISOString(),
+    scrapingOptionB: {
+      configured: getEffectiveScraperConfig().configured,
+      activeProvider: getEffectiveScraperConfig().activeProvider
+    },
     collections: {
       users: db.get('users').length,
       products: db.get('products').length,
@@ -929,6 +1491,11 @@ app.get('/api/health', (req, res) => {
     }
   });
 });
+
+// Serve runtime downloaded product images (e.g. /products/shopee_live/*.webp) BEFORE dist catch-all
+const PUBLIC_PRODUCTS_PATH = join(PROJECT_ROOT, 'public', 'products');
+mkdirSync(PUBLIC_PRODUCTS_PATH, { recursive: true });
+app.use('/products', express.static(PUBLIC_PRODUCTS_PATH));
 
 // Serve static frontend build if dist exists (hỗ trợ deploy 24/7 trên Render / Cloud Server)
 const DIST_PATH = join(PROJECT_ROOT, 'dist');

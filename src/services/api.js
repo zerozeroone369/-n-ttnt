@@ -1,53 +1,80 @@
-const API_BASE = '/api';
+const DEFAULT_RENDER_BACKEND_ORIGIN = 'https://n-ttnt.onrender.com';
+
+export function resolveApiBase(
+  rawBase,
+  hostname = (typeof window !== 'undefined' ? window.location?.hostname : '')
+) {
+  const cleaned = String(rawBase || '').trim().replace(/\/+$/, '');
+  if (!cleaned) {
+    if (hostname && /\.vercel\.app$/i.test(hostname)) {
+      return `${DEFAULT_RENDER_BACKEND_ORIGIN}/api`;
+    }
+    return '/api';
+  }
+  if (/^https?:\/\//i.test(cleaned)) {
+    return cleaned.toLowerCase().endsWith('/api') ? cleaned : `${cleaned}/api`;
+  }
+  return cleaned.startsWith('/') ? cleaned : `/${cleaned}`;
+}
+
+export function resolveBackendOrigin(apiBase = API_BASE) {
+  const match = String(apiBase || '').match(/^(https?:\/\/[^/]+)/i);
+  return match ? match[1] : '';
+}
+
+export const API_BASE = resolveApiBase(import.meta.env?.VITE_API_BASE);
+export const BACKEND_ORIGIN = resolveBackendOrigin(API_BASE);
+
+export function resolveMediaUrl(url, origin = BACKEND_ORIGIN) {
+  if (!url || typeof url !== 'string') return '/placeholder.svg';
+  const trimmed = url.trim();
+  if (!trimmed) return '/placeholder.svg';
+  if (origin && trimmed.startsWith('/products/shopee_live/')) {
+    return `${origin}${trimmed}`;
+  }
+  return trimmed;
+}
+
 const TOKEN_KEY = 'boutique_auth_token';
 const USER_KEY = 'boutique_auth_user';
-const LOCAL_USERS_KEY = 'boutique_local_users';
+const LEGACY_LOCAL_USERS_KEY = 'boutique_local_users';
 
-const DEFAULT_DEMO_USERS = [
-  {
-    id: 'usr_admin',
+export const IS_DEMO_MODE_ALLOWED = Boolean(
+  import.meta.env?.DEV || import.meta.env?.VITE_ENABLE_DEMO_AUTH === 'true'
+);
+
+const DEMO_OFFLINE_PROFILES = {
+  admin: {
+    id: 'demo_offline_admin',
     email: 'admin@tiemnhanho.vn',
-    password: 'admin123',
-    name: 'Chủ Tiệm (Admin)',
+    name: 'Chủ Tiệm (Demo Offline)',
     phone: '0982 123 456',
     address: '48 Ngõ 12 Đặng Thai Mai, Tây Hồ',
     city: 'Hà Nội',
-    role: 'admin'
+    role: 'admin',
+    isOfflineDemo: true
   },
-  {
-    id: 'usr_staff',
+  staff: {
+    id: 'demo_offline_staff',
     email: 'staff@tiemnhanho.vn',
-    password: 'staff123',
-    name: 'Lan Nguyễn (Kho & Đóng Gói)',
+    name: 'Nhân Viên (Demo Offline)',
     phone: '0978 889 990',
     address: 'Kho Đóng Gói Bát Tràng',
     city: 'Hà Nội',
-    role: 'staff'
+    role: 'staff',
+    isOfflineDemo: true
   },
-  {
-    id: 'usr_customer',
+  customer: {
+    id: 'demo_offline_customer',
     email: 'khachhang@gmail.com',
-    password: 'khach123',
-    name: 'Mai Phương (Khách Thân Thiết)',
+    name: 'Khách Mua (Demo Offline)',
     phone: '0912 345 678',
     address: 'Số 15 Phố Huế, Hoàn Kiếm',
     city: 'Hà Nội',
-    role: 'customer'
+    role: 'customer',
+    isOfflineDemo: true
   }
-];
-
-function getLocalUsers() {
-  try {
-    const raw = localStorage.getItem(LOCAL_USERS_KEY);
-    if (!raw) {
-      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(DEFAULT_DEMO_USERS));
-      return DEFAULT_DEMO_USERS;
-    }
-    return JSON.parse(raw);
-  } catch {
-    return DEFAULT_DEMO_USERS;
-  }
-}
+};
 
 async function request(endpoint, options = {}) {
   const token = localStorage.getItem(TOKEN_KEY);
@@ -57,22 +84,37 @@ async function request(endpoint, options = {}) {
     ...options.headers
   };
 
+  let response;
   try {
-    const response = await fetch(`${API_BASE}${endpoint}`, {
+    response = await fetch(`${API_BASE}${endpoint}`, {
       ...options,
       headers
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.error || `Request failed with status ${response.status}`);
-    }
-
-    return await response.json();
-  } catch (error) {
-    console.warn(`[API Client] ${endpoint} error:`, error.message);
-    throw error;
+  } catch (networkErr) {
+    const err = new Error('Không thể kết nối tới máy chủ backend.');
+    err.isNetworkError = true;
+    err.cause = networkErr;
+    throw err;
   }
+
+  const contentType = response.headers.get('content-type') || '';
+  if (!response.ok) {
+    const errorData = contentType.includes('application/json')
+      ? await response.json().catch(() => ({}))
+      : {};
+    const err = new Error(errorData.error || `Request failed with status ${response.status}`);
+    err.status = response.status;
+    err.data = errorData;
+    throw err;
+  }
+
+  if (!contentType.includes('application/json')) {
+    const err = new Error('Phản hồi từ máy chủ không phải định dạng JSON hợp lệ (có thể backend chưa chạy).');
+    err.isInvalidContentType = true;
+    throw err;
+  }
+
+  return await response.json();
 }
 
 export const ApiClient = {
@@ -105,144 +147,93 @@ export const ApiClient = {
       }
     },
 
+    clearLocalSession() {
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.removeItem(USER_KEY);
+      localStorage.removeItem(LEGACY_LOCAL_USERS_KEY);
+    },
+
     async register(userData) {
-      if (await ApiClient.isServerOnline()) {
-        try {
-          const data = await request('/auth/register', {
-            method: 'POST',
-            body: JSON.stringify(userData)
-          });
-          if (data.token && data.user) {
-            localStorage.setItem(TOKEN_KEY, data.token);
-            localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-          }
-          return data;
-        } catch (err) {
-          // Nếu server lỗi hoặc không hỗ trợ POST (như Vercel static 405), chuyển sang fallback 24/7
-          const isNetworkOrStaticError = !err.message || 
-            err.message.includes('405') || 
-            err.message.includes('404') || 
-            err.message.includes('50') || 
-            err.message.includes('Failed to fetch') ||
-            err.message.includes('NetworkError');
-          
-          if (!isNetworkOrStaticError) {
-            throw err;
-          }
-        }
+      if (!(await ApiClient.isServerOnline())) {
+        const err = new Error(
+          'Máy chủ xác thực hiện không phản hồi hoặc đang chạy web tĩnh. Không thể đăng ký tài khoản thật lên hệ thống.'
+        );
+        err.isBackendOffline = true;
+        throw err;
       }
 
-      // Offline / Vercel fallback
-      const users = getLocalUsers();
-      const normEmail = (userData.email || '').trim().toLowerCase();
-      if (users.some(u => u.email.toLowerCase() === normEmail)) {
-        throw new Error('Email này đã được đăng ký tài khoản.');
+      const data = await request('/auth/register', {
+        method: 'POST',
+        body: JSON.stringify(userData)
+      });
+
+      if (!data?.token || !data?.user) {
+        throw new Error('Máy chủ không cấp được phiên đăng nhập hợp lệ sau khi đăng ký.');
       }
 
-      const newUser = {
-        id: `usr_${Date.now()}`,
-        email: normEmail,
-        password: userData.password,
-        name: userData.name?.trim() || 'Khách hàng',
-        phone: userData.phone?.trim() || '',
-        address: userData.address?.trim() || '',
-        city: userData.city?.trim() || 'Hà Nội',
-        role: 'customer'
-      };
-
-      users.push(newUser);
-      localStorage.setItem(LOCAL_USERS_KEY, JSON.stringify(users));
-
-      const sessionUser = {
-        id: newUser.id,
-        email: newUser.email,
-        name: newUser.name,
-        role: newUser.role,
-        phone: newUser.phone,
-        address: newUser.address,
-        city: newUser.city
-      };
-      const token = `local_token_${Date.now()}`;
-      localStorage.setItem(TOKEN_KEY, token);
-      localStorage.setItem(USER_KEY, JSON.stringify(sessionUser));
-
-      return {
-        token,
-        user: sessionUser,
-        message: 'Đăng ký thành công'
-      };
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      return data;
     },
 
     async login(email, password) {
-      if (await ApiClient.isServerOnline()) {
-        try {
-          const data = await request('/auth/login', {
-            method: 'POST',
-            body: JSON.stringify({ email, password })
-          });
-          if (data.token && data.user) {
-            localStorage.setItem(TOKEN_KEY, data.token);
-            localStorage.setItem(USER_KEY, JSON.stringify(data.user));
-          }
-          return data;
-        } catch (err) {
-          // Nếu server lỗi hoặc không hỗ trợ POST (như Vercel static 405), chuyển sang fallback 24/7
-          const isNetworkOrStaticError = !err.message || 
-            err.message.includes('405') || 
-            err.message.includes('404') || 
-            err.message.includes('50') || 
-            err.message.includes('Failed to fetch') ||
-            err.message.includes('NetworkError');
-          
-          if (!isNetworkOrStaticError) {
-            throw err;
-          }
-        }
+      if (!(await ApiClient.isServerOnline())) {
+        const err = new Error(
+          'Không kết nối được máy chủ xác thực. Vui lòng bật backend server để đăng nhập tài khoản thật.'
+        );
+        err.isBackendOffline = true;
+        throw err;
       }
 
-      // Chế độ Cloud 24/7 (Vercel) / Offline fallback
-      const users = getLocalUsers();
-      const normEmail = (email || '').trim().toLowerCase();
-      const user = users.find(u => u.email.toLowerCase() === normEmail);
+      const data = await request('/auth/login', {
+        method: 'POST',
+        body: JSON.stringify({ email, password })
+      });
 
-      if (!user || user.password !== password) {
-        throw new Error('Email hoặc mật khẩu không chính xác.');
+      if (!data?.token || !data?.user) {
+        throw new Error('Phản hồi đăng nhập từ máy chủ không hợp lệ.');
       }
 
-      const sessionUser = {
-        id: user.id,
-        email: user.email,
-        name: user.name,
-        role: user.role,
-        phone: user.phone || '',
-        address: user.address || '',
-        city: user.city || ''
-      };
-      const token = `local_token_${Date.now()}`;
-      localStorage.setItem(TOKEN_KEY, token);
-      localStorage.setItem(USER_KEY, JSON.stringify(sessionUser));
+      localStorage.setItem(TOKEN_KEY, data.token);
+      localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      return data;
+    },
 
-      return {
-        token,
-        user: sessionUser,
-        message: 'Đăng nhập thành công'
-      };
+    enterOfflineDemoSession(role = 'customer') {
+      if (!IS_DEMO_MODE_ALLOWED) {
+        throw new Error('Chế độ Demo Offline không được bật trong môi trường production.');
+      }
+      const profile = DEMO_OFFLINE_PROFILES[role] || DEMO_OFFLINE_PROFILES.customer;
+      localStorage.removeItem(TOKEN_KEY);
+      localStorage.setItem(USER_KEY, JSON.stringify(profile));
+      return { token: null, user: profile, isOfflineDemo: true };
     },
 
     async me() {
-      const data = await request('/auth/me');
-      if (data.user) {
-        localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+      try {
+        const data = await request('/auth/me');
+        if (data?.user) {
+          localStorage.setItem(USER_KEY, JSON.stringify(data.user));
+        }
+        return data.user;
+      } catch (err) {
+        if (err.status === 401) {
+          ApiClient.auth.clearLocalSession();
+        }
+        throw err;
       }
-      return data.user;
     },
 
     async logout() {
-      try {
-        await request('/auth/logout', { method: 'POST' });
-      } catch {}
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(USER_KEY);
+      const token = localStorage.getItem(TOKEN_KEY);
+      if (token) {
+        try {
+          await request('/auth/logout', { method: 'POST' });
+        } catch {
+          // Best-effort server logout
+        }
+      }
+      ApiClient.auth.clearLocalSession();
     }
   },
 
@@ -278,6 +269,12 @@ export const ApiClient = {
     getAll: () => request('/audit-logs')
   },
 
+  // AI Chat Status & Testing
+  chat: {
+    getStatus: () => request('/chat/status'),
+    testConnection: () => request('/chat/test', { method: 'POST' })
+  },
+
   // Helper for auth headers
   _authHeaders() {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -286,32 +283,46 @@ export const ApiClient = {
 
   // Shopee Scraper & Sync
   shopee: {
-    scrape: (keywords = [], limit = 20) => request('/shopee/scrape', {
+    scrape: (keywords = [], limit = 20, provider = '') => request('/shopee/scrape', {
       method: 'POST',
-      body: JSON.stringify({ keywords, limit })
+      body: JSON.stringify({
+        keywords,
+        limit,
+        ...(provider ? { provider } : {})
+      })
     }),
     importProducts: (products) => request('/shopee/import', {
       method: 'POST',
       body: JSON.stringify({ products })
     }),
-    getStatus: async () => {
+    getStatus: (sessionId = '') => {
+      const qs = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : '';
+      return request(`/shopee/status${qs}`);
+    },
+    getScraperConfig: () => request('/shopee/scraper-config'),
+    updateScraperConfig: (payload) => request('/shopee/scraper-config', {
+      method: 'PUT',
+      body: JSON.stringify(payload || {})
+    }),
+    getCookieStatus: () => request('/shopee/cookie-status'),
+    updateCookie: (cookie) => request('/shopee/cookie', {
+      method: 'PUT',
+      body: JSON.stringify({ cookie })
+    }),
+    async getStaticSnapshot() {
       try {
-        const res = await fetch('/api/shopee/status');
-        const contentType = res.headers.get('content-type') || '';
-        if (res.ok && contentType.includes('application/json')) {
-          return await res.json();
-        }
-      } catch {}
-      // Fallback nạp dữ liệu cào thật đã đóng gói cho Vercel Cloud tĩnh
-      try {
-        const staticRes = await fetch('/shopee_scraped.json');
+        const staticRes = await fetch('/shopee_scraped.json', { cache: 'no-cache' });
         if (staticRes.ok) {
-          const results = await staticRes.json();
-          return { running: false, progress: 'Nạp dữ liệu Shopee đóng gói', results };
+          const parsed = await staticRes.json();
+          const results = Array.isArray(parsed)
+            ? parsed
+            : (Array.isArray(parsed?.products) ? parsed.products : []);
+          return { mode: 'static_snapshot', results };
         }
-      } catch {}
-      return { running: false, results: [] };
+      } catch {
+        // Ignored
+      }
+      return { mode: 'static_snapshot', results: [] };
     }
   }
 };
-

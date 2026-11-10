@@ -5,6 +5,9 @@ dist/
 *.env.production
 
 # Scraper & security sensitive files
+server/data/sessions.json
+server/data/*.tmp
+server/data/*.local.json
 shopee_profile/
 tools/edge_profile/
 *cookie*.txt
@@ -14,6 +17,7 @@ debug*.json
 raw_*.json
 shopee_scraped.json
 shopee_parsed.json
+shopee_test*.json
 *.log
 __pycache__/
 *.pyc
@@ -22,3 +26,4 @@ tools/test_*.py
 # Backup and office docs
 TIEM_NHA_NHO_ECOMMERCE_AI/
 *.docx
+scratch/

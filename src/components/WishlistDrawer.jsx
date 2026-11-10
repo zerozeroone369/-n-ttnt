@@ -1,6 +1,7 @@
 import React from 'react';
 import { X, Heart, ShoppingBag, Trash2, ArrowRight } from 'lucide-react';
 import { formatCurrency } from '../services/aiChatEngine';
+import { resolveMediaUrl } from '../services/api';
 
 export default function WishlistDrawer({
   isOpen,
@@ -67,13 +68,18 @@ export default function WishlistDrawer({
                 >
                   {/* Thumbnail */}
                   <img
-                    src={product.images[0]}
+                    src={resolveMediaUrl(product.images?.[0])}
                     alt={product.name}
                     onClick={() => {
                       onSelectProduct(product);
                       onClose();
                     }}
                     className="w-20 h-20 rounded-xl object-cover bg-white cursor-pointer hover:scale-105 transition-transform flex-shrink-0"
+                    onError={(e) => {
+                      const fallback = product.images?.[1];
+                      if (fallback && e.target.src !== fallback) e.target.src = fallback;
+                      else e.target.src = '/placeholder.svg';
+                    }}
                   />
 
                   {/* Info */}

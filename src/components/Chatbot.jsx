@@ -1,16 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
-  Bot, Send, X, Sparkles, ShoppingBag, Eye, RotateCcw, ChevronDown, Check, 
-  MessageSquare, Flame, Gift, Package, Truck, Tag, Phone, ExternalLink, Ruler, 
-  ArrowRight, Settings, Key, Compass, ShoppingCart, ShieldCheck, HeartHandshake, 
-  CheckCircle2, AlertCircle, Plus, Minus, QrCode, CreditCard, ChevronRight, User, MapPin, Star
+  Bot, Send, X, Sparkles, ShoppingBag, Eye, RotateCcw, Check, 
+  Package, Truck, Tag, Phone, ExternalLink, Settings, Compass, ShoppingCart, 
+  ShieldCheck, CheckCircle2, AlertCircle, Plus, Minus, QrCode, ChevronRight, User, RefreshCw, Brain
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 import { 
   AIChatEngine, formatCurrency, NEED_ANALYSIS_STEPS, 
-    NeedAnalysisEngine, OrderingAssistantEngine, CustomerCareEngine, isProductInStock 
+    NeedAnalysisEngine, OrderingAssistantEngine, isProductInStock 
 } from '../services/aiChatEngine.js';
 import { StorageService } from '../services/storage.js';
+import { ApiClient, resolveMediaUrl } from '../services/api.js';
 import { STORE_INFO } from '../data/initialData.js';
 
 export default function Chatbot({
@@ -51,10 +51,28 @@ export default function Chatbot({
   // Settings & Gemini Config Panel
   const [showConfig, setShowConfig] = useState(false);
   const [chatSettings, setChatSettings] = useState(() => StorageService.getSettings());
-  const [apiKeyInput, setApiKeyInput] = useState(() => StorageService.getSettings().apiKey || '');
+  const [geminiStatus, setGeminiStatus] = useState({
+    checked: false,
+    online: false,
+    configured: false,
+    model: '',
+    keyMasked: null
+  });
   const [savedSuccess, setSavedSuccess] = useState(false);
 
   const messagesEndRef = useRef(null);
+
+  const updateChatSettings = (patch, showNotice = false) => {
+    setChatSettings((prev) => {
+      const updated = { ...prev, ...patch };
+      StorageService.saveSettings(updated);
+      return updated;
+    });
+    if (showNotice) {
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 1500);
+    }
+  };
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -64,6 +82,57 @@ export default function Chatbot({
   useEffect(() => {
     scrollToBottom();
   }, [messages, isTyping, showConfig]);
+
+  // Query live backend Gemini status on mount / open / config toggle
+  useEffect(() => {
+    let active = true;
+    const syncGeminiStatus = async () => {
+      const online = await ApiClient.isServerOnline();
+      if (!active) return;
+      if (!online) {
+        setGeminiStatus({
+          checked: true,
+          online: false,
+          configured: false,
+          model: '',
+          keyMasked: null
+        });
+        return;
+      }
+
+      try {
+        const status = await ApiClient.chat.getStatus();
+        if (!active) return;
+        const configured = Boolean(status?.configured);
+        setGeminiStatus({
+          checked: true,
+          online: true,
+          configured,
+          model: status?.model || '',
+          keyMasked: status?.keyMasked || null
+        });
+
+        const latest = StorageService.getSettings();
+        if (configured && !latest.aiProviderExplicit && latest.aiProvider !== 'gemini') {
+          const autoUpdated = { ...latest, aiProvider: 'gemini' };
+          StorageService.saveSettings(autoUpdated);
+          setChatSettings(autoUpdated);
+        }
+      } catch {
+        if (!active) return;
+        setGeminiStatus({
+          checked: true,
+          online: true,
+          configured: false,
+          model: '',
+          keyMasked: null
+        });
+      }
+    };
+
+    syncGeminiStatus();
+    return () => { active = false; };
+  }, [isOpen, showConfig]);
 
   // Handle external query
   useEffect(() => {
@@ -78,27 +147,44 @@ export default function Chatbot({
     StorageService.saveChatHistory(messages);
   }, [messages]);
 
-  const handleSendMessage = async (textToSend) => {
-    const query = (textToSend || inputText).trim();
+  const handleSendMessage = async (textToSend, options = {}) => {
+    const query = (textToSend ?? inputText).trim();
     if (!query || isTyping) return;
 
-    // 1. Add user message
-    const userMsg = {
-      id: `user-${Date.now()}`,
-      sender: 'user',
-      text: query,
-      timestamp: new Date().toISOString()
-    };
+    const activeScope = options.scopeOverride || chatSettings.assistantScope || 'store';
 
-    setMessages((prev) => [...prev, userMsg]);
-    setInputText('');
+    // Build prior turn history before appending new user turn (avoid duplicating query on retry)
+    let baseHistory = messages;
+    if (options.excludeErrorMsgId) {
+      const errIdx = messages.findIndex(m => m.id === options.excludeErrorMsgId);
+      if (errIdx > -1) {
+        const prevIdx = errIdx - 1;
+        const cutIdx = prevIdx >= 0 && messages[prevIdx]?.sender === 'user' ? prevIdx : errIdx;
+        baseHistory = messages.slice(0, cutIdx);
+      }
+    }
+
+    // 1. Add user message unless explicitly retrying a prior user message
+    if (!options.skipUserEcho) {
+      const userMsg = {
+        id: `user-${Date.now()}`,
+        sender: 'user',
+        text: query,
+        timestamp: new Date().toISOString()
+      };
+      setMessages((prev) => [...prev, userMsg]);
+      setInputText('');
+    }
     setIsTyping(true);
 
     // 2. Process with AI Engine
     try {
-      await new Promise((resolve) => setTimeout(resolve, 400));
-
-      const response = await AIChatEngine.processMessage(query, products, orders, currentUser);
+      const response = await AIChatEngine.processMessage(query, products, orders, currentUser, {
+        scope: activeScope,
+        history: baseHistory,
+        forceGemini: Boolean(options.forceGemini),
+        forceLocal: Boolean(options.forceLocal)
+      });
       const botMsgId = `bot-${Date.now()}`;
 
       const botMsg = {
@@ -111,6 +197,15 @@ export default function Chatbot({
         curatedProducts: response.curatedProducts || [],
         order: response.order || null,
         actionContact: response.actionContact || false,
+        engineUsed: response.engineUsed || (options.forceLocal ? 'local' : chatSettings.aiProvider),
+        model: response.model || null,
+        scope: response.scope || activeScope,
+        truncated: Boolean(response.truncated),
+        isGeminiError: Boolean(response.isGeminiError),
+        needsGemini: Boolean(response.needsGemini),
+        suggestGeneralMode: Boolean(response.suggestGeneralMode),
+        originalQuery: response.originalQuery || query,
+        errorStatus: response.errorStatus || null,
         timestamp: new Date().toISOString()
       };
 
@@ -129,20 +224,34 @@ export default function Chatbot({
         }));
       }
 
-      setMessages((prev) => [...prev, botMsg]);
+      setMessages((prev) => {
+        const cleaned = options.excludeErrorMsgId
+          ? prev.filter(m => m.id !== options.excludeErrorMsgId)
+          : prev;
+        return [...cleaned, botMsg];
+      });
     } catch (error) {
       console.error("AI Error:", error);
-      setMessages((prev) => [
-        ...prev,
-        {
-          id: `bot-${Date.now()}`,
-          sender: 'bot',
-          text: 'Dạ xin lỗi bạn, đường truyền của em đang bị gián đoạn chút xíu. Bạn thử gửi lại tin nhắn giúp em nhé!',
-          products: [],
-          vouchers: [],
-          timestamp: new Date().toISOString()
-        }
-      ]);
+      setMessages((prev) => {
+        const cleaned = options.excludeErrorMsgId
+          ? prev.filter(m => m.id !== options.excludeErrorMsgId)
+          : prev;
+        return [
+          ...cleaned,
+          {
+            id: `bot-${Date.now()}`,
+            sender: 'bot',
+            text: `⚠️ Có lỗi kết nối hoặc xử lý phản hồi: ${error.message || 'Vui lòng thử lại.'}`,
+            products: [],
+            vouchers: [],
+            isGeminiError: chatSettings.aiProvider === 'gemini' || Boolean(options.forceGemini),
+            engineUsed: 'gemini-error',
+            scope: activeScope,
+            originalQuery: query,
+            timestamp: new Date().toISOString()
+          }
+        ];
+      });
     } finally {
       setIsTyping(false);
     }
@@ -487,26 +596,11 @@ export default function Chatbot({
     setTimeout(() => setAppliedCouponCode(null), 2000);
   };
 
-  const handleSaveAISettings = (e) => {
-    e.preventDefault();
-    const updated = {
-      ...chatSettings,
-      apiKey: apiKeyInput.trim()
-    };
-    StorageService.saveSettings(updated);
-    setChatSettings(updated);
-    setSavedSuccess(true);
-    setTimeout(() => {
-      setSavedSuccess(false);
-      setShowConfig(false);
-    }, 1500);
-  };
-
   // Helper to format bot markdown text
   const renderFormattedText = (text) => {
-    const lines = text.split('\n');
+    const safeText = typeof text === 'string' ? text : String(text || '');
+    const lines = safeText.split('\n');
     return lines.map((line, idx) => {
-      let formattedLine = line;
       const parts = [];
       let lastIdx = 0;
 
@@ -591,11 +685,26 @@ export default function Chatbot({
                   <h3 className="font-bold text-sm text-stone-100">
                     Trợ Lý AI Tiệm Nhà Nhỏ
                   </h3>
-                  <span className="text-[10px] bg-emerald-950 text-emerald-300 font-semibold px-1.5 py-0.2 rounded border border-emerald-700">
-                    {chatSettings.aiProvider === 'gemini' ? 'Gemini AI' : 'AI Cục Bộ'}
-                  </span>
+                  <button
+                    type="button"
+                    onClick={() => setShowConfig(!showConfig)}
+                    className={`text-[10px] font-semibold px-1.5 py-0.2 rounded border transition-colors ${
+                      chatSettings.aiProvider === 'gemini'
+                        ? 'bg-emerald-950 text-emerald-300 border-emerald-700 hover:bg-emerald-900'
+                        : 'bg-amber-950 text-amber-200 border-amber-700 hover:bg-amber-900'
+                    }`}
+                    title="Bấm để đổi engine AI"
+                  >
+                    {chatSettings.aiProvider === 'gemini'
+                      ? (geminiStatus.model ? `Gemini · ${geminiStatus.model}` : 'Gemini AI')
+                      : 'AI Cục Bộ'}
+                  </button>
                 </div>
-                <p className="text-[11px] text-stone-400">Cố vấn kinh doanh, bán sỉ & sản phẩm chuyên sâu</p>
+                <p className="text-[11px] text-stone-400">
+                  {chatSettings.assistantScope === 'general'
+                    ? 'Trợ lý AI đa lĩnh vực · Suy luận chuyên sâu'
+                    : 'Tư vấn sản phẩm, bán sỉ B2B & tra cứu đơn hàng'}
+                </p>
               </div>
             </div>
 
@@ -626,25 +735,48 @@ export default function Chatbot({
             </div>
           </div>
 
+          {/* Scope Switcher Bar (Always 1-click accessible) */}
+          <div className="bg-stone-900/95 px-3 py-2 border-b border-stone-800 flex items-center gap-1.5 flex-shrink-0">
+            <button
+              type="button"
+              onClick={() => updateChatSettings({ assistantScope: 'store' })}
+              className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all ${
+                chatSettings.assistantScope !== 'general'
+                  ? 'bg-amber-600 text-white shadow-xs'
+                  : 'bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white'
+              }`}
+            >
+              <ShoppingBag className="w-3.5 h-3.5" />
+              <span>Tư vấn Cửa hàng</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => updateChatSettings({ assistantScope: 'general' })}
+              className={`flex-1 py-1.5 px-2.5 rounded-xl text-[11px] font-bold flex items-center justify-center gap-1.5 transition-all ${
+                chatSettings.assistantScope === 'general'
+                  ? 'bg-emerald-600 text-white shadow-xs'
+                  : 'bg-stone-800 text-stone-300 hover:bg-stone-700 hover:text-white'
+              }`}
+            >
+              <Brain className="w-3.5 h-3.5" />
+              <span>Trợ lý AI Tổng quát</span>
+            </button>
+          </div>
+
           {/* Collapsible AI Config Banner */}
           {showConfig && (
             <div className="bg-stone-800 text-stone-200 p-3.5 border-b border-stone-700 text-xs space-y-2.5 animate-fadeIn flex-shrink-0">
               <div className="flex items-center justify-between">
                 <span className="font-bold text-amber-300 flex items-center gap-1">
-                  <Sparkles className="w-3.5 h-3.5" /> Chế độ hoạt động của Chatbot AI
+                  <Sparkles className="w-3.5 h-3.5" /> Bộ máy phản hồi Chatbot AI
                 </span>
                 <button onClick={() => setShowConfig(false)} className="text-stone-400 hover:text-white text-xs">✕</button>
               </div>
 
               <div className="flex gap-2">
                 <button
-                  onClick={() => {
-                    const updated = { ...chatSettings, aiProvider: 'local' };
-                    StorageService.saveSettings(updated);
-                    setChatSettings(updated);
-                    setSavedSuccess(true);
-                    setTimeout(() => setSavedSuccess(false), 1500);
-                  }}
+                  type="button"
+                  onClick={() => updateChatSettings({ aiProvider: 'local', aiProviderExplicit: true }, true)}
                   className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11px] border transition-all ${
                     chatSettings.aiProvider === 'local'
                       ? 'bg-amber-700 text-white border-amber-600'
@@ -654,13 +786,8 @@ export default function Chatbot({
                   ⚡ AI Cục Bộ (Tức thì)
                 </button>
                 <button
-                  onClick={() => {
-                    const updated = { ...chatSettings, aiProvider: 'gemini' };
-                    StorageService.saveSettings(updated);
-                    setChatSettings(updated);
-                    setSavedSuccess(true);
-                    setTimeout(() => setSavedSuccess(false), 1500);
-                  }}
+                  type="button"
+                  onClick={() => updateChatSettings({ aiProvider: 'gemini', aiProviderExplicit: true }, true)}
                   className={`flex-1 py-1.5 px-2 rounded-lg font-semibold text-[11px] border transition-all ${
                     chatSettings.aiProvider === 'gemini'
                       ? 'bg-amber-700 text-white border-amber-600'
@@ -673,15 +800,27 @@ export default function Chatbot({
 
               {chatSettings.aiProvider === 'gemini' && (
                 <div className="p-2.5 bg-stone-900 rounded-lg border border-stone-700 text-[11px] text-stone-300 space-y-1">
-                  <p>🔒 <strong className="text-amber-300">API Key được giấu hoàn toàn trên server</strong> — không lộ ra trình duyệt.</p>
-                  <p className="text-stone-500">Model: <span className="text-emerald-400 font-mono">gemini-3.6-flash</span> · Key: <span className="text-emerald-400 font-mono">AQ.Ab8R...</span></p>
+                  <p>🔒 <strong className="text-amber-300">API Key được bảo vệ trên server</strong> — không lộ ra trình duyệt.</p>
+                  {!geminiStatus.checked ? (
+                    <p className="text-stone-400">Đang kiểm tra trạng thái kết nối Gemini...</p>
+                  ) : !geminiStatus.online ? (
+                    <p className="text-rose-300">⚠️ Backend server hiện offline — Gemini AI tạm thời không khả dụng (bạn có thể dùng AI Cục Bộ cho chế độ Cửa hàng).</p>
+                  ) : geminiStatus.configured ? (
+                    <p className="text-stone-400">
+                      Model: <span className="text-emerald-400 font-mono">{geminiStatus.model}</span> · Key: <span className="text-emerald-400 font-mono">{geminiStatus.keyMasked}</span>
+                    </p>
+                  ) : (
+                    <p className="text-amber-300">⚠️ Server chưa cấu hình GEMINI_API_KEY trong file .env.</p>
+                  )}
                 </div>
               )}
 
               {savedSuccess && <span className="text-emerald-400 text-[11px] font-bold block">✓ Đã lưu cài đặt!</span>}
 
               <p className="text-[10px] text-stone-400 leading-tight">
-                🛡️ Bot chỉ hỗ trợ tư vấn kinh doanh & sản phẩm — tự động từ chối các chủ đề ngoại lai.
+                {chatSettings.assistantScope === 'general'
+                  ? '🧠 Chế độ Tổng quát: Trả lời mọi chủ đề phức tạp (lập trình, toán, phân tích, đời sống...) kết hợp ngữ cảnh tiệm khi cần.'
+                  : '🛍️ Chế độ Cửa hàng: Tập trung tư vấn sản phẩm, size, bán sỉ B2B & tra cứu đơn — tự gợi ý chuyển Tổng quát khi hỏi ngoài lề.'}
               </p>
             </div>
           )}
@@ -789,11 +928,118 @@ export default function Chatbot({
                   <div
                     className={`max-w-[92%] p-3.5 rounded-2xl shadow-sm text-xs ${
                       isBot
-                        ? 'bg-white border border-stone-200/90 text-stone-800 rounded-tl-sm'
+                        ? msg.isGeminiError
+                          ? 'bg-rose-50/70 border border-rose-300 text-stone-800 rounded-tl-sm'
+                          : 'bg-white border border-stone-200/90 text-stone-800 rounded-tl-sm'
                         : 'bg-stone-900 text-white rounded-tr-sm shadow-stone-900/10'
                     }`}
                   >
                     {isBot ? renderFormattedText(msg.text) : <p className="leading-relaxed">{msg.text}</p>}
+
+                    {/* Truncation warning if Gemini hit MAX_TOKENS */}
+                    {isBot && msg.truncated && (
+                      <div className="mt-2 p-2 rounded-lg bg-amber-50 border border-amber-200 text-[10px] text-amber-900 font-medium">
+                        ⚠️ Câu trả lời dài đã chạm giới hạn hiển thị một lượt. Bạn có thể nhắn <strong>"viết tiếp"</strong> để xem phần còn lại.
+                      </div>
+                    )}
+
+                    {/* Transparent Retry / Explicit Fallback Actions when Gemini Fails */}
+                    {isBot && msg.isGeminiError && msg.originalQuery && (
+                      <div className="mt-3 pt-2.5 border-t border-rose-200 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => handleSendMessage(msg.originalQuery, {
+                            forceGemini: true,
+                            skipUserEcho: true,
+                            excludeErrorMsgId: msg.id,
+                            scopeOverride: msg.scope
+                          })}
+                          className="px-3 py-1.5 rounded-xl bg-rose-700 hover:bg-rose-800 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition-all"
+                        >
+                          <RefreshCw className="w-3 h-3" />
+                          <span>Thử lại Gemini</span>
+                        </button>
+                        {msg.scope !== 'general' ? (
+                          <button
+                            type="button"
+                            onClick={() => handleSendMessage(msg.originalQuery, {
+                              forceLocal: true,
+                              skipUserEcho: true,
+                              excludeErrorMsgId: msg.id,
+                              scopeOverride: 'store'
+                            })}
+                            className="px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 text-[11px] font-semibold flex items-center gap-1.5 transition-all"
+                          >
+                            <span>⚡ Dùng AI Cục bộ cho câu này</span>
+                          </button>
+                        ) : (
+                          <button
+                            type="button"
+                            onClick={() => updateChatSettings({ assistantScope: 'store' })}
+                            className="px-3 py-1.5 rounded-xl bg-white hover:bg-stone-100 text-stone-800 border border-stone-300 text-[11px] font-semibold transition-all"
+                          >
+                            🛍️ Chuyển về Tư vấn Cửa hàng
+                          </button>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Action when Local Engine cannot answer General Scope */}
+                    {isBot && msg.needsGemini && msg.originalQuery && (
+                      <div className="mt-3 pt-2.5 border-t border-stone-200 flex flex-wrap gap-2">
+                        {geminiStatus.configured && (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              updateChatSettings({ aiProvider: 'gemini', aiProviderExplicit: true, assistantScope: 'general' });
+                              handleSendMessage(msg.originalQuery, {
+                                scopeOverride: 'general',
+                                forceGemini: true,
+                                skipUserEcho: true,
+                                excludeErrorMsgId: msg.id
+                              });
+                            }}
+                            className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition-all"
+                          >
+                            <Sparkles className="w-3 h-3" />
+                            <span>Bật Google Gemini AI</span>
+                          </button>
+                        )}
+                        <button
+                          type="button"
+                          onClick={() => updateChatSettings({ assistantScope: 'store' })}
+                          className="px-3 py-1.5 rounded-xl bg-stone-100 hover:bg-stone-200 text-stone-800 border border-stone-300 text-[11px] font-semibold transition-all"
+                        >
+                          🛍️ Chuyển về Tư vấn Cửa hàng
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Action when Store Guardrail suggests switching to General AI Assistant */}
+                    {isBot && msg.suggestGeneralMode && msg.originalQuery && (
+                      <div className="mt-3 pt-2.5 border-t border-amber-200/80 flex flex-wrap gap-2">
+                        <button
+                          type="button"
+                          onClick={() => {
+                            const enableGemini = geminiStatus.configured;
+                            updateChatSettings({
+                              assistantScope: 'general',
+                              ...(enableGemini ? { aiProvider: 'gemini', aiProviderExplicit: true } : {})
+                            });
+                            handleSendMessage(msg.originalQuery, {
+                              scopeOverride: 'general',
+                              forceGemini: enableGemini,
+                              skipUserEcho: true,
+                              excludeErrorMsgId: msg.id
+                            });
+                          }}
+                          className="px-3 py-1.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-[11px] font-bold flex items-center gap-1.5 shadow-xs transition-all"
+                        >
+                          <Brain className="w-3.5 h-3.5" />
+                          <span>Chuyển sang Trợ lý AI Tổng quát</span>
+                        </button>
+                      </div>
+                    )}
 
                     {/* PILLAR 1: CURATED PRODUCTS FROM NEED ANALYSIS */}
                     {msg.curatedProducts && msg.curatedProducts.length > 0 && (
@@ -806,7 +1052,7 @@ export default function Chatbot({
                           {msg.curatedProducts.map(p => (
                             <div key={p.id} className="bg-amber-50/40 hover:bg-amber-50/80 p-2.5 rounded-xl border border-amber-200 flex flex-col gap-2 transition-all">
                               <div className="flex items-center gap-3">
-                                <img src={p.images[0]} alt={p.name} className="w-14 h-14 rounded-lg object-cover bg-white flex-shrink-0 border border-stone-200" />
+                                <img src={resolveMediaUrl(p.images?.[0])} alt={p.name} className="w-14 h-14 rounded-lg object-cover bg-white flex-shrink-0 border border-stone-200" />
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center justify-between gap-1">
                                     <h4 className="font-bold text-stone-900 text-xs truncate">{p.name}</h4>
@@ -857,7 +1103,14 @@ export default function Chatbot({
 
                         {draft.items.map((item, idx) => (
                           <div key={idx} className="flex gap-2.5 items-center">
-                            <img src={item.image} alt={item.name} className="w-12 h-12 rounded-lg object-cover bg-white border border-stone-200 flex-shrink-0" />
+                            <img
+                              src={resolveMediaUrl(item.image)}
+                              alt={item.name}
+                              className="w-12 h-12 rounded-lg object-cover bg-white border border-stone-200 flex-shrink-0"
+                              onError={(e) => {
+                                e.target.src = '/placeholder.svg';
+                              }}
+                            />
                             <div className="flex-1 min-w-0">
                               <div className="font-bold text-stone-900 text-xs truncate">{item.name}</div>
                               <div className="text-amber-900 font-extrabold text-xs">{formatCurrency(item.price)}</div>
@@ -1111,9 +1364,14 @@ export default function Chatbot({
                                 className="bg-stone-50 hover:bg-stone-100/80 p-2.5 rounded-xl border border-stone-200/80 flex items-center gap-3 transition-colors"
                               >
                                 <img
-                                  src={p.images[0]}
+                                  src={resolveMediaUrl(p.images?.[0])}
                                   alt={p.name}
                                   className="w-14 h-14 rounded-lg object-cover bg-white flex-shrink-0"
+                                  onError={(e) => {
+                                    const fallback = p.images?.[1];
+                                    if (fallback && e.target.src !== fallback) e.target.src = fallback;
+                                    else e.target.src = '/placeholder.svg';
+                                  }}
                                 />
                                 <div className="flex-1 min-w-0">
                                   <h4 className="font-bold text-stone-900 text-xs truncate">
@@ -1241,9 +1499,20 @@ export default function Chatbot({
                     )}
                   </div>
 
-                  <span className="text-[10px] text-stone-400 mt-1 px-1">
-                    {new Date(msg.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <div className="flex items-center gap-2 mt-1 px-1 text-[10px] text-stone-400">
+                    <span>{new Date(msg.timestamp).toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' })}</span>
+                    {isBot && msg.engineUsed && (
+                      <span className="text-stone-500">
+                        · {msg.engineUsed === 'gemini'
+                          ? `✨ Gemini${msg.model ? ` (${msg.model})` : ''}${msg.scope === 'general' ? ' · Tổng quát' : ''}`
+                          : msg.engineUsed === 'gemini-error'
+                            ? '⚠️ Lỗi Gemini'
+                            : msg.engineUsed === 'guardrail'
+                              ? '🛡️ Ngoài phạm vi Cửa hàng'
+                              : '⚡ AI Cục bộ'}
+                      </span>
+                    )}
+                  </div>
                 </div>
               );
             })}
@@ -1271,7 +1540,11 @@ export default function Chatbot({
             >
               <input
                 type="text"
-                placeholder="Hỏi đơn hàng, tư vấn size, quà tặng, ship..."
+                placeholder={
+                  chatSettings.assistantScope === 'general'
+                    ? 'Hỏi mọi chủ đề (lập trình, toán, phân tích, bán sỉ, sản phẩm...)'
+                    : 'Hỏi đơn hàng, tư vấn size, quà tặng, ship...'
+                }
                 value={inputText}
                 onChange={(e) => setInputText(e.target.value)}
                 className="flex-1 px-4 py-2.5 rounded-2xl bg-stone-100 border border-stone-200 text-xs text-stone-900 focus:outline-none focus:ring-2 focus:ring-amber-700 focus:bg-white transition-all"

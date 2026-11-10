@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
-import { X, Lock, Mail, User, Phone, MapPin, ShieldCheck, Check, Sparkles, AlertCircle } from 'lucide-react';
-import { ApiClient } from '../services/api.js';
+import React, { useState, useEffect } from 'react';
+import { X, Lock, Mail, User, Phone, MapPin, ShieldCheck, Check, Sparkles, AlertCircle, WifiOff } from 'lucide-react';
+import { ApiClient, IS_DEMO_MODE_ALLOWED } from '../services/api.js';
 
 export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [isLoginMode, setIsLoginMode] = useState(true);
@@ -13,6 +13,18 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const [serverOnline, setServerOnline] = useState(true);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    let active = true;
+    setError('');
+    setSuccessMsg('');
+    ApiClient.isServerOnline().then((online) => {
+      if (active) setServerOnline(online);
+    });
+    return () => { active = false; };
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -20,21 +32,41 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     e.preventDefault();
     setError('');
     setSuccessMsg('');
-    setLoading(true);
 
+    const cleanEmail = email.trim();
+    if (!/^\S+@\S+\.\S+$/.test(cleanEmail)) {
+      setError('Vui lòng nhập địa chỉ email hợp lệ.');
+      return;
+    }
+
+    if (!isLoginMode) {
+      if (name.trim().length < 2) {
+        setError('Họ và tên phải có ít nhất 2 ký tự.');
+        return;
+      }
+      if (password.length < 6) {
+        setError('Mật khẩu phải có ít nhất 6 ký tự.');
+        return;
+      }
+    } else if (!password) {
+      setError('Vui lòng nhập mật khẩu.');
+      return;
+    }
+
+    setLoading(true);
     try {
       if (isLoginMode) {
-        const res = await ApiClient.auth.login(email, password);
+        const res = await ApiClient.auth.login(cleanEmail, password);
         setSuccessMsg(`Chào mừng bạn quay trở lại, ${res.user.name}!`);
         setTimeout(() => {
           onAuthSuccess(res.user);
           onClose();
-        }, 800);
+        }, 500);
       } else {
         const res = await ApiClient.auth.register({
-          email,
+          email: cleanEmail,
           password,
-          name,
+          name: name.trim(),
           phone,
           address,
           city
@@ -43,7 +75,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
         setTimeout(() => {
           onAuthSuccess(res.user);
           onClose();
-        }, 800);
+        }, 500);
       }
     } catch (err) {
       setError(err.message || 'Đã có lỗi xảy ra. Vui lòng thử lại.');
@@ -52,20 +84,36 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
     }
   };
 
-  const handleQuickDemoLogin = async (demoEmail, demoPassword) => {
-    setEmail(demoEmail);
-    setPassword(demoPassword);
+  const handleQuickDevLogin = async (demoEmail, demoPassword, role) => {
+    if (!IS_DEMO_MODE_ALLOWED) return;
     setError('');
-    setLoading(true);
-    try {
-      const res = await ApiClient.auth.login(demoEmail, demoPassword);
-      setSuccessMsg(`Đăng nhập thành công với vai trò: ${res.user.role.toUpperCase()}`);
+    setSuccessMsg('');
+
+    const online = await ApiClient.isServerOnline();
+    setServerOnline(online);
+
+    if (!online) {
+      const res = ApiClient.auth.enterOfflineDemoSession(role);
+      setSuccessMsg(`Đã vào Chế độ Demo Offline (${role.toUpperCase()} - chỉ xem cục bộ, không lưu server)`);
       setTimeout(() => {
         onAuthSuccess(res.user);
         onClose();
-      }, 700);
+      }, 450);
+      return;
+    }
+
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setLoading(true);
+    try {
+      const res = await ApiClient.auth.login(demoEmail, demoPassword);
+      setSuccessMsg(`Đăng nhập máy chủ thành công (${res.user.role.toUpperCase()})`);
+      setTimeout(() => {
+        onAuthSuccess(res.user);
+        onClose();
+      }, 450);
     } catch (err) {
-      setError(err.message || 'Lỗi đăng nhập nhanh.');
+      setError(err.message || 'Lỗi đăng nhập tài khoản phát triển.');
     } finally {
       setLoading(false);
     }
@@ -93,52 +141,72 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           </h3>
           <p className="text-stone-400 text-xs mt-1">
             {isLoginMode
-              ? 'Đăng nhập để theo dõi đơn hàng, quản trị kho hoặc cửa hàng'
-              : 'Tạo tài khoản để nhận ưu đãi thành viên và lưu địa chỉ nhận hàng'}
+              ? 'Đăng nhập bằng tài khoản máy chủ để theo dõi đơn hàng hoặc quản trị shop'
+              : 'Tạo tài khoản mới được lưu bảo mật (PBKDF2) trên máy chủ'}
           </p>
         </div>
 
-        {/* Quick Demo Accounts Selection */}
-        <div className="bg-amber-50/70 border-b border-amber-200/60 p-4">
-          <div className="text-[11px] font-bold text-amber-900 uppercase tracking-wider flex items-center gap-1.5 mb-2">
-            <Sparkles className="w-3.5 h-3.5 text-amber-600" />
-            <span>Đăng Nhập Nhanh Trải Nghiệm (1-Click Demo):</span>
+        {/* Backend Offline Warning */}
+        {!serverOnline && (
+          <div className="bg-rose-50 border-b border-rose-200 px-4 py-3 flex items-start gap-2 text-[11px] text-rose-800">
+            <WifiOff className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
+            <div>
+              <strong>Máy chủ backend hiện không hoạt động</strong> (hoặc đang chạy web tĩnh). Tài khoản thật và đăng ký thành viên cần backend Node kết nối trực tuyến.
+            </div>
           </div>
-          <div className="grid grid-cols-3 gap-2">
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin('admin@tiemnhanho.vn', 'admin123')}
-              className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-300 text-stone-900 text-left transition-all group"
-            >
-              <span className="font-bold text-[11px] block text-amber-900">
-                👑 Chủ Shop
-              </span>
-              <span className="text-[10px] text-stone-500 block truncate">Toàn quyền</span>
-            </button>
+        )}
 
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin('staff@tiemnhanho.vn', 'staff123')}
-              className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-300 text-stone-900 text-left transition-all group"
-            >
-              <span className="font-bold text-[11px] block text-blue-900">
-                🛠️ Nhân Viên
+        {/* Dev / Demo Quick Login (strictly gated outside production customer flow) */}
+        {IS_DEMO_MODE_ALLOWED && (
+          <div className="bg-amber-50/70 border-b border-amber-200/60 p-4">
+            <div className="text-[11px] font-bold text-amber-900 uppercase tracking-wider flex items-center justify-between gap-1.5 mb-2">
+              <span className="flex items-center gap-1.5">
+                <Sparkles className="w-3.5 h-3.5 text-amber-600" />
+                {serverOnline ? 'Chế độ Dev (Đăng nhập nhanh qua API):' : 'Chế độ Demo Offline (Chỉ xem cục bộ):'}
               </span>
-              <span className="text-[10px] text-stone-500 block truncate">Kho & Đơn</span>
-            </button>
+            </div>
+            <div className="grid grid-cols-3 gap-2">
+              <button
+                type="button"
+                onClick={() => handleQuickDevLogin('admin@tiemnhanho.vn', 'admin123', 'admin')}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-300 text-stone-900 text-left transition-all"
+              >
+                <span className="font-bold text-[11px] block text-amber-900">
+                  👑 Chủ Shop
+                </span>
+                <span className="text-[10px] text-stone-500 block truncate">
+                  {serverOnline ? 'Toàn quyền' : 'Demo Offline'}
+                </span>
+              </button>
 
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin('khachhang@gmail.com', 'khach123')}
-              className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-300 text-stone-900 text-left transition-all group"
-            >
-              <span className="font-bold text-[11px] block text-emerald-900">
-                👤 Khách Mua
-              </span>
-              <span className="text-[10px] text-stone-500 block truncate">Hà Nội</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => handleQuickDevLogin('staff@tiemnhanho.vn', 'staff123', 'staff')}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-300 text-stone-900 text-left transition-all"
+              >
+                <span className="font-bold text-[11px] block text-blue-900">
+                  🛠️ Nhân Viên
+                </span>
+                <span className="text-[10px] text-stone-500 block truncate">
+                  {serverOnline ? 'Kho & Đơn' : 'Demo Offline'}
+                </span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => handleQuickDevLogin('khachhang@gmail.com', 'khach123', 'customer')}
+                className="p-2 rounded-xl bg-white hover:bg-amber-100/60 border border-amber-300 text-stone-900 text-left transition-all"
+              >
+                <span className="font-bold text-[11px] block text-emerald-900">
+                  👤 Khách Mua
+                </span>
+                <span className="text-[10px] text-stone-500 block truncate">
+                  {serverOnline ? 'Hà Nội' : 'Demo Offline'}
+                </span>
+              </button>
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-6 space-y-3.5 text-xs">
@@ -166,6 +234,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 <input
                   type="text"
                   required
+                  minLength={2}
                   placeholder="Ví dụ: Nguyễn Thu Hà"
                   value={name}
                   onChange={(e) => setName(e.target.value)}
@@ -199,6 +268,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
               <input
                 type="password"
                 required
+                minLength={!isLoginMode ? 6 : undefined}
                 placeholder="Ít nhất 6 ký tự"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
@@ -243,7 +313,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
           {/* Submit button */}
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !serverOnline}
             className="w-full py-2.5 bg-amber-900 hover:bg-amber-800 text-white font-bold rounded-xl shadow-md transition-colors disabled:opacity-50 mt-2"
           >
             {loading ? 'Đang xử lý...' : (isLoginMode ? 'Đăng Nhập Ngay' : 'Tạo Tài Khoản Thành Viên')}
@@ -256,7 +326,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 Chưa có tài khoản?{' '}
                 <button
                   type="button"
-                  onClick={() => { setIsLoginMode(false); setError(''); }}
+                  onClick={() => { setIsLoginMode(false); setError(''); setSuccessMsg(''); }}
                   className="font-bold text-amber-900 hover:underline"
                 >
                   Đăng ký ngay
@@ -267,7 +337,7 @@ export default function AuthModal({ isOpen, onClose, onAuthSuccess }) {
                 Đã có tài khoản?{' '}
                 <button
                   type="button"
-                  onClick={() => { setIsLoginMode(true); setError(''); }}
+                  onClick={() => { setIsLoginMode(true); setError(''); setSuccessMsg(''); }}
                   className="font-bold text-amber-900 hover:underline"
                 >
                   Đăng nhập tại đây

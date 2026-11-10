@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Star, Plus, Eye, Check, Heart, Flame } from 'lucide-react';
 import { formatCurrency } from '../services/aiChatEngine';
+import { resolveMediaUrl } from '../services/api';
 
 export default function ProductCard({ 
   product, 
@@ -35,10 +36,15 @@ export default function ProductCard({
       {/* Image container */}
       <div className="relative aspect-square overflow-hidden bg-stone-100">
         <img
-          src={product.images[0]}
+          src={resolveMediaUrl(product.images?.[0])}
           alt={product.name}
           className="w-full h-full object-cover object-center group-hover:scale-105 transition-transform duration-500 ease-out"
           loading="lazy"
+          onError={(e) => {
+            const fallback = product.images?.[1];
+            if (fallback && e.target.src !== fallback) e.target.src = fallback;
+            else e.target.src = '/placeholder.svg';
+          }}
         />
 
         {/* Badges on Top Left */}

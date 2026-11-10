@@ -134,7 +134,14 @@ export default function Header({
                   <span className="text-xs font-bold text-stone-900 max-w-[110px] truncate leading-tight">
                     {currentUser.name}
                   </span>
-                  <div className="mt-0.5">{getRoleBadge(currentUser.role)}</div>
+                  <div className="mt-0.5 flex items-center gap-1 flex-wrap">
+                    {getRoleBadge(currentUser.role)}
+                    {currentUser.isOfflineDemo && (
+                      <span className="bg-amber-50 text-amber-800 border border-amber-300 text-[9px] px-1 py-0.2 rounded font-bold uppercase">
+                        Demo Offline
+                      </span>
+                    )}
+                  </div>
                 </div>
                 <button
                   onClick={onLogout}

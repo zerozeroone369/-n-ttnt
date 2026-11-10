@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { X, Package, Clock, CheckCircle2, Truck, MessageSquare, AlertCircle, ShoppingBag, ChevronRight } from 'lucide-react';
 import { formatCurrency } from '../services/aiChatEngine';
 import { getOrdersForUser } from '../services/aiChatEngine';
+import { resolveMediaUrl } from '../services/api';
 
 export default function CustomerOrdersModal({
   isOpen,
@@ -209,7 +210,14 @@ export default function CustomerOrdersModal({
                       {selectedOrder.items.map((it, idx) => (
                         <div key={idx} className="flex items-center justify-between bg-white p-2 rounded-lg border border-stone-200/70 text-xs">
                           <div className="flex items-center gap-2">
-                            <img src={it.image} alt="" className="w-8 h-8 rounded object-cover" />
+                            <img
+                              src={resolveMediaUrl(it.image)}
+                              alt=""
+                              className="w-8 h-8 rounded object-cover"
+                              onError={(e) => {
+                                e.target.src = '/placeholder.svg';
+                              }}
+                            />
                             <div>
                               <div className="font-bold text-stone-900 line-clamp-1">{it.name}</div>
                               <div className="text-[10px] text-stone-400">{it.variant} x{it.quantity}</div>

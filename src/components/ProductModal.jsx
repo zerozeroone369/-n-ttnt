@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { X, Star, ShoppingBag, Check, Shield, Truck, RotateCcw, Heart, MessageSquare, Send, CheckCircle2 } from 'lucide-react';
 import { formatCurrency } from '../services/aiChatEngine';
+import { resolveMediaUrl } from '../services/api';
 
 export default function ProductModal({ 
   product, 
@@ -89,9 +90,14 @@ export default function ProductModal({
             {/* Main image */}
             <div className="aspect-square rounded-2xl overflow-hidden bg-white shadow-inner relative">
               <img
-                src={product.images[activeImageIndex] || product.images[0]}
+                src={resolveMediaUrl(product.images?.[activeImageIndex] || product.images?.[0])}
                 alt={product.name}
                 className="w-full h-full object-cover object-center"
+                onError={(e) => {
+                  const fallback = product.images?.[1];
+                  if (fallback && e.target.src !== fallback) e.target.src = fallback;
+                  else e.target.src = '/placeholder.svg';
+                }}
               />
 
               {discountPercent > 0 && (
@@ -121,7 +127,14 @@ export default function ProductModal({
                       activeImageIndex === idx ? 'border-amber-800 scale-105 shadow-sm' : 'border-transparent opacity-70 hover:opacity-100'
                     }`}
                   >
-                    <img src={img} alt="" className="w-full h-full object-cover" />
+                    <img
+                      src={resolveMediaUrl(img)}
+                      alt=""
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.target.src = '/placeholder.svg';
+                      }}
+                    />
                   </button>
                 ))}
               </div>

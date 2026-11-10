@@ -1,12 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { 
   Package, ShoppingCart, DollarSign, AlertTriangle, Plus, Trash2, Edit, 
-  CheckCircle, Clock, Truck, XCircle, Search, Sparkles, RefreshCw, Key, Store, ArrowLeft, Printer, Tag, ToggleLeft, ToggleRight, History, Shield, User, Globe, Download, Loader2, CheckSquare, Square, Star
+  CheckCircle, XCircle, Search, Sparkles, RefreshCw, Key, ArrowLeft, Printer, Tag, History, Shield, Globe, Download, Loader2, CheckSquare, Square, Star, ChevronDown, ChevronUp, ExternalLink
 } from 'lucide-react';
 import { formatCurrency, AIChatEngine } from '../services/aiChatEngine';
 import { StorageService } from '../services/storage';
-import { ApiClient } from '../services/api';
-import { CATEGORIES, STORE_INFO } from '../data/initialData';
+import { ApiClient, resolveMediaUrl } from '../services/api';
+import { filterShopeeCatalog } from '../utils/shopeeFilter.js';
+import { STORE_INFO } from '../data/initialData';
 
 export default function AdminDashboard({
   products,
@@ -54,19 +55,205 @@ export default function AdminDashboard({
 
   // Settings state
   const [settings, setSettings] = useState(() => StorageService.getSettings());
+  const [geminiStatus, setGeminiStatus] = useState({
+    checked: false,
+    online: false,
+    configured: false,
+    model: '',
+    keyMasked: null
+  });
   const [apiKeySaved, setApiKeySaved] = useState(false);
   const [apiTestStatus, setApiTestStatus] = useState(null); // null | 'testing' | { ok, message }
-  const [showApiKey, setShowApiKey] = useState(false);
 
   // Shopee Scraper state
   const [shopeeKeywords, setShopeeKeywords] = useState('áo khoác');
   const [shopeeLimit, setShopeeLimit] = useState(20);
   const [shopeeLoading, setShopeeLoading] = useState(false);
+  const [shopeeProgress, setShopeeProgress] = useState('');
   const [shopeeResults, setShopeeResults] = useState([]);
   const [shopeeSelected, setShopeeSelected] = useState(new Set());
   const [shopeeImporting, setShopeeImporting] = useState(false);
   const [shopeeError, setShopeeError] = useState(null);
   const [shopeeSuccess, setShopeeSuccess] = useState(null);
+  const [shopeeMode, setShopeeMode] = useState(null); // 'live' | 'static_snapshot' | null
+  const [shopeeServerOnline, setShopeeServerOnline] = useState(null);
+  const [shopeeSessionId, setShopeeSessionId] = useState(null);
+  const [scraperConfig, setScraperConfig] = useState(null);
+  const [scraperConfigLoading, setScraperConfigLoading] = useState(false);
+  const [scraperConfigOpen, setScraperConfigOpen] = useState(false);
+  const [scraperProviderInput, setScraperProviderInput] = useState('zenrows');
+  const [scraperApiKeyInput, setScraperApiKeyInput] = useState('');
+  const [scraperConfigSaving, setScraperConfigSaving] = useState(false);
+  const [scraperConfigFeedback, setScraperConfigFeedback] = useState(null);
+  const [shopeeBlockedByBot, setShopeeBlockedByBot] = useState(false);
+  const isMountedRef = useRef(true);
+
+  const loadScraperConfig = async () => {
+    if (!ApiClient.auth.getToken() || currentUser?.role !== 'admin') return;
+    setScraperConfigLoading(true);
+    try {
+      const meta = await ApiClient.shopee.getScraperConfig();
+      if (isMountedRef.current) {
+        setScraperConfig(meta);
+        if (meta?.activeProvider) {
+          setScraperProviderInput(meta.activeProvider);
+        }
+        if (!meta?.configured) {
+          setScraperConfigOpen(true);
+        }
+      }
+    } catch (err) {
+      console.warn('Fetch scraping API config error:', err);
+    } finally {
+      if (isMountedRef.current) setScraperConfigLoading(false);
+    }
+  };
+
+  const handleSaveScraperConfig = async (e) => {
+    e.preventDefault();
+    setScraperConfigFeedback(null);
+    const trimmedKey = scraperApiKeyInput.trim();
+    if (trimmedKey && (trimmedKey.length < 8 || /\s/.test(trimmedKey))) {
+      setScraperConfigFeedback({
+        ok: false,
+        message: 'API Key không hợp lệ (cần tối thiểu 8 ký tự và không chứa khoảng trắng).'
+      });
+      return;
+    }
+    if (!ApiClient.auth.getToken()) {
+      setScraperConfigFeedback({
+        ok: false,
+        message: 'Bạn đang ở chế độ Demo Offline. Vui lòng đăng nhập bằng tài khoản Chủ Shop trên backend để lưu cấu hình.'
+      });
+      return;
+    }
+
+    setScraperConfigSaving(true);
+    try {
+      const saved = await ApiClient.shopee.updateScraperConfig({
+        provider: scraperProviderInput,
+        ...(trimmedKey ? { apiKey: trimmedKey } : {})
+      });
+      if (!isMountedRef.current) return;
+      setScraperConfig(saved);
+      setScraperApiKeyInput('');
+      setShopeeBlockedByBot(false);
+      setShopeeError(null);
+      setScraperConfigFeedback({
+        ok: true,
+        message: saved?.configured
+          ? `✅ Đã cấu hình Scraping API (${saved.activeProvider?.toUpperCase()}). Bây giờ bạn có thể bấm "Bắt Đầu Cào" để lấy dữ liệu thật!`
+          : 'Đã cập nhật nhà cung cấp ưu tiên. Hãy dán thêm API Key để kích hoạt cào trực tiếp.'
+      });
+    } catch (err) {
+      if (isMountedRef.current) {
+        setScraperConfigFeedback({ ok: false, message: err.message || 'Không thể lưu cấu hình Scraping API lên máy chủ.' });
+      }
+    } finally {
+      if (isMountedRef.current) setScraperConfigSaving(false);
+    }
+  };
+
+  const handleClearScraperKey = async (providerName) => {
+    if (!ApiClient.auth.getToken()) return;
+    setScraperConfigSaving(true);
+    setScraperConfigFeedback(null);
+    try {
+      const saved = await ApiClient.shopee.updateScraperConfig({
+        provider: providerName,
+        clearKey: true
+      });
+      if (!isMountedRef.current) return;
+      setScraperConfig(saved);
+      setScraperConfigFeedback({
+        ok: true,
+        message: `Đã xóa key lưu cục bộ của ${providerName.toUpperCase()}.`
+      });
+    } catch (err) {
+      if (isMountedRef.current) {
+        setScraperConfigFeedback({ ok: false, message: err.message || 'Không thể xóa key.' });
+      }
+    } finally {
+      if (isMountedRef.current) setScraperConfigSaving(false);
+    }
+  };
+
+  const pollScrapeSession = async (activeSessionId, keywords, limitVal) => {
+    const maxDeadline = Date.now() + 320 * 1000;
+    let finalState = null;
+
+    while (isMountedRef.current && Date.now() < maxDeadline) {
+      const statusData = await ApiClient.shopee.getStatus(activeSessionId);
+      if (!isMountedRef.current) return;
+      if (statusData.progress) {
+        setShopeeProgress(statusData.progress);
+      }
+      if (!statusData.running) {
+        finalState = statusData;
+        break;
+      }
+      await new Promise(resolve => setTimeout(resolve, 1500));
+    }
+
+    if (!isMountedRef.current) return;
+
+    if (!finalState) {
+      setShopeeError('Quá thời gian chờ phản hồi từ phiên cào trên máy chủ.');
+      setShopeeLoading(false);
+      return;
+    }
+
+    if (finalState.status === 'config_required') {
+      setShopeeResults([]);
+      setScraperConfigOpen(true);
+      setShopeeError(finalState.error || finalState.message || 'Chưa cấu hình Scraping API Key (Phương án B).');
+      setShopeeLoading(false);
+      return;
+    }
+
+    if (finalState.status === 'failed') {
+      if (finalState.configRequired) setScraperConfigOpen(true);
+      setShopeeError(finalState.error || finalState.message || 'Phiên cào dữ liệu Shopee thất bại.');
+      setShopeeLoading(false);
+      return;
+    }
+
+    if (finalState.status === 'blocked') {
+      setShopeeResults([]);
+      setShopeeBlockedByBot(true);
+      setScraperConfigOpen(true);
+      setShopeeError(
+        finalState.message || 'Shopee tạm thời giới hạn phản hồi qua Scraping API. Vui lòng thử lại hoặc kiểm tra gói proxy/render của provider.'
+      );
+      setShopeeLoading(false);
+      return;
+    }
+
+    const rawResults = Array.isArray(finalState.results) ? finalState.results : [];
+    const matched = filterShopeeCatalog(rawResults, keywords, limitVal);
+
+    if (matched.length === 0 || finalState.status === 'empty') {
+      setShopeeResults([]);
+      setShopeeError(
+        finalState.message || `Không tìm thấy sản phẩm mới nào trên Shopee khớp với từ khóa "${keywords.join(', ')}". Vui lòng thử từ khóa khác.`
+      );
+      setShopeeLoading(false);
+      return;
+    }
+
+    setShopeeResults(matched);
+    setShopeeSuccess(
+      `🎉 Phiên ${activeSessionId}: Đã cào trực tiếp và lọc ${matched.length} sản phẩm thật khớp từ khóa "${keywords.join(', ')}" từ Shopee!`
+    );
+    setShopeeLoading(false);
+  };
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
 
   // Computed metrics
   const totalRevenue = orders.reduce((sum, o) => sum + (o.orderStatus !== 'cancelled' ? o.total : 0), 0);
@@ -87,18 +274,74 @@ export default function AdminDashboard({
   useEffect(() => {
     if (activeTab === 'auditLogs' && !isStaff) {
       ApiClient.auditLogs.getAll()
-        .then(data => setAuditLogs(data))
+        .then(data => { if (isMountedRef.current) setAuditLogs(data); })
         .catch(err => console.warn('Fetch audit logs error:', err));
     }
-    if (activeTab === 'shopeeScraper' && shopeeResults.length === 0) {
-      ApiClient.shopee.getStatus()
-        .then(data => {
-          if (Array.isArray(data.results) && data.results.length > 0) {
-            setShopeeResults(data.results);
-            setShopeeSuccess(`Đã nạp sẵn ${data.results.length} sản phẩm thật từ Shopee.`);
+
+    if (activeTab === 'settings') {
+      (async () => {
+        const online = await ApiClient.isServerOnline();
+        if (!isMountedRef.current) return;
+        if (!online) {
+          setGeminiStatus({ checked: true, online: false, configured: false, model: '', keyMasked: null });
+          return;
+        }
+        try {
+          const st = await ApiClient.chat.getStatus();
+          if (!isMountedRef.current) return;
+          setGeminiStatus({
+            checked: true,
+            online: true,
+            configured: Boolean(st?.configured),
+            model: st?.model || '',
+            keyMasked: st?.keyMasked || null
+          });
+        } catch {
+          if (isMountedRef.current) {
+            setGeminiStatus({ checked: true, online: true, configured: false, model: '', keyMasked: null });
           }
-        })
-        .catch(err => console.warn('Fetch shopee status error:', err));
+        }
+      })();
+    }
+
+    if (activeTab === 'shopeeScraper') {
+      (async () => {
+        const online = await ApiClient.isServerOnline();
+        if (!isMountedRef.current) return;
+        setShopeeServerOnline(online);
+        if (!online) {
+          setShopeeMode('static_snapshot');
+          return;
+        }
+        loadScraperConfig();
+        try {
+          const st = await ApiClient.shopee.getStatus();
+          if (!isMountedRef.current) return;
+          if (st?.running && st?.sessionId) {
+            setShopeeMode('live');
+            setShopeeSessionId(st.sessionId);
+            setShopeeLoading(true);
+            setShopeeProgress(st.progress || '');
+            pollScrapeSession(st.sessionId, st.requestedKeywords || [], st.limit || shopeeLimit);
+          } else if (st?.status === 'config_required') {
+            setShopeeMode('live');
+            setShopeeSessionId(st.sessionId || null);
+            setScraperConfigOpen(true);
+          } else if (st?.status === 'blocked') {
+            setShopeeMode('live');
+            setShopeeSessionId(st.sessionId || null);
+            setShopeeBlockedByBot(true);
+            setScraperConfigOpen(true);
+          } else if (st?.status === 'completed' && Array.isArray(st.results) && st.results.length > 0 && shopeeResults.length === 0) {
+            setShopeeMode('live');
+            setShopeeSessionId(st.sessionId || null);
+            setShopeeResults(st.results);
+            setShopeeSuccess(`Phiên ${st.sessionId}: đã nạp ${st.results.length} sản phẩm cào trực tiếp gần nhất trên máy chủ.`);
+          }
+        } catch (err) {
+          console.warn('Fetch shopee status error:', err);
+        }
+      })();
     }
   }, [activeTab]);
 
@@ -319,20 +562,21 @@ export default function AdminDashboard({
   // Save Settings
   const handleSaveSettings = (e) => {
     e.preventDefault();
-    StorageService.saveSettings(settings);
+    const updated = {
+      ...settings,
+      aiProviderExplicit: true
+    };
+    StorageService.saveSettings(updated);
+    setSettings(updated);
     setApiKeySaved(true);
     setApiTestStatus(null);
     setTimeout(() => setApiKeySaved(false), 2500);
   };
 
-  // Test Gemini API Key
+  // Test Gemini server connectivity & live model verification
   const handleTestApiKey = async () => {
-    if (!settings.apiKey?.trim()) {
-      setApiTestStatus({ ok: false, message: 'Vui lòng nhập API Key trước khi kiểm tra.' });
-      return;
-    }
     setApiTestStatus('testing');
-    const result = await AIChatEngine.testGeminiKey(settings.apiKey.trim());
+    const result = await AIChatEngine.testGeminiConnection();
     setApiTestStatus(result);
   };
 
@@ -347,77 +591,6 @@ export default function AdminDashboard({
     }
   };
 
-// ====== SHOPEE MULTI-TIER SMART MATCHER ======
-function filterShopeeCatalog(allItems, keywords, limit = 20) {
-  if (!Array.isArray(allItems) || allItems.length === 0) return [];
-  if (!keywords || keywords.length === 0) return allItems.slice(0, limit);
-
-  const cleanKeywords = keywords.map(k => String(k).trim().toLowerCase()).filter(Boolean);
-  if (cleanKeywords.length === 0) return allItems.slice(0, limit);
-
-  const limitPerKw = Math.max(1, Math.ceil(limit / cleanKeywords.length));
-  const selected = [];
-  const seenIds = new Set();
-
-  for (const rawKw of cleanKeywords) {
-    const kwWords = rawKw.split(/\s+/).filter(w => w.length > 1);
-
-    // Tier 1: Khớp chuỗi chính xác (trong tên, danh mục, từ khóa gốc)
-    let matches = allItems.filter(item => {
-      const id = item.id || item.shopee_id;
-      if (seenIds.has(id)) return false;
-      const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
-      return text.includes(rawKw);
-    });
-
-    // Tier 2: Khớp tất cả các từ trong cụm từ tìm kiếm (VD: 'áo' và 'nam' cùng xuất hiện)
-    if (matches.length === 0 && kwWords.length > 0) {
-      matches = allItems.filter(item => {
-        const id = item.id || item.shopee_id;
-        if (seenIds.has(id)) return false;
-        const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
-        return kwWords.every(w => text.includes(w));
-      });
-    }
-
-    // Tier 3: Khớp từ ngữ quan trọng nhất (bỏ qua hư từ thông thường)
-    if (matches.length === 0 && kwWords.length > 0) {
-      const stopWords = new Set(['cho', 'và', 'của', 'các', 'loại', 'mẫu', 'decor', 'phòng', 'ngủ']);
-      const majorWords = kwWords.filter(w => !stopWords.has(w));
-      const targetWords = majorWords.length > 0 ? majorWords : kwWords;
-      matches = allItems.filter(item => {
-        const id = item.id || item.shopee_id;
-        if (seenIds.has(id)) return false;
-        const text = `${item.name || ''} ${item.category || ''} ${item.keyword || ''}`.toLowerCase();
-        return targetWords.some(w => text.includes(w));
-      });
-    }
-
-    const itemsToAdd = matches.slice(0, limitPerKw);
-    for (const it of itemsToAdd) {
-      selected.push({
-        ...it,
-        keyword: rawKw // Gắn nhãn từ khóa người dùng tìm kiếm
-      });
-      seenIds.add(it.id || it.shopee_id);
-    }
-  }
-
-  // Nếu chưa đủ số lượng yêu cầu, bù thêm các sản phẩm còn lại
-  if (selected.length < limit) {
-    for (const it of allItems) {
-      if (selected.length >= limit) break;
-      const id = it.id || it.shopee_id;
-      if (!seenIds.has(id)) {
-        selected.push(it);
-        seenIds.add(id);
-      }
-    }
-  }
-
-  return selected.slice(0, limit);
-}
-
   // ====== SHOPEE SCRAPER HANDLERS ======
   const handleShopeeScrape = async () => {
     setShopeeLoading(true);
@@ -425,56 +598,76 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
     setShopeeSuccess(null);
     setShopeeResults([]);
     setShopeeSelected(new Set());
-    
+    setShopeeProgress('');
+    setShopeeSessionId(null);
+    setShopeeBlockedByBot(false);
+    setScraperConfigFeedback(null);
+
     try {
       const keywords = shopeeKeywords
         .split(',')
         .map(k => k.trim())
         .filter(k => k.length > 0);
-      
+
       if (keywords.length === 0) {
         setShopeeError('Vui lòng nhập ít nhất 1 từ khóa để tìm kiếm và cào dữ liệu.');
         setShopeeLoading(false);
         return;
       }
 
-      if (!(await ApiClient.isServerOnline())) {
-        // Trên Vercel Cloud (Static): Lọc thông minh theo đúng từng từ khóa người dùng yêu cầu
-        const status = await ApiClient.shopee.getStatus();
-        const allItems = status.results || [];
-        if (allItems.length > 0) {
-          const filtered = filterShopeeCatalog(allItems, keywords, shopeeLimit);
-          setShopeeResults(filtered);
-          setShopeeSuccess(`⚡ Chế độ Cloud 24/7 (Vercel): Đã tìm thấy ${filtered.length} sản phẩm thật từ Shopee theo từ khóa: "${keywords.join(', ')}"!`);
-        } else {
-          setShopeeError('Không có dữ liệu sản phẩm Shopee phù hợp.');
+      const online = await ApiClient.isServerOnline();
+      setShopeeServerOnline(online);
+
+      if (!online) {
+        // Chế độ web tĩnh (Vercel chưa gắn VITE_API_BASE / Backend Offline): đọc từ dữ liệu mẫu đóng gói
+        setShopeeMode('static_snapshot');
+        const snapshot = await ApiClient.shopee.getStaticSnapshot();
+        const allItems = Array.isArray(snapshot?.results) ? snapshot.results : [];
+        if (allItems.length === 0) {
+          setShopeeError('Không tìm thấy tệp dữ liệu mẫu đã đóng gói (/shopee_scraped.json) trên web tĩnh.');
+          setShopeeLoading(false);
+          return;
         }
+
+        const filtered = filterShopeeCatalog(allItems, keywords, shopeeLimit);
+        if (filtered.length === 0) {
+          setShopeeError(
+            `Không có sản phẩm nào trong dữ liệu mẫu đã lưu khớp với từ khóa "${keywords.join(', ')}". Hãy thử từ khóa khác hoặc cấu hình VITE_API_BASE kết nối backend Render để cào trực tiếp từ Shopee.`
+          );
+          setShopeeLoading(false);
+          return;
+        }
+
+        setShopeeResults(filtered);
+        setShopeeSuccess(
+          `📦 Dữ liệu mẫu đã lưu cục bộ (chế độ Web tĩnh — không cào Shopee trực tiếp): tìm thấy ${filtered.length} sản phẩm khớp từ khóa "${keywords.join(', ')}".`
+        );
         setShopeeLoading(false);
         return;
       }
 
-      const data = await ApiClient.shopee.scrape(keywords, shopeeLimit);
-      // Xử lý an toàn tuyệt đối mảng dữ liệu (tránh lỗi crash .map() khi API trả về Object)
-      let products = Array.isArray(data.products)
-        ? data.products
-        : (Array.isArray(data.results)
-            ? data.results
-            : (Array.isArray(data) ? data : []));
-      
-      // Áp dụng bộ lọc đa tầng thông minh để sản phẩm hiển thị luôn chuẩn xác 100% theo từ khóa
-      const matched = filterShopeeCatalog(products, keywords, shopeeLimit);
-      const finalProducts = matched.length > 0 ? matched : products.slice(0, shopeeLimit);
-
-      if (finalProducts.length === 0) {
-        setShopeeError('Không tìm thấy sản phẩm nào phù hợp từ Shopee. Vui lòng thử từ khóa khác.');
-      } else {
-        setShopeeResults(finalProducts);
-        setShopeeSuccess(`🎉 Đã tìm thấy ${finalProducts.length} sản phẩm thật từ Shopee theo từ khóa: "${keywords.join(', ')}"!`);
+      if (!ApiClient.auth.getToken()) {
+        setShopeeError('Bạn đang ở chế độ Demo Offline nên chưa có phiên xác thực máy chủ. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản Chủ Shop trên backend để chạy trình cào.');
+        setShopeeLoading(false);
+        return;
       }
+
+      setShopeeMode('live');
+      const job = await ApiClient.shopee.scrape(keywords, shopeeLimit);
+      const activeSessionId = job?.sessionId;
+      if (!activeSessionId) {
+        throw new Error('Máy chủ không khởi tạo được mã phiên cào hợp lệ.');
+      }
+
+      setShopeeSessionId(activeSessionId);
+      setShopeeProgress('Đang kết nối Scraping API (Phương án B) trên máy chủ...\n');
+      await pollScrapeSession(activeSessionId, keywords, shopeeLimit);
     } catch (err) {
       console.error('Shopee scrape error:', err);
-      setShopeeError(err.message || 'Lỗi kết nối — đảm bảo server backend đang chạy và Python đã cài đặt.');
-    } finally {
+      if (err?.data?.code === 'SCRAPER_CONFIG_REQUIRED') {
+        setScraperConfigOpen(true);
+      }
+      setShopeeError(err.message || 'Lỗi kết nối — đảm bảo server backend đang chạy và đã cấu hình Scraping API (ZenRows / ScraperAPI / Crawlbase).');
       setShopeeLoading(false);
     }
   };
@@ -484,25 +677,32 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
       setShopeeError('Vui lòng chọn ít nhất 1 sản phẩm để nhập vào kho.');
       return;
     }
-    
+
     setShopeeImporting(true);
     setShopeeError(null);
-    
+
     try {
       const selectedProducts = shopeeResults.filter((_, i) => shopeeSelected.has(i));
+      const online = await ApiClient.isServerOnline();
+      setShopeeServerOnline(online);
 
-      if (!(await ApiClient.isServerOnline())) {
-        // Fallback lưu trực tiếp vào StorageService trên Vercel Cloud
+      if (!online) {
+        // Lưu bản nháp vào trình duyệt khi không có backend
         const currentProducts = StorageService.getProducts();
         const existingShopeeIds = new Set(
-          currentProducts.map(p => p.shopee_id || p.shopeeId).filter(Boolean)
+          currentProducts.map(p => p.shopee_id || p.shopeeId || p.specs?.['Mã Shopee']).filter(Boolean)
         );
+        const existingNames = new Set(
+          currentProducts.map(p => String(p.name || '').trim().toLowerCase()).filter(Boolean)
+        );
+
         let importedCount = 0;
         let skipped = 0;
         const newItems = [];
-        
+
         for (const item of selectedProducts) {
-          if (item.shopee_id && existingShopeeIds.has(item.shopee_id)) {
+          const itemNameLower = String(item.name || '').trim().toLowerCase();
+          if ((item.shopee_id && existingShopeeIds.has(item.shopee_id)) || (itemNameLower && existingNames.has(itemNameLower))) {
             skipped++;
             continue;
           }
@@ -520,34 +720,42 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
             reviewsCount: item.reviews || 0,
             soldCount: item.sold || 0,
             shopeeId: item.shopee_id,
-            sourceUrl: item.source_url
+            sourceUrl: item.source_url,
+            specs: {
+              'Nguồn gốc': 'Shopee',
+              'Mã Shopee': item.shopee_id || ''
+            }
           };
           newItems.push(draft);
-          existingShopeeIds.add(item.shopee_id);
+          if (item.shopee_id) existingShopeeIds.add(item.shopee_id);
+          if (itemNameLower) existingNames.add(itemNameLower);
           importedCount++;
         }
-        
+
         const updatedList = [...currentProducts, ...newItems];
         StorageService.saveProducts(updatedList);
         setProducts(updatedList);
-        setShopeeSuccess(`✅ Đã nhập thành công ${importedCount} sản phẩm vào kho hàng (Bản Nháp)! Đã bỏ qua ${skipped} sản phẩm trùng.`);
+        setShopeeSuccess(
+          `📦 (Chế độ trình duyệt cục bộ — chưa đồng bộ lên máy chủ) Đã lưu ${importedCount} sản phẩm Bản Nháp vào localStorage. Đã bỏ qua ${skipped} sản phẩm trùng.`
+        );
         setShopeeSelected(new Set());
-        setShopeeImporting(false);
+        return;
+      }
+
+      if (!ApiClient.auth.getToken()) {
+        setShopeeError('Bạn đang dùng tài khoản Demo Offline. Vui lòng đăng nhập lại bằng tài khoản Chủ Shop trên backend để lưu sản phẩm vào CSDL máy chủ.');
         return;
       }
 
       const data = await ApiClient.shopee.importProducts(selectedProducts);
-      
-      // Refresh product list
-      if (await ApiClient.isServerOnline()) {
-        const freshProducts = await ApiClient.products.getAll();
-        setProducts(freshProducts);
-        StorageService.saveProducts(freshProducts);
-      }
-      
+
+      const freshProducts = await ApiClient.products.getAll();
+      setProducts(freshProducts);
+      StorageService.saveProducts(freshProducts);
+
       const successMsg = data.skippedDuplicates > 0
-        ? `✅ Đã nhập thành công ${data.imported} sản phẩm vào kho hàng (Trạng thái Bản Nháp)! Đã tự động bỏ qua ${data.skippedDuplicates} sản phẩm trùng lặp.`
-        : `✅ Đã nhập thành công ${data.imported || selectedProducts.length} sản phẩm vào kho hàng (Trạng thái Bản Nháp)!`;
+        ? `✅ Đã nhập thành công ${data.imported} sản phẩm vào CSDL kho hàng (Trạng thái Bản Nháp)! Đã tự động bỏ qua ${data.skippedDuplicates} sản phẩm trùng lặp.`
+        : `✅ Đã nhập thành công ${data.imported || selectedProducts.length} sản phẩm vào CSDL kho hàng (Trạng thái Bản Nháp)!`;
 
       setShopeeSuccess(successMsg);
       setShopeeSelected(new Set());
@@ -1123,7 +1331,16 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                   {filteredProducts.map(p => (
                     <tr key={p.id} className="hover:bg-stone-50/70 transition-colors">
                       <td className="p-3 flex items-center gap-3">
-                        <img src={p.images[0]} alt="" className="w-10 h-10 rounded-lg object-cover bg-stone-100 flex-shrink-0" />
+                        <img
+                          src={resolveMediaUrl(p.images?.[0])}
+                          alt=""
+                          className="w-10 h-10 rounded-lg object-cover bg-stone-100 flex-shrink-0"
+                          onError={(e) => {
+                            const fallback = p.images?.[1];
+                            if (fallback && e.target.src !== fallback) e.target.src = fallback;
+                            else e.target.src = '/placeholder.svg';
+                          }}
+                        />
                         <div>
                           <div className="font-bold text-stone-900 line-clamp-1">{p.name}</div>
                           <div className="text-[10px] text-stone-400 font-mono">{p.id}</div>
@@ -1337,10 +1554,10 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
               <form onSubmit={handleSaveSettings} className="space-y-5 text-xs">
                 {/* Mode Selector */}
                 <div>
-                  <label className="block font-semibold text-stone-700 mb-2">Chế độ AI:</label>
+                  <label className="block font-semibold text-stone-700 mb-2">Bộ máy xử lý AI:</label>
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                     <div
-                      onClick={() => { setSettings({ ...settings, aiProvider: 'local' }); setApiTestStatus(null); }}
+                      onClick={() => { setSettings({ ...settings, aiProvider: 'local', aiProviderExplicit: true }); setApiTestStatus(null); }}
                       className={`p-4 rounded-xl border-2 flex flex-col gap-1.5 cursor-pointer transition-all ${
                         settings.aiProvider === 'local' ? 'border-amber-900 bg-amber-50/60 shadow-sm' : 'border-stone-200 hover:border-stone-300'
                       }`}
@@ -1353,26 +1570,76 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                         )}
                       </div>
                       <p className="text-stone-500 text-[11px] leading-relaxed">
-                        100% offline, phản hồi tức thì, không mất phí. Tự động nhận diện ngân sách, gợi ý sản phẩm, tra cứu đơn hàng.
+                        100% offline, phản hồi tức thì trong chế độ Cửa hàng. Tự động nhận diện ngân sách, gợi ý sản phẩm, tra cứu đơn hàng.
                       </p>
                     </div>
 
                     <div
-                      onClick={() => { setSettings({ ...settings, aiProvider: 'gemini' }); setApiTestStatus(null); }}
+                      onClick={() => { setSettings({ ...settings, aiProvider: 'gemini', aiProviderExplicit: true }); setApiTestStatus(null); }}
                       className={`p-4 rounded-xl border-2 flex flex-col gap-1.5 cursor-pointer transition-all ${
                         settings.aiProvider === 'gemini' ? 'border-amber-900 bg-amber-50/60 shadow-sm' : 'border-stone-200 hover:border-stone-300'
                       }`}
                     >
-                      <div className="font-bold text-stone-900 flex items-center gap-2">
+                      <div className="font-bold text-stone-900 flex items-center gap-2 flex-wrap">
                         <span>✨</span>
-                        <span>Google Gemini 2.5 Flash</span>
+                        <span>{geminiStatus.model ? `Google Gemini (${geminiStatus.model})` : 'Google Gemini AI'}</span>
                         {settings.aiProvider === 'gemini' && (
                           <span className="ml-auto text-[10px] px-2 py-0.5 bg-amber-900 text-white rounded-full font-semibold">Đang dùng</span>
                         )}
                       </div>
                       <p className="text-stone-500 text-[11px] leading-relaxed">
-                        AI tạo sinh mới nhất của Google — hiểu ngữ cảnh sâu, tư vấn tự nhiên hơn, key ẩn hoàn toàn trên server.
+                        AI tạo sinh của Google — hỗ trợ hội thoại nhiều lượt, suy luận phức tạp và cả chế độ Tổng quát, key ẩn trên server.
                       </p>
+                      {geminiStatus.checked && (
+                        <div className="mt-1">
+                          {!geminiStatus.online ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-semibold">Backend offline</span>
+                          ) : geminiStatus.configured ? (
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 font-semibold">
+                              ✓ Đã cấu hình key ({geminiStatus.keyMasked})
+                            </span>
+                          ) : (
+                            <span className="text-[10px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-semibold">
+                              ⚠️ Chưa cấu hình GEMINI_API_KEY
+                            </span>
+                          )}
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Assistant Scope Default */}
+                <div>
+                  <label className="block font-semibold text-stone-700 mb-2">Phạm vi Trợ lý mặc định trên khung chat:</label>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div
+                      onClick={() => setSettings({ ...settings, assistantScope: 'store' })}
+                      className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                        settings.assistantScope !== 'general' ? 'border-amber-900 bg-amber-50/50' : 'border-stone-200 hover:border-stone-300'
+                      }`}
+                    >
+                      <div className="font-bold text-stone-900 flex items-center justify-between">
+                        <span>🛍️ Tư vấn Cửa hàng</span>
+                        {settings.assistantScope !== 'general' && (
+                          <span className="text-[10px] px-2 py-0.5 bg-amber-900 text-white rounded-full">Mặc định</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-stone-500 mt-1">Tập trung sản phẩm, chọn size, bán sỉ B2B, đơn hàng & chính sách shop.</p>
+                    </div>
+                    <div
+                      onClick={() => setSettings({ ...settings, assistantScope: 'general' })}
+                      className={`p-3.5 rounded-xl border-2 cursor-pointer transition-all ${
+                        settings.assistantScope === 'general' ? 'border-emerald-700 bg-emerald-50/50' : 'border-stone-200 hover:border-stone-300'
+                      }`}
+                    >
+                      <div className="font-bold text-stone-900 flex items-center justify-between">
+                        <span>🧠 Trợ lý AI Tổng quát</span>
+                        {settings.assistantScope === 'general' && (
+                          <span className="text-[10px] px-2 py-0.5 bg-emerald-700 text-white rounded-full">Mặc định</span>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-stone-500 mt-1">Giải đáp đa lĩnh vực phức tạp (code, toán, phân tích, đời sống...) bằng Gemini AI.</p>
                     </div>
                   </div>
                 </div>
@@ -1384,20 +1651,13 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                     <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl space-y-2.5 text-[11px] text-blue-900">
                       <div className="font-bold text-xs flex items-center gap-2">
                         <Key className="w-4 h-4 text-blue-600 shrink-0" />
-                        Cách cấu hình Gemini API Key (1 lần duy nhất)
+                        Trạng thái cấu hình Gemini API Key trên Server
                       </div>
                       <ol className="space-y-1.5 pl-1 list-decimal list-inside leading-relaxed">
-                        <li>Truy cập <a href="https://aistudio.google.com/app/apikey" target="_blank" rel="noreferrer" className="underline font-semibold hover:text-blue-700">aistudio.google.com/app/apikey</a> → Đăng nhập Google → Bấm <strong>"Create API Key"</strong></li>
-                        <li>Copy key (dạng <code className="bg-blue-100 px-1 rounded">AIzaSy...</code>)</li>
-                        <li>Mở file <code className="bg-blue-100 px-1 rounded">.env</code> trong thư mục gốc dự án</li>
-                        <li>Thay dòng <code className="bg-blue-100 px-1 rounded">GEMINI_API_KEY=your_gemini_api_key_here</code> bằng key thật</li>
+                        <li>Lấy API Key từ Google AI Studio và đặt vào biến <code className="bg-blue-100 px-1 rounded">GEMINI_API_KEY</code> trong file <code className="bg-blue-100 px-1 rounded">.env</code> trên máy chủ</li>
+                        <li>Model mặc định trên server: <code className="bg-blue-100 px-1 rounded font-semibold">{geminiStatus.model || 'gemini-3.5-flash-lite'}</code></li>
                         <li>Khởi động lại server: <code className="bg-blue-100 px-1 rounded">node server/index.js</code></li>
                       </ol>
-                      <div className="mt-2 p-2 bg-white border border-blue-200 rounded-lg font-mono text-[10px] text-stone-700 leading-relaxed">
-                        <span className="text-stone-400"># File: .env</span><br/>
-                        GEMINI_API_KEY=<span className="text-amber-700">AIzaSyXXXXXXXXXXXXXXXXXX</span><br/>
-                        PORT=5000
-                      </div>
                       <p className="text-blue-700 font-semibold">🔒 Key chỉ tồn tại trên server — không bao giờ gửi về trình duyệt người dùng.</p>
                     </div>
 
@@ -1414,7 +1674,7 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                           : <><span>🔌</span> Kiểm tra kết nối server</>
                         }
                       </button>
-                      <span className="text-stone-400 text-[11px]">Gọi <code>/api/chat/status</code> để xác nhận</span>
+                      <span className="text-stone-400 text-[11px]">Gọi <code>/api/chat/status</code> &amp; <code>/api/chat/test</code> để xác nhận model thực tế</span>
                     </div>
 
                     {/* Test result */}
@@ -1605,12 +1865,256 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
               </div>
             </div>
 
+            {/* Backend Online vs Static Mode Banner */}
+            {shopeeServerOnline === false && (
+              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-xs text-amber-900">
+                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                <div>
+                  <p className="font-bold">Đang chạy chế độ Web Tĩnh (Backend / Python Scraper Offline)</p>
+                  <p className="mt-0.5 text-amber-800">
+                    Khi bấm tìm kiếm ở chế độ này, hệ thống chỉ lọc từ <strong>dữ liệu mẫu đã đóng gói cục bộ</strong> (<code>/shopee_scraped.json</code>), không kết nối Shopee trực tiếp; sản phẩm nhập sẽ lưu Bản Nháp vào <code>localStorage</code> trên trình duyệt.
+                  </p>
+                </div>
+              </div>
+            )}
+
+            {shopeeServerOnline === true && (
+              <div className="space-y-3">
+                <div className="bg-emerald-50/70 border border-emerald-200 rounded-xl px-4 py-3 flex items-center justify-between gap-2 text-xs text-emerald-900">
+                  <span className="font-semibold flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                    Backend Scraper Trực Tuyến · Phương án B (Scraping API Cloud — tối ưu RAM cho Render Free)
+                  </span>
+                  {shopeeSessionId && (
+                    <span className="font-mono text-[11px] bg-white px-2 py-0.5 rounded border border-emerald-200">
+                      Phiên: {shopeeSessionId}
+                    </span>
+                  )}
+                </div>
+
+                {/* Cấu Hình Scraping API Card (Phương Án B: ZenRows / ScraperAPI / Crawlbase) */}
+                {(() => {
+                  const isReady = Boolean(scraperConfig?.configured) && !shopeeBlockedByBot;
+                  const activeProv = scraperConfig?.activeProvider;
+                  const activeMeta = activeProv ? scraperConfig?.providers?.[activeProv] : null;
+                  const selectedMeta = scraperConfig?.providers?.[scraperProviderInput];
+
+                  return (
+                    <div
+                      className={`rounded-2xl border shadow-xs transition-all ${
+                        !scraperConfig?.configured || shopeeBlockedByBot
+                          ? 'bg-amber-50/80 border-amber-300'
+                          : 'bg-white border-stone-200'
+                      }`}
+                    >
+                      <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                          <span
+                            className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                              isReady
+                                ? 'bg-emerald-100 text-emerald-700'
+                                : 'bg-amber-100 text-amber-700'
+                            }`}
+                          >
+                            <Key className="w-4 h-4" />
+                          </span>
+                          <div>
+                            <div className="font-bold text-stone-900 flex flex-wrap items-center gap-2">
+                              <span>Scraping API (Phương án B: ZenRows / ScraperAPI / Crawlbase)</span>
+                              {scraperConfigLoading ? (
+                                <span className="text-[11px] font-medium text-stone-500">Đang kiểm tra...</span>
+                              ) : scraperConfig?.configured ? (
+                                <span
+                                  className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${
+                                    shopeeBlockedByBot
+                                      ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                                      : 'bg-emerald-100 text-emerald-800 border border-emerald-200'
+                                  }`}
+                                >
+                                  Đang dùng: {activeProv?.toUpperCase()} ({activeMeta?.keyMasked || 'configured'})
+                                </span>
+                              ) : (
+                                <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-rose-100 text-rose-700 border border-rose-200">
+                                  Chưa gắn API Key
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[11px] text-stone-500 mt-0.5">
+                              {scraperConfig?.configured
+                                ? 'Dịch vụ bên thứ 3 tự chạy JS, giải quyết token Akamai và xoay IP Việt Nam (VN) cho server.'
+                                : 'Cần ít nhất 1 API Key (ZenRows, ScraperAPI hoặc Crawlbase) để vượt lỗi 403 / Akamai 90309999.'}
+                            </p>
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => setScraperConfigOpen((prev) => !prev)}
+                          aria-expanded={scraperConfigOpen}
+                          className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all ${
+                            !scraperConfig?.configured || shopeeBlockedByBot
+                              ? 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shadow-xs'
+                              : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                          }`}
+                        >
+                          <Key className="w-3.5 h-3.5" />
+                          <span>{scraperConfigOpen ? 'Thu gọn' : 'Cấu hình API Key'}</span>
+                          {scraperConfigOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                        </button>
+                      </div>
+
+                      {scraperConfigOpen && (
+                        <div className="px-4 pb-4 pt-3 border-t border-stone-200/80 space-y-3 text-xs">
+                          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                            {[
+                              { id: 'zenrows', name: 'ZenRows', note: 'Khuyên dùng · JS + XHR JSON', url: 'https://www.zenrows.com/' },
+                              { id: 'scraperapi', name: 'ScraperAPI', note: 'Ultra Premium + Render', url: 'https://www.scraperapi.com/' },
+                              { id: 'crawlbase', name: 'Crawlbase', note: 'Dùng JavaScript Token', url: 'https://crawlbase.com/' }
+                            ].map((item) => {
+                              const pMeta = scraperConfig?.providers?.[item.id];
+                              const active = scraperConfig?.activeProvider === item.id;
+                              return (
+                                <div
+                                  key={item.id}
+                                  className={`p-2.5 rounded-xl border text-[11px] flex flex-col justify-between gap-1 ${
+                                    active
+                                      ? 'bg-emerald-50/70 border-emerald-300'
+                                      : 'bg-stone-50 border-stone-200'
+                                  }`}
+                                >
+                                  <div className="flex items-center justify-between gap-1">
+                                    <span className="font-bold text-stone-900">{item.name}</span>
+                                    <a
+                                      href={item.url}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="text-orange-700 hover:underline inline-flex items-center gap-0.5"
+                                    >
+                                      <span>Lấy key</span>
+                                      <ExternalLink className="w-2.5 h-2.5" />
+                                    </a>
+                                  </div>
+                                  <span className="text-stone-500">{item.note}</span>
+                                  <div className="flex items-center justify-between mt-1">
+                                    <span className={`font-mono text-[10px] ${pMeta?.configured ? 'text-emerald-700 font-bold' : 'text-stone-400'}`}>
+                                      {pMeta?.configured ? pMeta.keyMasked : 'Chưa cấu hình'}
+                                    </span>
+                                    {pMeta?.configured && pMeta?.source === 'admin_runtime' && (
+                                      <button
+                                        type="button"
+                                        onClick={() => handleClearScraperKey(item.id)}
+                                        className="text-[10px] text-rose-600 hover:underline font-medium"
+                                        disabled={scraperConfigSaving}
+                                      >
+                                        Xóa
+                                      </button>
+                                    )}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+
+                          <form onSubmit={handleSaveScraperConfig} className="space-y-2.5">
+                            <div className="grid grid-cols-1 sm:grid-cols-12 gap-2.5">
+                              <div className="sm:col-span-4">
+                                <label htmlFor="scraper-provider-select" className="block font-semibold text-stone-800 mb-1">
+                                  Nhà cung cấp API:
+                                </label>
+                                <select
+                                  id="scraper-provider-select"
+                                  value={scraperProviderInput}
+                                  onChange={(e) => {
+                                    setScraperProviderInput(e.target.value);
+                                    setScraperConfigFeedback(null);
+                                  }}
+                                  disabled={scraperConfigSaving}
+                                  className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                >
+                                  <option value="zenrows">ZenRows (ZENROWS_API_KEY)</option>
+                                  <option value="scraperapi">ScraperAPI (SCRAPERAPI_KEY)</option>
+                                  <option value="crawlbase">Crawlbase (CRAWLBASE_TOKEN)</option>
+                                </select>
+                              </div>
+
+                              <div className="sm:col-span-8">
+                                <label htmlFor="scraper-apikey-input" className="block font-semibold text-stone-800 mb-1">
+                                  API Key / Token cho {scraperProviderInput.toUpperCase()}
+                                  {selectedMeta?.configured ? ` (đang có: ${selectedMeta.keyMasked})` : ''}:
+                                </label>
+                                <input
+                                  id="scraper-apikey-input"
+                                  type="password"
+                                  value={scraperApiKeyInput}
+                                  onChange={(e) => {
+                                    setScraperApiKeyInput(e.target.value);
+                                    if (scraperConfigFeedback) setScraperConfigFeedback(null);
+                                  }}
+                                  autoComplete="off"
+                                  spellCheck={false}
+                                  placeholder={`Dán API Key mới cho ${scraperProviderInput.toUpperCase()} (để trống nếu chỉ đổi provider)`}
+                                  className="w-full font-mono text-xs bg-white border border-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
+                                  disabled={scraperConfigSaving}
+                                />
+                              </div>
+                            </div>
+
+                            {scraperConfigFeedback && (
+                              <div
+                                className={`p-3 rounded-xl border text-xs flex items-start gap-2 ${
+                                  scraperConfigFeedback.ok
+                                    ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                                    : 'bg-rose-50 border-rose-200 text-rose-800'
+                                }`}
+                              >
+                                {scraperConfigFeedback.ok ? (
+                                  <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                                ) : (
+                                  <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                                )}
+                                <span>{scraperConfigFeedback.message}</span>
+                              </div>
+                            )}
+
+                            <div className="flex flex-wrap items-center justify-between gap-2">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="submit"
+                                  disabled={scraperConfigSaving || (!scraperApiKeyInput.trim() && !selectedMeta?.configured)}
+                                  className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all disabled:opacity-50"
+                                >
+                                  {scraperConfigSaving ? (
+                                    <>
+                                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                      <span>Đang lưu...</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <Key className="w-3.5 h-3.5" />
+                                      <span>Lưu Cấu Hình Scraping API</span>
+                                    </>
+                                  )}
+                                </button>
+                              </div>
+                              <span className="text-[11px] text-stone-500">
+                                💡 Trên Render Production, nên thêm biến <code>ZENROWS_API_KEY</code> (hoặc <code>SCRAPERAPI_KEY</code> / <code>CRAWLBASE_TOKEN</code>) vào Render Environment Variables để giữ vĩnh viễn sau mỗi lần redeploy.
+                              </span>
+                            </div>
+                          </form>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })()}
+              </div>
+            )}
+
             {/* Error Alert */}
             {shopeeError && (
               <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
                 <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-red-800">Lỗi</p>
+                  <p className="text-sm font-semibold text-red-800">Không có kết quả hoặc có lỗi</p>
                   <p className="text-sm text-red-700 mt-0.5">{shopeeError}</p>
                 </div>
                 <button onClick={() => setShopeeError(null)} className="ml-auto text-red-400 hover:text-red-600">
@@ -1624,7 +2128,9 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">Thành công</p>
+                  <p className="text-sm font-semibold text-emerald-800">
+                    {shopeeMode === 'static_snapshot' ? 'Dữ liệu mẫu cục bộ' : 'Hoàn tất phiên cào'}
+                  </p>
                   <p className="text-sm text-emerald-700 mt-0.5">{shopeeSuccess}</p>
                 </div>
                 <button onClick={() => setShopeeSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-600">
@@ -1639,7 +2145,7 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                 <Search className="w-4 h-4 text-orange-600" />
                 Nhập Từ Khóa Tìm Kiếm
               </h3>
-              <p className="text-xs text-stone-500 mb-4">Nhập các từ khóa sản phẩm cần cào, phân tách bằng dấu phẩy. Mỗi từ khóa sẽ tìm ~10 sản phẩm.</p>
+              <p className="text-xs text-stone-500 mb-4">Nhập các từ khóa sản phẩm cần tìm, phân tách bằng dấu phẩy. Tổng số lượng sẽ được phân bổ cân bằng qua tất cả từ khóa.</p>
               
               <textarea
                 value={shopeeKeywords}
@@ -1740,7 +2246,7 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <div className="bg-orange-50 rounded-lg p-2">
-                    <p className="text-xs text-orange-800 font-medium">🌐 Truy cập Shopee</p>
+                    <p className="text-xs text-orange-800 font-medium">🌐 Qua Scraping API</p>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-2">
                     <p className="text-xs text-amber-800 font-medium">🔍 Tìm sản phẩm</p>
@@ -1749,6 +2255,11 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                     <p className="text-xs text-stone-600 font-medium">📥 Tải ảnh về</p>
                   </div>
                 </div>
+                {shopeeProgress && (
+                  <pre className="mt-3 p-3 bg-stone-900 text-stone-200 rounded-xl text-[11px] font-mono max-h-36 overflow-y-auto whitespace-pre-wrap">
+                    {shopeeProgress}
+                  </pre>
+                )}
               </div>
             )}
 
@@ -1757,7 +2268,16 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
               <div className="space-y-4">
                 {/* Action Bar */}
                 <div className="bg-white rounded-2xl border border-stone-200 shadow-xs p-4 flex flex-wrap items-center justify-between gap-3">
-                  <div className="flex items-center gap-3">
+                  <div className="flex items-center gap-3 flex-wrap">
+                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${
+                      shopeeMode === 'static_snapshot'
+                        ? 'bg-amber-50 text-amber-800 border-amber-200'
+                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
+                    }`}>
+                      {shopeeMode === 'static_snapshot'
+                        ? '📦 Dữ liệu mẫu / đã lưu cục bộ'
+                        : `🌐 Cào trực tiếp${shopeeSessionId ? ` · ${shopeeSessionId}` : ''}`}
+                    </span>
                     <button
                       onClick={toggleShopeeSelectAll}
                       className="px-3 py-1.5 rounded-lg text-xs font-bold border border-stone-300 hover:bg-stone-50 flex items-center gap-1.5 transition-all"
@@ -1814,12 +2334,17 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                       {/* Image */}
                       <div className="relative aspect-square bg-stone-100 overflow-hidden">
                         <img
-                          src={product.images?.[0] || '/placeholder.svg'}
+                          src={resolveMediaUrl(product.images?.[0])}
                           alt={product.name}
                           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                           loading="lazy"
                           onError={(e) => {
-                            e.target.src = '/placeholder.svg';
+                            const fallback = product.images?.[1];
+                            if (fallback && e.target.src !== fallback) {
+                              e.target.src = fallback;
+                            } else {
+                              e.target.src = '/placeholder.svg';
+                            }
                           }}
                         />
                         
@@ -1937,7 +2462,7 @@ function filterShopeeCatalog(allItems, keywords, limit = 20) {
                 Lưu ý quan trọng
               </h4>
               <ul className="text-xs text-amber-800 space-y-1.5 leading-relaxed">
-                <li>• <strong>Quy chuẩn bảo mật:</strong> Hệ thống không hardcode thông tin đăng nhập, không lưu cookie tài khoản cá nhân, tuân thủ an toàn mạng.</li>
+                <li>• <strong>Quy chuẩn bảo mật:</strong> Hệ thống không hardcode API Key hoặc thông tin đăng nhập trong mã nguồn; Scraping API Key được lưu an toàn qua biến môi trường (Render / .env) và luôn được che giấu khi hiển thị.</li>
                 <li>• <strong>Kiểm soát dữ liệu thực tế (Zero Hallucination):</strong> Scraper không tự bịa giá gốc, không random tồn kho ảo, không gán số bán vào đánh giá.</li>
                 <li>• <strong>Quy trình nhập kho an toàn:</strong> Toàn bộ sản phẩm nhập từ Shopee được lưu ở trạng thái <strong>Bản Nháp (Draft)</strong> với <strong>Tồn kho = 0</strong>, giúp chủ shop kiểm kê và điều chỉnh giá trước khi kích hoạt bán thật trên storefront.</li>
                 <li>• <strong>Chống trùng lặp (Deduplication):</strong> Hệ thống tự động phát hiện và bỏ qua các sản phẩm đã có trong cơ sở dữ liệu để tránh nhập đè.</li>

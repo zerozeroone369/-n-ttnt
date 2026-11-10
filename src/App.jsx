@@ -13,7 +13,7 @@ import AdminDashboard from './components/AdminDashboard';
 import AuthModal from './components/AuthModal';
 import AppDownloadModal from './components/AppDownloadModal';
 import { StorageService } from './services/storage';
-import { ApiClient } from './services/api';
+import { ApiClient, IS_DEMO_MODE_ALLOWED } from './services/api';
 import { getOrdersForUser } from './services/aiChatEngine';
 import { STORE_INFO } from './data/initialData';
 import { Heart, MapPin, Phone, Mail, Clock, ShieldCheck, Check } from 'lucide-react';
@@ -67,14 +67,69 @@ export default function App() {
     };
   }, []);
 
+  // Verify persisted session token on startup & clear invalid/stale sessions
+  useEffect(() => {
+    let active = true;
+    const verifyStartupSession = async () => {
+      const token = ApiClient.auth.getToken();
+      const storedUser = ApiClient.auth.getCurrentUser();
+
+      if (storedUser?.isOfflineDemo) {
+        if (!IS_DEMO_MODE_ALLOWED) {
+          ApiClient.auth.clearLocalSession();
+          if (active) {
+            setCurrentUser(null);
+            setOrders([]);
+            setIsAdminView(false);
+          }
+        }
+        return;
+      }
+
+      // Remove legacy insecure local tokens or user objects missing server token
+      if ((token && token.startsWith('local_token_')) || (storedUser && !token)) {
+        ApiClient.auth.clearLocalSession();
+        if (active) {
+          setCurrentUser(null);
+          setOrders([]);
+          setIsAdminView(false);
+        }
+        return;
+      }
+
+      if (!token) return;
+
+      const online = await ApiClient.isServerOnline();
+      if (!online || !active) return;
+
+      try {
+        const verifiedUser = await ApiClient.auth.me();
+        if (active && verifiedUser) {
+          setCurrentUser(verifiedUser);
+        }
+      } catch (err) {
+        if (active && err.status === 401) {
+          setCurrentUser(null);
+          setOrders([]);
+          setIsAdminView(false);
+          showToast('Phiên đăng nhập trước đã hết hạn, vui lòng đăng nhập lại.');
+        }
+      }
+    };
+
+    verifyStartupSession();
+    return () => { active = false; };
+  }, []);
+
   // Initial Sync from Backend Database Server
   useEffect(() => {
     const syncDataWithServer = async () => {
       if (!(await ApiClient.isServerOnline())) return;
 
+      const hasServerToken = Boolean(ApiClient.auth.getToken());
       const [productsResult, ordersResult] = await Promise.allSettled([
         ApiClient.products.getAll(),
-        currentUser ? ApiClient.orders.getAll() : Promise.resolve([])
+        (currentUser && hasServerToken) ? ApiClient.orders.getAll() : Promise.resolve([])
       ]);
 
       if (productsResult.status === 'fulfilled') {
@@ -86,7 +141,13 @@ export default function App() {
       if (ordersResult.status === 'fulfilled') {
         setOrders(getOrdersForUser(ordersResult.value, currentUser));
       } else {
-        console.warn('Order sync error (using local storage):', ordersResult.reason);
+        if (ordersResult.reason?.status === 401 && hasServerToken) {
+          ApiClient.auth.clearLocalSession();
+          setCurrentUser(null);
+          setIsAdminView(false);
+          setOrders([]);
+        }
+        console.warn('Order sync error:', ordersResult.reason);
       }
     };
     syncDataWithServer();

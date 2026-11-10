@@ -3,6 +3,7 @@ import { X, Trash2, ShoppingBag, ArrowRight, Tag, Check, AlertCircle } from 'luc
 import { formatCurrency } from '../services/aiChatEngine';
 import { STORE_INFO } from '../data/initialData';
 import { StorageService } from '../services/storage';
+import { resolveMediaUrl } from '../services/api';
 
 export default function CartDrawer({
   isOpen,
@@ -152,9 +153,14 @@ export default function CartDrawer({
                 >
                   {/* Thumbnail */}
                   <img
-                    src={item.image || item.images?.[0]}
+                    src={resolveMediaUrl(item.image || item.images?.[0])}
                     alt={item.name}
                     className="w-18 h-18 w-20 h-20 rounded-xl object-cover bg-white flex-shrink-0"
+                    onError={(e) => {
+                      const fallback = item.images?.[1];
+                      if (fallback && e.target.src !== fallback) e.target.src = fallback;
+                      else e.target.src = '/placeholder.svg';
+                    }}
                   />
 
                   {/* Info */}

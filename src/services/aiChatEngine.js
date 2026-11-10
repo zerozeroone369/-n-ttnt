@@ -1,5 +1,6 @@
 import { STORE_INFO } from '../data/initialData.js';
 import { StorageService } from './storage.js';
+import { ApiClient, API_BASE } from './api.js';
 
 /**
  * Format price in Vietnamese Dong
@@ -585,12 +586,20 @@ export const CustomerCareEngine = {
 export const AIChatEngine = {
   /**
    * Process a user message and return assistant reply
+   * @param {string} userMessage
+   * @param {Array} currentProducts
+   * @param {Array} currentOrders
+   * @param {Object|null} currentUser
+   * @param {{ scope?: 'store' | 'general', history?: Array, forceLocal?: boolean, forceGemini?: boolean }} options
    */
-  async processMessage(userMessage, currentProducts, currentOrders, currentUser) {
+  async processMessage(userMessage, currentProducts, currentOrders, currentUser, options = {}) {
     const text = userMessage.trim();
     const lower = text.toLowerCase();
     const normalized = removeVietnameseTones(text);
     const settings = StorageService.getSettings();
+    const scope = (options.scope || settings?.assistantScope) === 'general' ? 'general' : 'store';
+    const provider = options.forceLocal ? 'local' : (options.forceGemini ? 'gemini' : settings?.aiProvider);
+    const history = Array.isArray(options.history) ? options.history : [];
     const accessibleOrders = getOrdersForUser(currentOrders, currentUser);
     const orderCodeMatch = text.match(/ORD-\d{4}/i);
 
@@ -598,7 +607,9 @@ export const AIChatEngine = {
       return {
         text: 'Dạ bạn vui lòng đăng nhập để tra cứu đơn hàng cá nhân của mình ạ.',
         products: [],
-        vouchers: []
+        vouchers: [],
+        engineUsed: 'guardrail',
+        scope
       };
     }
 
@@ -610,45 +621,87 @@ export const AIChatEngine = {
         return {
           text: 'Mình không thể cung cấp thông tin của đơn hàng này.',
           products: [],
+          vouchers: [],
+          engineUsed: 'guardrail',
+          scope
+        };
+      }
+    }
+
+    // =========================================================================
+    // 1. DOMAIN GUARDRAIL: Chỉ áp dụng trong chế độ Tư Vấn Cửa Hàng ('store')
+    // =========================================================================
+    if (scope === 'store' && isOutOfDomain(text, lower, normalized)) {
+      return {
+        text: `Dạ xin lỗi bạn, câu hỏi này **nằm ngoài phạm vi Tư vấn Cửa hàng** của Tiệm ạ! 🌿\n\n` +
+              `Trong chế độ **🛍️ Tư vấn Cửa hàng**, em tập trung giải đáp về sản phẩm, chọn size, bán sỉ B2B, đơn hàng và chính sách bảo hành/freeship.\n\n` +
+              `💡 *Mẹo:* Nếu bạn muốn hỏi các chủ đề tổng quát hơn (lập trình, toán học, kiến thức chung, phân tích sâu...), hãy chuyển sang chế độ **🧠 Trợ lý AI Tổng quát** ở ngay phía trên khung chat nhé! ✨`,
+        products: [],
+        vouchers: [],
+        engineUsed: 'guardrail',
+        scope,
+        suggestGeneralMode: true
+      };
+    }
+
+    // =========================================================================
+    // 2. GOOGLE GEMINI ENGINE (Không fallback im lặng — báo lỗi minh bạch)
+    // =========================================================================
+    if (provider === 'gemini') {
+      try {
+        const result = await this.callBackendChat(text, currentProducts, accessibleOrders, { scope, history });
+        if (result?.text) {
+          return result;
+        }
+        return {
+          isGeminiError: true,
+          engineUsed: 'gemini-error',
+          errorStatus: 502,
+          errorMessage: 'Gemini trả về nội dung rỗng.',
+          originalQuery: text,
+          scope,
+          text: '⚠️ **Google Gemini trả về phản hồi rỗng.** Bạn vui lòng bấm **"Thử lại Gemini"** hoặc chuyển sang Trợ lý cục bộ.',
+          products: [],
+          vouchers: []
+        };
+      } catch (err) {
+        console.warn('[AI] Backend /api/chat failed:', err.message);
+        return {
+          isGeminiError: true,
+          engineUsed: 'gemini-error',
+          errorStatus: err.status || 500,
+          errorMessage: err.message || 'Lỗi kết nối Gemini trên máy chủ.',
+          originalQuery: text,
+          scope,
+          text: `⚠️ **Không thể nhận phản hồi từ Google Gemini:** ${err.message || 'Lỗi kết nối máy chủ.'}\n\nHệ thống không tự ý thay thế bằng câu trả lời mẫu để tránh gây hiểu nhầm. Bạn có thể bấm nút bên dưới để **thử lại Gemini**${scope === 'store' ? ' hoặc **dùng AI cục bộ cho câu này**' : ''}.`,
+          products: [],
           vouchers: []
         };
       }
     }
 
     // =========================================================================
-    // 1. STRICT GUARDRAIL CHECK (Câu hỏi không liên quan thì KHÔNG trả lời)
+    // 3. LOCAL ENGINE (Chỉ hỗ trợ Tư vấn Cửa hàng — không giả lập AI tổng quát)
     // =========================================================================
-    if (isOutOfDomain(text, lower, normalized)) {
+    if (scope === 'general') {
       return {
-        text: `Dạ xin lỗi bạn, câu hỏi này **nằm ngoài phạm vi hỗ trợ của em** ạ! 🌿\n\n` +
-              `Em là **Trợ lý AI Cao Cấp chuyên trách Tư Vấn Kinh Doanh & Sản Phẩm** của Tiệm Nhà Nhỏ. Em chỉ được lập trình để hỗ trợ giải quyết các nội dung liên quan đến thương mại và dịch vụ của cửa hàng:\n\n` +
-              `• 🛍️ **Tư vấn sản phẩm chuyên sâu:** Chất liệu, nguồn gốc xưởng thủ công, thông số kỹ thuật, tư vấn size áo (chiều cao/cân nặng), cách sử dụng và hướng dẫn bảo quản đồ thủ công.\n` +
-              `• 💼 **Chính sách kinh doanh & Bán sỉ:** Mua số lượng lớn, chiết khấu quà tặng doanh nghiệp, xuất hóa đơn VAT, hợp tác cung ứng hàng thủ công.\n` +
-              `• 📦 **Vận hành đơn hàng:** Tra cứu hành trình giao hàng, kiểm tra tiền thu hộ COD, tiếp nhận hủy đơn hoặc thay đổi địa chỉ nhận.\n` +
-              `• 🚚 **Chính sách mua sắm:** Đổi trả 1 đổi 1 trong 7 ngày, miễn phí vận chuyển Freeship từ 450k và áp dụng mã khuyến mãi.\n\n` +
-              `Nếu bạn có bất kỳ câu hỏi nào về sản phẩm hoặc hoạt động kinh doanh của Tiệm, em luôn sẵn lòng hỗ trợ bạn ngay ạ! ✨`,
+        text: `💡 Chế độ **🧠 Trợ lý AI Tổng quát** cần kết nối **Google Gemini AI** để phân tích và trả lời câu hỏi đa lĩnh vực.\n\n` +
+              `Hiện tại chatbot đang bật **⚡ AI Cục bộ (chỉ hỗ trợ nghiệp vụ cửa hàng)**. Bạn có thể bấm **"Bật Google Gemini AI"** ngay bên dưới hoặc chuyển về **🛍️ Tư vấn Cửa hàng**.`,
+        needsGemini: true,
+        originalQuery: text,
+        engineUsed: 'local',
+        scope,
         products: [],
         vouchers: []
       };
     }
 
-    // 2. Gọi backend /api/chat (Gemini key ẩn hoàn toàn trên server)
-    if (settings?.aiProvider === 'gemini') {
-      try {
-        const result = await this.callBackendChat(text, currentProducts, accessibleOrders);
-        // Kiểm tra result có text hợp lệ không (không phải system prompt bị lộ)
-        if (result?.text && !result.text.includes('Persona maintained') && !result.text.includes('NHIỆM VỤ') && !result.text.includes('systemInstruction')) {
-          return result;
-        }
-        console.warn('[AI] Gemini trả về nội dung không hợp lệ, dùng local engine');
-      } catch (err) {
-        console.warn('[AI] Backend /api/chat thất bại, dùng local engine:', err.message);
-        // Server 503 quá tải → fallback im lặng
-      }
-    }
-
-    // 3. Default: Local Semantic Engine
-    return this.processLocally(text, lower, normalized, currentProducts, accessibleOrders);
+    const localResult = this.processLocally(text, lower, normalized, currentProducts, accessibleOrders);
+    return {
+      ...localResult,
+      engineUsed: 'local',
+      scope
+    };
   },
 
   /**
@@ -1277,31 +1330,33 @@ export const AIChatEngine = {
 
   /**
    * callBackendChat — Gọi /api/chat trên server (Gemini key ẩn hoàn toàn)
-   * Server nhận message + danh sách sản phẩm/đơn hàng → gọi Gemini → trả về text + recommendedIds
+   * Gửi message + scope + bounded conversation history → nhận phản hồi thật từ backend
    */
-  async callBackendChat(message, products, orders) {
-    // STORE_INFO đã được import static ở đầu file
+  async callBackendChat(message, products, _orders, options = {}) {
+    const scope = options.scope === 'general' ? 'general' : 'store';
+    const rawHistory = Array.isArray(options.history) ? options.history : [];
+    const boundedHistory = rawHistory
+      .filter(m => m && typeof m.text === 'string' && m.text.trim() && !m.isGeminiError && !m.needsGemini)
+      .slice(-10)
+      .map(m => ({
+        role: m.sender === 'bot' ? 'model' : 'user',
+        text: m.text.trim().slice(0, 1500)
+      }));
 
+    const inStock = getInStockProducts(products);
     const payload = {
       message,
-      // Chỉ gửi các trường cần thiết để giảm payload size
-      products: getInStockProducts(products).map(p => ({
+      scope,
+      history: boundedHistory,
+      // Gửi catalog thu gọn (tối đa 120 sản phẩm trong store mode, 30 trong general mode)
+      products: inStock.slice(0, scope === 'general' ? 30 : 120).map(p => ({
         id: p.id,
         name: p.name,
         category: p.category,
         price: p.price,
         originalPrice: p.originalPrice,
         stock: p.stock,
-        shortDesc: p.shortDesc,
-        tags: p.tags
-      })),
-      orders: orders.slice(0, 5).map(o => ({
-        id: o.id,
-        customer: { name: o.customer?.name, phone: o.customer?.phone },
-        orderStatus: o.orderStatus,
-        total: o.total,
-        trackingCarrier: o.trackingCarrier,
-        trackingCode: o.trackingCode
+        shortDesc: p.shortDesc
       })),
       storeInfo: {
         name: STORE_INFO.name,
@@ -1314,246 +1369,108 @@ export const AIChatEngine = {
       }
     };
 
-    const res = await fetch('/api/chat', {
+    const res = await fetch(`${API_BASE}/chat`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        ...ApiClient._authHeaders()
+      },
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || `Server error ${res.status}`);
+    const contentType = res.headers.get('content-type') || '';
+    if (!contentType.includes('application/json')) {
+      const err = new Error('Máy chủ backend không phản hồi JSON (hãy đảm bảo server Node đang chạy).');
+      err.status = res.status;
+      throw err;
     }
 
     const data = await res.json();
-    const { text, recommendedIds = [] } = data;
+    if (!res.ok) {
+      const err = new Error(data.error || `Server error ${res.status}`);
+      err.status = res.status;
+      throw err;
+    }
 
-    // Map recommended IDs → product objects để frontend render card
+    const { text, recommendedIds = [], model, finishReason, truncated } = data;
+
+    // Map recommended IDs -> product objects
     const productIndex = {};
-    getInStockProducts(products).forEach(p => { productIndex[p.id] = p; });
+    inStock.forEach(p => { productIndex[p.id] = p; });
     const matchedProducts = recommendedIds
       .map(id => productIndex[id])
       .filter(Boolean)
       .slice(0, 4);
 
-    // Fallback nếu server quên gắn ID nhưng Gemini đề cập tên sp
-    const finalProducts = matchedProducts.length > 0
+    // Chỉ tự match thêm tên sản phẩm trong chế độ 'store'
+    const finalProducts = matchedProducts.length > 0 || scope === 'general'
       ? matchedProducts
-      : getInStockProducts(products)
-          .filter(p => removeVietnameseTones(text).includes(removeVietnameseTones(p.name.substring(0, 12))))
+      : inStock
+          .filter(p => removeVietnameseTones(text).includes(removeVietnameseTones(p.name.substring(0, 15))))
           .slice(0, 3);
-
-    return { text, products: finalProducts, vouchers: [] };
-  },
-
-  /**
-   * Gemini 2.0 Flash API Integration
-   * - Model: gemini-2.0-flash (tốt nhất hiện tại, miễn phí quota cao)
-   * - Context tối ưu: nhóm sản phẩm theo danh mục thay vì liệt kê toàn bộ
-   * - System instruction tách riêng (Gemini 2.0 hỗ trợ systemInstruction field)
-   * - Trả về recommended product IDs để frontend render card
-   */
-  async callGeminiAPI(prompt, apiKey, products, orders) {
-    // ── 1. Build compact catalog (tối đa 200 sản phẩm, nhóm theo category) ──
-    const inStock = getInStockProducts(products);
-    
-    // Tạo index nhanh cho lookup sau này
-    const productIndex = {};
-    inStock.forEach(p => { productIndex[p.id] = p; });
-
-    // Tóm tắt catalog theo nhóm để tiết kiệm token
-    const byCategory = {};
-    inStock.forEach(p => {
-      if (!byCategory[p.category]) byCategory[p.category] = [];
-      byCategory[p.category].push(p);
-    });
-
-    const catLabels = {
-      fashion: '👕 Thời Trang & Phụ Kiện',
-      decor: '🏡 Decor & Nến Thơm & Gốm Sứ',
-      coffee: '☕ Cà Phê & Thực Phẩm Đặc Sản',
-      tech: '⌨️ Phụ Kiện Công Nghệ Gỗ'
-    };
-
-    const catalogLines = Object.entries(byCategory).map(([cat, items]) => {
-      const label = catLabels[cat] || cat;
-      const rows = items.map(p =>
-        `  • [${p.id}] ${p.name} | ${formatCurrency(p.price)}${p.originalPrice && p.originalPrice > p.price ? ` (gốc ${formatCurrency(p.originalPrice)})` : ''} | Còn ${p.stock} | ${p.shortDesc}`
-      ).join('\n');
-      return `${label} (${items.length} sản phẩm):\n${rows}`;
-    }).join('\n\n');
-
-    // ── 2. Orders summary (tối đa 5 đơn gần nhất) ──
-    const recentOrders = orders.slice(0, 5);
-    const ordersSummary = recentOrders.length > 0
-      ? recentOrders.map(o =>
-          `  • ${o.id} | ${o.customer.name} (${o.customer.phone}) | ${this.getStatusLabel(o.orderStatus)} | ${formatCurrency(o.total)} | ${o.trackingCarrier || 'GHTK'} - ${o.trackingCode || 'chưa có mã'}`
-        ).join('\n')
-      : '  (Chưa có đơn hàng)';
-
-    // ── 3. System instruction ──
-    const systemInstruction = `Bạn là **Nhân Viên Tư Vấn AI Cao Cấp** của **"${STORE_INFO.name}"** — một boutique thủ công tối giản tại Hà Nội.
-
-🎯 NHIỆM VỤ DUY NHẤT: Hỗ trợ khách hàng trong phạm vi hoạt động thương mại của Tiệm Nhà Nhỏ gồm:
-  (1) Tư vấn & gợi ý sản phẩm phù hợp ngân sách / nhu cầu / phong cách của khách
-  (2) Tư vấn chọn size quần áo dựa trên chiều cao / cân nặng
-  (3) Chính sách bán sỉ, quà tặng doanh nghiệp, xuất hóa đơn VAT
-  (4) Tra cứu và cập nhật tiến độ đơn hàng
-  (5) Chính sách đổi trả, vận chuyển, thanh toán
-  (6) Hướng dẫn sử dụng và bảo quản sản phẩm thủ công
-
-❌ TUYỆT ĐỐI KHÔNG TRẢ LỜI: Lập trình, toán học, thời tiết, tin tức, chính trị, y tế, soi bói, cryptocurrency, hay bất kỳ chủ đề nào ngoài hoạt động thương mại của tiệm. Khi gặp câu hỏi ngoài phạm vi, từ chối lịch sự và dẫn khách quay lại tư vấn sản phẩm.
-
-💬 PHONG CÁCH: Lịch thiệp, thân thiện, thông thái, xưng "em" / "bạn". Dùng emoji nhẹ nhàng. Câu trả lời ngắn gọn súc tích, tránh dài dòng.
-
-📦 DANH MỤC SẢN PHẨM HIỆN TẠI (${inStock.length} sản phẩm còn hàng):
-${catalogLines}
-
-📋 ĐƠN HÀNG GẦN ĐÂY:
-${ordersSummary}
-
-🏪 THÔNG TIN TIỆM:
-  • Địa chỉ: ${STORE_INFO.address}
-  • Hotline / Zalo: ${STORE_INFO.phone}
-  • Giờ mở cửa: ${STORE_INFO.operatingHours}
-  • Freeship từ: ${formatCurrency(STORE_INFO.freeshipThreshold)}
-  • Ship tiêu chuẩn: ${formatCurrency(STORE_INFO.standardShippingFee)} (2-3 ngày)
-  • Ship hỏa tốc: ${formatCurrency(STORE_INFO.expressShippingFee)} (2-4h nội thành)
-  • Đổi trả: 1 đổi 1 trong 7 ngày, đồng kiểm trước khi nhận
-
-📐 BẢNG SIZE ÁO LINEN:
-  • S: dưới 1m62, 45–53kg | M: 1m60–1m70, 54–63kg | L: 1m68–1m76, 64–73kg | XL: 1m74–1m82, 74–83kg
-
-💼 CHÍNH SÁCH BÁN SỈ:
-  • 10–29 món: giảm 12–15% | 30–99 món: giảm 20–25% + freeship | ≥100 món: giảm 30–35% + hợp đồng
-  • Hỗ trợ xuất hóa đơn VAT, khắc logo, đóng hộp quà doanh nghiệp
-
-📌 QUY TẮC GỢI Ý SẢN PHẨM QUAN TRỌNG:
-Khi gợi ý sản phẩm, LUÔN đặt tag [RECOMMENDED_IDS: sp-xx, sp-yy, ...] ở CUỐI câu trả lời (tối đa 4 ID, lấy từ danh mục trên). Không bịa ID không có trong danh mục.`;
-
-    // ── 4. Call Gemini 2.0 Flash API ──
-    const GEMINI_MODEL = 'gemini-2.0-flash';
-    const url = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${apiKey}`;
-    
-    const requestBody = {
-      system_instruction: {
-        parts: [{ text: systemInstruction }]
-      },
-      contents: [
-        {
-          role: "user",
-          parts: [{ text: prompt }]
-        }
-      ],
-      generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
-        responseMimeType: "text/plain"
-      },
-      safetySettings: [
-        { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_MEDIUM_AND_ABOVE" },
-        { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_MEDIUM_AND_ABOVE" }
-      ]
-    };
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(requestBody)
-    });
-
-    if (!response.ok) {
-      const errBody = await response.text().catch(() => response.statusText);
-      throw new Error(`Gemini API ${response.status}: ${errBody}`);
-    }
-
-    const data = await response.json();
-
-    // Handle blocked / empty response
-    const candidate = data.candidates?.[0];
-    if (!candidate || candidate.finishReason === 'SAFETY') {
-      return {
-        text: 'Dạ em xin lỗi, em không thể xử lý yêu cầu này. Bạn vui lòng thử lại với câu hỏi khác nhé! 🌿',
-        products: [],
-        vouchers: []
-      };
-    }
-
-    let text = candidate.content?.parts?.[0]?.text || "";
-
-    // ── 5. Extract recommended product IDs and render cards ──
-    const idMatch = text.match(/\[RECOMMENDED_IDS:\s*([^\]]+)\]/i);
-    let matchedProducts = [];
-    if (idMatch) {
-      const ids = idMatch[1].split(',').map(s => s.trim()).filter(Boolean);
-      matchedProducts = ids
-        .map(id => productIndex[id])
-        .filter(Boolean)
-        .slice(0, 4);
-      // Remove the tag from displayed text
-      text = text.replace(/\[RECOMMENDED_IDS:[^\]]+\]/i, '').trim();
-    }
-
-    // Fallback: nếu Gemini quên gắn tag nhưng đề cập tên sản phẩm, thử match
-    if (matchedProducts.length === 0) {
-      const normalizedText = removeVietnameseTones(text);
-      matchedProducts = inStock
-        .filter(p => normalizedText.includes(removeVietnameseTones(p.name.substring(0, 15))))
-        .slice(0, 3);
-    }
 
     return {
       text,
-      products: matchedProducts,
-      vouchers: []
+      products: finalProducts,
+      vouchers: [],
+      engineUsed: 'gemini',
+      model,
+      scope,
+      finishReason,
+      truncated
     };
   },
 
   /**
-   * Test Gemini qua backend /api/chat/status (không lộ key ra browser)
-   * Trả về { ok, model, message }
+   * Kiểm tra kết nối Gemini thực tế qua /api/chat/status và /api/chat/test
    */
-  async testGeminiKey(_unusedKey) {
+  async testGeminiKey() {
+    return this.testGeminiConnection();
+  },
+
+  async testGeminiConnection() {
     try {
-      // 1. Kiểm tra server có cấu hình key chưa
-      const statusRes = await fetch('/api/chat/status');
-      if (!statusRes.ok) {
-        return { ok: false, message: 'Không kết nối được với server. Hãy đảm bảo server đang chạy tại http://localhost:5000.' };
+      const statusRes = await fetch(`${API_BASE}/chat/status`, { cache: 'no-cache' });
+      const statusType = statusRes.headers.get('content-type') || '';
+      if (!statusRes.ok || !statusType.includes('application/json')) {
+        return {
+          ok: false,
+          message: 'Không kết nối được với backend server (/api/chat/status). Hãy đảm bảo server Node đang chạy.'
+        };
       }
       const status = await statusRes.json();
 
       if (!status.configured) {
         return {
           ok: false,
-          message: 'Server chưa có GEMINI_API_KEY. Hãy mở file .env, điền key rồi khởi động lại server.'
+          model: status.model,
+          message: 'Server chưa cấu hình GEMINI_API_KEY trong file .env.'
         };
       }
 
-      // 2. Gửi tin nhắn thử để xác nhận Gemini hoạt động
-      const testRes = await fetch('/api/chat', {
+      const testRes = await fetch(`${API_BASE}/chat/test`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          message: 'Xin chào, bạn là ai?',
-          products: [],
-          orders: [],
-          storeInfo: {}
-        })
+        headers: { 'Content-Type': 'application/json' }
       });
 
-      if (!testRes.ok) {
-        const err = await testRes.json().catch(() => ({}));
-        return { ok: false, message: err.error || `Lỗi server ${testRes.status}` };
+      const testType = testRes.headers.get('content-type') || '';
+      if (!testType.includes('application/json')) {
+        return { ok: false, model: status.model, message: `Server trả về phản hồi không hợp lệ (${testRes.status}).` };
       }
 
       const data = await testRes.json();
-      const preview = (data.text || '').substring(0, 80);
+      if (!testRes.ok || !data.ok) {
+        return {
+          ok: false,
+          model: data.model || status.model,
+          message: data.error || `Lỗi kiểm tra kết nối (${testRes.status})`
+        };
+      }
+
       return {
         ok: true,
-        model: `gemini-2.5-flash (key: ${status.keyMasked})`,
-        message: `✅ Kết nối thành công! Server phản hồi: "${preview}..."`
+        model: `${data.model} (key: ${status.keyMasked})`,
+        message: `✅ Kết nối thành công (${data.latencyMs}ms)! Gemini phản hồi: "${data.preview}"`
       };
     } catch (e) {
       return { ok: false, message: `Lỗi mạng: ${e.message}` };

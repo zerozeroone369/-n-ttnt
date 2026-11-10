@@ -205,17 +205,33 @@ export const StorageService = {
   },
 
   getSettings() {
+    const defaults = {
+      aiProvider: 'local',
+      aiProviderExplicit: false,
+      assistantScope: 'store'
+    };
     try {
       const data = localStorage.getItem(KEYS.SETTINGS);
-      return data ? JSON.parse(data) : { apiKey: "", aiProvider: "local" };
+      if (!data) return defaults;
+      const parsed = JSON.parse(data);
+      return {
+        aiProvider: parsed.aiProvider === 'gemini' ? 'gemini' : 'local',
+        aiProviderExplicit: Boolean(parsed.aiProviderExplicit),
+        assistantScope: parsed.assistantScope === 'general' ? 'general' : 'store'
+      };
     } catch {
-      return { apiKey: "", aiProvider: "local" };
+      return defaults;
     }
   },
 
   saveSettings(settings) {
     try {
-      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(settings));
+      const clean = {
+        aiProvider: settings?.aiProvider === 'gemini' ? 'gemini' : 'local',
+        aiProviderExplicit: Boolean(settings?.aiProviderExplicit),
+        assistantScope: settings?.assistantScope === 'general' ? 'general' : 'store'
+      };
+      localStorage.setItem(KEYS.SETTINGS, JSON.stringify(clean));
     } catch (e) {
       console.error("Failed to save settings", e);
     }

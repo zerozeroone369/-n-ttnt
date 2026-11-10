@@ -1,14 +1,27 @@
 services:
   - type: web
-    name: tiem-nha-nho-ecommerce-ai
-    env: node
+    name: n-ttnt
+    env: docker
     plan: free
     region: singapore
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV
         value: production
+      - key: PORT
+        value: "5000"
+      - key: PYTHON_BIN
+        value: python3
+      - key: GEMINI_MODEL
+        value: gemini-3.5-flash-lite
       - key: GEMINI_API_KEY
         sync: false
-
+      - key: SCRAPING_PROVIDER
+        value: auto
+      - key: ZENROWS_API_KEY
+        sync: false
+      - key: SCRAPERAPI_KEY
+        sync: false
+      - key: CRAWLBASE_TOKEN
+        sync: false
