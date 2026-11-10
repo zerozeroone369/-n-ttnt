@@ -253,6 +253,33 @@ function stripTags(html) {
     .trim();
 }
 
+function pickNumericPriceCandidate(val) {
+  if (val === null || val === undefined) return 0;
+  if (typeof val === 'number') return Number.isFinite(val) && val > 0 ? val : 0;
+  if (typeof val === 'string') return parseVndPrice(val);
+  if (typeof val === 'object') {
+    const keys = ['single_value', 'range_min', 'min_price', 'min', 'price', 'value', 'current_price', 'final_price', 'lowPrice', 'range_max'];
+    for (const k of keys) {
+      const c = val[k];
+      if (typeof c === 'number' && Number.isFinite(c) && c > 0) return c;
+      if (typeof c === 'string') {
+        const parsed = parseVndPrice(c);
+        if (parsed > 0) return parsed;
+      }
+    }
+  }
+  return 0;
+}
+
+function pickImageStringFromEntry(entry) {
+  if (!entry) return '';
+  if (typeof entry === 'string') return entry.trim();
+  if (typeof entry === 'object') {
+    return String(entry.image_id || entry.id || entry.hash || entry.url || entry.src || entry.image || '').trim();
+  }
+  return '';
+}
+
 export function parseShopeeItem(rawItem, kw) {
   if (!rawItem || typeof rawItem !== 'object') return null;
   const card = rawItem.item_card && typeof rawItem.item_card === 'object' ? rawItem.item_card : rawItem;
@@ -263,40 +290,59 @@ export function parseShopeeItem(rawItem, kw) {
     {};
   const ib = card.item_basic || card.item_data || rawItem.item_basic || rawItem.item_data || card;
 
-  const rawName = asset.name || ib.name || ib.title || card.title || rawItem.name || rawItem.title || '';
+  const rawName =
+    asset.name ||
+    asset.title ||
+    ib.name ||
+    ib.title ||
+    ib.item_name ||
+    card.name ||
+    card.title ||
+    card.item_name ||
+    rawItem.name ||
+    rawItem.title ||
+    rawItem.item_name ||
+    '';
   const name = String(rawName).trim();
   if (!name || name.length < 3) return null;
 
+  const firstIbModel = Array.isArray(ib.models) ? ib.models[0] : Array.isArray(rawItem.models) ? rawItem.models[0] : null;
   const rawPriceCand =
-    asset?.display_price?.price ??
-    ib?.item_card_display_price?.price ??
-    ib?.display_price?.price ??
-    ib.price ??
-    ib.price_min ??
-    card.price ??
-    rawItem.price ??
+    pickNumericPriceCandidate(asset?.display_price?.price) ||
+    pickNumericPriceCandidate(asset?.display_price) ||
+    pickNumericPriceCandidate(ib?.item_card_display_price?.price) ||
+    pickNumericPriceCandidate(card?.item_card_display_price?.price) ||
+    pickNumericPriceCandidate(rawItem?.item_card_display_price?.price) ||
+    pickNumericPriceCandidate(ib?.display_price?.price) ||
+    pickNumericPriceCandidate(ib?.price_info) ||
+    pickNumericPriceCandidate(rawItem?.price_info) ||
+    pickNumericPriceCandidate(ib.price) ||
+    pickNumericPriceCandidate(ib.price_min) ||
+    pickNumericPriceCandidate(ib.min_price) ||
+    pickNumericPriceCandidate(ib.current_price) ||
+    pickNumericPriceCandidate(card.price) ||
+    pickNumericPriceCandidate(card.price_min) ||
+    pickNumericPriceCandidate(rawItem.price) ||
+    pickNumericPriceCandidate(rawItem.price_min) ||
+    pickNumericPriceCandidate(firstIbModel?.price) ||
     0;
   let priceRaw = Number(rawPriceCand);
-  if (!Number.isFinite(priceRaw) || priceRaw <= 0) {
-    priceRaw = typeof rawPriceCand === 'string' ? parseVndPrice(rawPriceCand) : 0;
-  }
   if (!Number.isFinite(priceRaw) || priceRaw <= 0) return null;
   const price = priceRaw >= 100_000_000 ? Math.trunc(priceRaw / 100000) : Math.trunc(priceRaw);
   if (price <= 0) return null;
 
   const origCand =
-    asset?.display_price?.strikethrough_price ??
-    ib?.item_card_display_price?.strikethrough_price ??
-    ib?.display_price?.strikethrough_price ??
-    ib.price_before_discount ??
-    ib.price_max_before_discount ??
-    card.price_before_discount ??
-    rawItem.price_before_discount ??
+    pickNumericPriceCandidate(asset?.display_price?.strikethrough_price) ||
+    pickNumericPriceCandidate(ib?.item_card_display_price?.strikethrough_price) ||
+    pickNumericPriceCandidate(card?.item_card_display_price?.strikethrough_price) ||
+    pickNumericPriceCandidate(ib?.display_price?.strikethrough_price) ||
+    pickNumericPriceCandidate(ib.price_before_discount) ||
+    pickNumericPriceCandidate(ib.price_max_before_discount) ||
+    pickNumericPriceCandidate(card.price_before_discount) ||
+    pickNumericPriceCandidate(rawItem.price_before_discount) ||
+    pickNumericPriceCandidate(firstIbModel?.price_before_discount) ||
     0;
   let origRaw = Number(origCand);
-  if (!Number.isFinite(origRaw) || origRaw <= 0) {
-    origRaw = typeof origCand === 'string' ? parseVndPrice(origCand) : 0;
-  }
   let orig = origRaw >= 100_000_000 ? Math.trunc(origRaw / 100000) : Math.trunc(origRaw);
   if (!Number.isFinite(orig) || orig <= price) orig = null;
 
@@ -320,12 +366,19 @@ export function parseShopeeItem(rawItem, kw) {
     sold = parseSoldCount(ib.historical_sold || ib.sold);
   }
 
-  const allImages = Array.isArray(asset.images)
+  const rawImgArr = Array.isArray(asset.images) && asset.images.length
     ? asset.images
-    : Array.isArray(ib.images)
+    : Array.isArray(ib.images) && ib.images.length
       ? ib.images
-      : [];
-  const rawPrimaryImg = String(asset.image || ib.image || allImages[0] || '').trim();
+      : Array.isArray(card.images) && card.images.length
+        ? card.images
+        : Array.isArray(rawItem.images) && rawItem.images.length
+          ? rawItem.images
+          : Array.isArray(ib.tier_variations?.[0]?.images)
+            ? ib.tier_variations[0].images
+            : [];
+  const allImages = rawImgArr.map(pickImageStringFromEntry).filter(Boolean);
+  const rawPrimaryImg = pickImageStringFromEntry(asset.image || ib.image || card.image || rawItem.image || allImages[0] || '');
   const [imageId, cdnUrl] = rawPrimaryImg.startsWith('http') || rawPrimaryImg.startsWith('//')
     ? extractImageRef(rawPrimaryImg)
     : [rawPrimaryImg, rawPrimaryImg ? `https://down-vn.img.susercontent.com/file/${rawPrimaryImg}` : ''];
@@ -565,48 +618,83 @@ export function isProductNotFoundHtml(html, finalUrl = '') {
 function extractPdpItemFromObject(root, kw, seenIds, outItems) {
   if (!root || typeof root !== 'object') return;
   const dp = root.data && typeof root.data === 'object' ? root.data : root;
-  const it = dp.item && typeof dp.item === 'object' ? dp.item : null;
+  const it =
+    dp.item && typeof dp.item === 'object'
+      ? dp.item
+      : dp.item_basic && typeof dp.item_basic === 'object'
+        ? dp.item_basic
+        : dp.item_id || dp.itemid
+          ? dp
+          : null;
 
   if (it && (it.item_id || it.itemid)) {
-    const pPrice = dp.product_price || {};
-    const pImages = dp.product_images || {};
-    const pReview = dp.product_review || {};
-    const firstModel = Array.isArray(it.models) ? it.models[0] : Array.isArray(dp.models) ? dp.models[0] : null;
+    const pPrice = dp.product_price || root.product_price || {};
+    const pImages = dp.product_images || root.product_images || {};
+    const pReview = dp.product_review || root.product_review || {};
+    const firstModel = Array.isArray(it.models)
+      ? it.models[0]
+      : Array.isArray(dp.models)
+        ? dp.models[0]
+        : null;
     const priceVal =
-      it.price ||
-      it.price_min ||
-      pPrice?.price?.single_value ||
-      pPrice?.price?.range_min ||
-      dp.price?.single_value ||
-      firstModel?.price ||
+      pickNumericPriceCandidate(it.price) ||
+      pickNumericPriceCandidate(it.price_min) ||
+      pickNumericPriceCandidate(it.min_price) ||
+      pickNumericPriceCandidate(it.current_price) ||
+      pickNumericPriceCandidate(it.price_info) ||
+      pickNumericPriceCandidate(pPrice?.price) ||
+      pickNumericPriceCandidate(pPrice?.discount_price) ||
+      pickNumericPriceCandidate(pPrice) ||
+      pickNumericPriceCandidate(dp.price_info) ||
+      pickNumericPriceCandidate(dp.price) ||
+      pickNumericPriceCandidate(firstModel?.price) ||
       0;
     const origVal =
-      it.price_before_discount ||
-      it.price_max_before_discount ||
-      pPrice?.price_before_discount?.single_value ||
-      pPrice?.price_before_discount?.range_min ||
-      firstModel?.price_before_discount ||
+      pickNumericPriceCandidate(it.price_before_discount) ||
+      pickNumericPriceCandidate(it.price_max_before_discount) ||
+      pickNumericPriceCandidate(pPrice?.price_before_discount) ||
+      pickNumericPriceCandidate(pPrice?.origin_price) ||
+      pickNumericPriceCandidate(firstModel?.price_before_discount) ||
       0;
     const tierImgs = Array.isArray(it.tier_variations?.[0]?.images) ? it.tier_variations[0].images : [];
-    const imgList = Array.isArray(it.images) && it.images.length > 0
+    const imgListRaw = Array.isArray(it.images) && it.images.length > 0
       ? it.images
       : Array.isArray(pImages?.images) && pImages.images.length > 0
         ? pImages.images
         : Array.isArray(pImages?.preselected_images) && pImages.preselected_images.length > 0
           ? pImages.preselected_images
-          : tierImgs;
+          : Array.isArray(dp.images) && dp.images.length > 0
+            ? dp.images
+            : tierImgs;
+    const imgList = imgListRaw.map(pickImageStringFromEntry).filter(Boolean);
     const shopFallback =
-      it.shop_id || it.shopid || dp.shop_detailed?.shopid || dp.shop_detailed?.shop_id || dp.shopid || dp.shop_id || '';
+      it.shop_id ||
+      it.shopid ||
+      dp.shop_detailed?.shopid ||
+      dp.shop_detailed?.shop_id ||
+      dp.shop?.shopid ||
+      dp.shop?.shop_id ||
+      dp.shopid ||
+      dp.shop_id ||
+      '';
+    const pdpTitle =
+      it.name ||
+      it.title ||
+      dp.title ||
+      dp.name ||
+      dp.product_meta?.title ||
+      dp.seo?.title ||
+      '';
     const merged = {
       ...it,
       shopid: shopFallback,
-      name: it.name || it.title || '',
+      name: pdpTitle,
       price: priceVal,
       price_before_discount: origVal,
       images: imgList,
-      image: it.image || imgList[0] || '',
+      image: pickImageStringFromEntry(it.image) || imgList[0] || '',
       historical_sold:
-        it.historical_sold || it.sold || pReview?.historical_sold || dp.item_sold || 0,
+        it.historical_sold || it.sold || pReview?.historical_sold || pReview?.sold || dp.item_sold || dp.historical_sold || 0,
       item_rating:
         it.item_rating || (pReview?.rating_star ? { rating_star: pReview.rating_star } : undefined)
     };
@@ -702,12 +790,107 @@ function findMatchingDelimiterEnd(str, startIdx, openCh, closeCh, maxScan = 2_00
   return -1;
 }
 
+function findEnclosingBraceStarts(str, targetIdx, maxLookback = 120_000, maxAncestors = 4) {
+  const starts = [];
+  let depth = 0;
+  let inString = false;
+  const stopAt = Math.max(0, targetIdx - maxLookback);
+  for (let i = targetIdx - 1; i >= stopAt && starts.length < maxAncestors; i--) {
+    const ch = str[i];
+    if (ch === '"') {
+      let bs = 0;
+      for (let k = i - 1; k >= stopAt && str[k] === '\\'; k--) bs++;
+      if (bs % 2 === 0) inString = !inString;
+      continue;
+    }
+    if (inString) continue;
+    if (ch === '}') {
+      depth++;
+    } else if (ch === '{') {
+      if (depth === 0) {
+        starts.push(i);
+      } else {
+        depth--;
+      }
+    }
+  }
+  return starts;
+}
+
+function parseBalancedObjectsAroundMatch(html, matchIdx, kw, seenIds, items, maxItems, { preferParent = true } = {}) {
+  const rawStarts = findEnclosingBraceStarts(html, matchIdx, 120_000, 4);
+  if (rawStarts.length === 0) return false;
+  const ordered = preferParent && rawStarts.length > 1
+    ? [rawStarts[1], rawStarts[0], ...rawStarts.slice(2)]
+    : rawStarts;
+
+  for (const startIdx of ordered) {
+    if (items.length >= maxItems) break;
+    const endIdx = findMatchingDelimiterEnd(html, startIdx, '{', '}', 350_000);
+    if (endIdx === -1 || endIdx < matchIdx) continue;
+    try {
+      const parsedObj = JSON.parse(html.slice(startIdx, endIdx + 1));
+      if (parsedObj && typeof parsedObj === 'object') {
+        const before = items.length;
+        collectShopeeItemsFromObject(parsedObj, kw, seenIds, items, maxItems);
+        if (items.length > before) return true;
+      }
+    } catch {
+      // Try next ancestor enclosing object
+    }
+  }
+  return false;
+}
+
 export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
   const items = [];
   const seenIds = new Set();
   if (!html || typeof html !== 'string') return items;
 
-  const markerRe = /"(?:items|item|item_list|units|sections|feeds|item_cards|cards)"\s*:\s*\[/g;
+  const directProduct = parseShopeeProductUrl(kw);
+  const hasTargetMatch = () =>
+    directProduct ? items.some((it) => scoreProductMatch(it, kw) > 0) : items.length > 0;
+
+  // Priority Pass 0: Target exact direct product ID inside hydrated JSON (never skipped by recommend arrays)
+  if (directProduct?.itemId) {
+    const escapedId = directProduct.itemId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+    const directRe = new RegExp(`"(?:itemid|item_id|itemId)"\\s*:\\s*"?${escapedId}"?(?!\\d)`, 'g');
+    let dm;
+    let tries = 0;
+    while ((dm = directRe.exec(html)) !== null && tries < 15) {
+      tries++;
+      parseBalancedObjectsAroundMatch(html, dm.index, kw, seenIds, items, maxItems, { preferParent: true });
+      if (hasTargetMatch()) {
+        const matchedWithImg = items.find((it) => scoreProductMatch(it, kw) > 0 && it.image_url);
+        if (matchedWithImg) break;
+      }
+    }
+
+    // Check serialized JSON inside JS strings (\"item_id\":...) or entity-encoded JSON (&quot;item_id&quot;:)
+    if (!hasTargetMatch()) {
+      const escapedMatchRe = new RegExp(`\\\\"(?:itemid|item_id|itemId)\\\\"\\s*:\\s*(?:\\\\")?${escapedId}(?!\\d)`, 'g');
+      let em;
+      let eTries = 0;
+      while ((em = escapedMatchRe.exec(html)) !== null && eTries < 5 && !hasTargetMatch()) {
+        eTries++;
+        const slice = html.slice(Math.max(0, em.index - 45_000), Math.min(html.length, em.index + 45_000));
+        const unescaped = slice.replace(/\\"/g, '"').replace(/\\\//g, '/').replace(/\\\\/g, '\\');
+        const subRe = new RegExp(`"(?:itemid|item_id|itemId)"\\s*:\\s*"?${escapedId}"?(?!\\d)`, 'g');
+        let sm;
+        while ((sm = subRe.exec(unescaped)) !== null && !hasTargetMatch()) {
+          parseBalancedObjectsAroundMatch(unescaped, sm.index, kw, seenIds, items, maxItems, { preferParent: true });
+        }
+      }
+    }
+
+    if (hasTargetMatch()) {
+      return items.filter((it) => scoreProductMatch(it, kw) > 0).slice(0, maxItems);
+    }
+  }
+
+  // Pass 1: Embedded arrays of item cards
+  const markerRe =
+    /"(?:items|item|item_list|item_lists|units|sections|feeds|item_cards|cards|products|recommend_items|top_product_list)"\s*:\s*\[/g;
   let m;
   while ((m = markerRe.exec(html)) !== null && items.length < maxItems) {
     const startIdx = m.index + m[0].length - 1;
@@ -723,15 +906,15 @@ export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
     }
   }
 
-  // Also check hydrated PDP objects ("data":{"item":{"item_id":...}} or "item":{"item_id":...})
-  if (items.length === 0) {
-    const objMarkerRe = /"(?:data|pdp_info|item_info|item)"\s*:\s*\{/g;
+  // Pass 2: Hydrated PDP / item objects (runs whenever no target item found yet)
+  if (!hasTargetMatch()) {
+    const objMarkerRe = /"(?:data|pdp_info|item_info|item|item_basic|item_data|product|product_info)"\s*:\s*\{/g;
     let om;
-    while ((om = objMarkerRe.exec(html)) !== null && items.length < maxItems) {
+    while ((om = objMarkerRe.exec(html)) !== null && (directProduct ? !hasTargetMatch() : items.length < maxItems)) {
       const startIdx = om.index + om[0].length - 1;
-      const preview = html.slice(startIdx, startIdx + 350);
+      const preview = html.slice(startIdx, startIdx + 4000);
       if (!/"(?:itemid|item_id|product_price)"\s*:/.test(preview)) continue;
-      const endIdx = findMatchingDelimiterEnd(html, startIdx, '{', '}', 600_000);
+      const endIdx = findMatchingDelimiterEnd(html, startIdx, '{', '}', 900_000);
       if (endIdx === -1) continue;
       try {
         const parsedObj = JSON.parse(html.slice(startIdx, endIdx + 1));
@@ -744,7 +927,19 @@ export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
     }
   }
 
-  return items.slice(0, maxItems);
+  // Pass 3: Generic backtracking around any "itemid"/"item_id" keys if Pass 0-2 still missed
+  if (!hasTargetMatch()) {
+    const genericIdRe = /"(?:itemid|item_id)"\s*:\s*"?\d+"?/gi;
+    let gm;
+    let scanCount = 0;
+    while ((gm = genericIdRe.exec(html)) !== null && scanCount < 60 && items.length < maxItems) {
+      scanCount++;
+      parseBalancedObjectsAroundMatch(html, gm.index, kw, seenIds, items, maxItems, { preferParent: true });
+      if (directProduct && hasTargetMatch()) break;
+    }
+  }
+
+  return (directProduct ? items.filter((it) => scoreProductMatch(it, kw) > 0) : items).slice(0, maxItems);
 }
 
 function safeDecodeHref(href) {
@@ -1219,7 +1414,7 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
   return results;
 }
 
-function extractPdpHtmlDiag(html) {
+function extractPdpHtmlDiag(html, directProduct = null) {
   if (!html || typeof html !== 'string') return '';
   const ldMatches = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
   const ldInfo = ldMatches.slice(0, 3).map((m) => {
@@ -1238,7 +1433,21 @@ function extractPdpHtmlDiag(html) {
     (html.match(/<meta[^>]+itemprop=["']price["'][^>]+content=["']([^"']+)["']/i)?.[1] || '');
   const ogImg = extractMetaPropertyContent(html, 'og:image') ? 'y' : 'n';
   const embIds = (html.match(/"(?:itemid|item_id)"\s*:/gi) || []).length;
-  return `pdpDiag(ld=${ldMatches.length}${ldInfo.length ? `[${ldInfo.join(',')}]` : ''},mPrice=${metaP || '-'},ogImg=${ogImg},embIds=${embIds})`;
+  let extra = '';
+  if (directProduct?.itemId) {
+    const tMatches = html.match(new RegExp(directProduct.itemId.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g')) || [];
+    const tPos = html.indexOf(directProduct.itemId);
+    const tCtx = tPos !== -1 ? sanitizeErrorText(html.slice(Math.max(0, tPos - 80), tPos + 140).replace(/\s+/g, ' ')) : '';
+    extra += `,tId=${tMatches.length}${tCtx ? `,ctx="${tCtx.slice(0, 140)}"` : ''}`;
+  }
+  if (embIds > 0) {
+    const firstEmb = html.search(/"(?:itemid|item_id)"\s*:/i);
+    if (firstEmb !== -1) {
+      const eCtx = sanitizeErrorText(html.slice(Math.max(0, firstEmb - 60), firstEmb + 160).replace(/\s+/g, ' '));
+      extra += `,emb="${eCtx.slice(0, 140)}"`;
+    }
+  }
+  return `pdpDiag(ld=${ldMatches.length}${ldInfo.length ? `[${ldInfo.join(',')}]` : ''},mPrice=${metaP || '-'},ogImg=${ogImg},embIds=${embIds}${extra})`;
 }
 
 function extractPdpMetaFallback(html, directProduct, kw) {
@@ -1652,7 +1861,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
   }
 
   const bodyDiagText =
-    sanitizeErrorText(String(htmlRes.evalData?.mainText || '')) || extractVisibleBodySnippet(rawHtml, 260);
+    sanitizeErrorText(String(htmlRes.evalData?.mainText || '')) || extractVisibleBodySnippet(rawHtml, 480);
 
   if (!directProduct && secondaryXhrItems.length > 0) {
     return {
@@ -1663,7 +1872,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       xhrSummary,
       itemSources: secondarySources,
       finalUrl,
-      bodySnippet: bodyDiagText.slice(0, 260),
+      bodySnippet: bodyDiagText.slice(0, 480),
       sampleCard: htmlRes.sampleCard || '',
       evalData: htmlRes.evalData,
       domStats: htmlRes.domStats
@@ -1678,7 +1887,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
     xhrSummary,
     itemSources: [],
     finalUrl,
-    bodySnippet: bodyDiagText.slice(0, 260),
+    bodySnippet: bodyDiagText.slice(0, 480),
     sampleCard: htmlRes.sampleCard || '',
     evalData: htmlRes.evalData,
     domStats: htmlRes.domStats
@@ -1896,7 +2105,7 @@ function buildZenrowsNetworkSpyBody() {
   return (
     "try{if(!window.__s){window.__s=1;const C=window.__c=[]," +
     "M=/search_items|recommend|\\/pdp\\/|\\/item\\/get/i," +
-    "P=t=>{try{C.length<3&&t?.length>40&&t.length<12e4&&C.push(JSON.parse(t));}catch{}}," +
+    "P=t=>{try{C.length<3&&t?.length>40&&t.length<3e5&&C.push(JSON.parse(t));}catch{}}," +
     "F=window.fetch;if(F)window.fetch=function(...a){const u=a[0]?.url||a[0]+'';" +
     "return F.apply(this,a).then(r=>{try{M.test(u)&&r.clone().text().then(P).catch(()=>{});}catch{}return r;});};" +
     "const X=XMLHttpRequest.prototype,O=X.open,S=X.send;" +
@@ -1917,10 +2126,12 @@ function buildZenrowsDomEvalScript({ includePdp = false } = {}) {
       "R=/(?:-i\\.(\\d+)\\.(\\d+)|\\/product\\/(\\d+)\\/(\\d+))/i,M=p=>Q(D,`meta[property='${p}']`)?.content||''," +
       "IU=x=>x.currentSrc||x.src||A(x,'data-src')||A(x,'data-lazy-src')||A(x,'srcset').split(/[\\s,]/)[0]||''," +
       "C=window.__c||window.__sr_cap,cp=Array.isArray(C)?C.slice(0,3):[]," +
-      "pm=L.pathname.match(R),mt=T(Q(D,'main,[role=main]')?.innerText);" +
+      "pm=L.pathname.match(R),mt=T(Q(D,'main,[role=main]')?.innerText||D.body?.innerText)," +
+      "mp=M('product:price:amount')||M('og:price:amount')||A(Q(D,'meta[itemprop=price]'),'content')," +
+      "pp=mt.match(/(?:₫\\s*[\\d.,]+|[\\d.,]+\\s*[₫đ])/)?.[0]||mt.match(/\\b\\d{1,3}(?:\\.\\d{3}){1,2}\\b/)?.[0]||'';" +
       "D.documentElement.setAttribute(E,JSON.stringify({u:L.href,tt:D.title||'',rd:D.readyState||'',sq:0,cc:Array.isArray(C)?C.length:0,cp,its:[]," +
-      "pdp:pm?{shopId:pm[1]||pm[3]||'',itemId:pm[2]||pm[4]||'',h1:Q(D,'main h1,h1')?.innerText?.trim()||'',metaPrice:M('product:price:amount'),pdpPrice:mt.match(/₫\\s*[\\d.,]+/)?.[0]||'',pdpOrig:Q(D,'main del,[class*=line-through]')?.innerText?.trim()||'',pdpImg:QA('main img,picture img').map(IU).find(u=>/susercontent\\.com\\/file\\//i.test(u))||M('og:image'),ogImg:M('og:image'),ogTitle:M('og:title'),sold:mt.match(/[\\d.,]+k?\\+?\\s*đã bán|đã bán\\s*[\\d.,]+k?\\+?/i)?.[0]||''}:null," +
-      "mt:mt.slice(0,360)}));}catch(e){try{D.documentElement.setAttribute(E,JSON.stringify({u:L.href,rd:D.readyState||'',err:(''+e).slice(0,120)}));}catch{}}})()"
+      "pdp:pm?{shopId:pm[1]||pm[3]||'',itemId:pm[2]||pm[4]||'',h1:Q(D,'main h1,h1')?.innerText?.trim()||'',metaPrice:mp,pdpPrice:pp,pdpOrig:Q(D,'main del,[class*=line-through]')?.innerText?.trim()||'',pdpImg:QA('main img,picture img').map(IU).find(u=>/susercontent\\.com\\/file\\//i.test(u))||M('og:image'),ogImg:M('og:image'),ogTitle:M('og:title'),sold:mt.match(/[\\d.,]+k?\\+?\\s*đã bán|đã bán\\s*[\\d.,]+k?\\+?/i)?.[0]||''}:null," +
+      "mt:mt.slice(0,750)}));}catch(e){try{D.documentElement.setAttribute(E,JSON.stringify({u:L.href,rd:D.readyState||'',err:(''+e).slice(0,120)}));}catch{}}})()"
     );
   }
   return (
@@ -2072,7 +2283,8 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         const evalTag = ev
           ? ` · eval(${ev.ready || '?'},cap=${ev.capCount || 0}${ev.err ? `,err=${sanitizeErrorText(ev.err)}` : ''})`
           : '';
-        const pdpDiagTag = isDirectProduct && htmlLen > 50000 ? ` · ${extractPdpHtmlDiag(resp.jsonBody.html || '')}` : '';
+        const directTarget = parseShopeeProductUrl(kw);
+        const pdpDiagTag = htmlLen > 50000 ? ` · ${extractPdpHtmlDiag(resp.jsonBody.html || '', directTarget)}` : '';
         log(
           `    [i] [${attemptLabel}] HTTP 200 · url=${parsed.finalUrl ? redactUrlForLogs(parsed.finalUrl) : '?'} · HTML=${htmlLen}B · title="${title || 'n/a'}"` +
             `${instrTag}${evalTag} · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs}) · xhr=${xhrLen}` +
@@ -2126,7 +2338,8 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       const title = extractHtmlTitle(resp.text);
       const snippet = extractVisibleBodySnippet(resp.text, 160);
       const ds = htmlRes.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
-      const pdpDiagTag = isDirectProduct && resp.text.length > 50000 ? ` · ${extractPdpHtmlDiag(resp.text)}` : '';
+      const directTarget = parseShopeeProductUrl(kw);
+      const pdpDiagTag = resp.text.length > 50000 ? ` · ${extractPdpHtmlDiag(resp.text, directTarget)}` : '';
       log(
         `    [i] [${attemptLabel}] HTTP 200 HTML=${resp.text.length}B · title="${title || 'n/a'}" · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs})` +
           `${pdpDiagTag}` +
