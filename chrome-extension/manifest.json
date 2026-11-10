@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Tiệm Nhà Nhỏ — Shopee Bridge",
+  "short_name": "Shopee Bridge",
+  "version": "1.0.0",
+  "description": "Cầu nối cào sản phẩm Shopee thật bằng trình duyệt & IP nhà của chủ shop, đồng bộ về Tiệm Nhà Nhỏ Admin.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "tabs",
+    "scripting"
+  ],
+  "host_permissions": [
+    "https://shopee.vn/*",
+    "https://*.shopee.vn/*",
+    "https://n-ttnt.vercel.app/*",
+    "https://n-ttnt.onrender.com/*",
+    "http://localhost/*",
+    "http://127.0.0.1/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://n-ttnt.vercel.app/*",
+        "http://localhost/*",
+        "http://127.0.0.1/*"
+      ],
+      "js": [
+        "bridge-content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {
+    "default_title": "Tiệm Nhà Nhỏ — Shopee Bridge",
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "48": "icons/icon48.png",
+      "128": "icons/icon128.png"
+    }
+  }
+}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Package, ShoppingCart, DollarSign, AlertTriangle, Plus, Trash2, Edit, 
-  CheckCircle, XCircle, Search, Sparkles, RefreshCw, Key, ArrowLeft, Printer, Tag, History, Shield, Globe, Download, Loader2, CheckSquare, Square, Star, ChevronDown, ChevronUp, ExternalLink
+  CheckCircle, XCircle, Search, Sparkles, RefreshCw, Key, ArrowLeft, Printer, Tag, History, Shield, Globe, Download, Loader2, CheckSquare, Square, Star, ChevronDown, ChevronUp, ExternalLink, Zap, Puzzle
 } from 'lucide-react';
 import { formatCurrency, AIChatEngine } from '../services/aiChatEngine';
 import { StorageService } from '../services/storage';
@@ -92,6 +92,10 @@ export default function AdminDashboard({
   const [cookieSaving, setCookieSaving] = useState(false);
   const [cookieFeedback, setCookieFeedback] = useState(null);
   const [retryingBackend, setRetryingBackend] = useState(false);
+  const [bridgeStatus, setBridgeStatus] = useState({ installed: false, version: null, shopeeTabs: 0 });
+  const [bridgeGuideOpen, setBridgeGuideOpen] = useState(false);
+  const [scrapeMode, setScrapeMode] = useState('server'); // 'server' | 'bridge'
+  const activeBridgeCleanupRef = useRef(null);
   const isMountedRef = useRef(true);
 
   const loadCookieStatus = async () => {
@@ -146,6 +150,8 @@ export default function AdminDashboard({
         setScraperConfig(meta);
         if (meta?.selectedProvider === 'auto') {
           setScraperProviderInput('auto');
+        } else if (meta?.selectedProvider && meta.selectedProvider !== 'auto') {
+          setScraperProviderInput(meta.selectedProvider);
         } else if (meta?.activeProvider) {
           setScraperProviderInput(meta.activeProvider);
         }
@@ -332,8 +338,63 @@ export default function AdminDashboard({
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
+      activeBridgeCleanupRef.current?.();
+      activeBridgeCleanupRef.current = null;
     };
   }, []);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const detectDataset = () => {
+      if (document.documentElement?.dataset?.snnBridgeInstalled === '1') {
+        const ver = document.documentElement?.dataset?.snnBridgeVersion || '1.0.0';
+        setBridgeStatus((prev) => (prev.installed && prev.version === ver ? prev : { ...prev, installed: true, version: ver }));
+      }
+    };
+
+    const pingExtension = () => {
+      try {
+        window.postMessage(
+          {
+            source: 'snn-webapp',
+            type: 'PING_BRIDGE',
+            requestId: `ping_${Date.now()}`
+          },
+          window.location.origin
+        );
+      } catch {
+        // ignore
+      }
+    };
+
+    const onBridgeWindowMessage = (event) => {
+      if (event.source !== window || event.origin !== window.location.origin) return;
+      const msg = event.data;
+      if (!msg || typeof msg !== 'object' || msg.source !== 'snn-bridge-ext') return;
+      if (msg.type === 'BRIDGE_READY') {
+        setBridgeStatus((prev) => ({
+          ...prev,
+          installed: true,
+          version: msg.version || prev.version || '1.0.0'
+        }));
+      } else if (msg.type === 'BRIDGE_PONG' && msg.ok) {
+        setBridgeStatus({
+          installed: true,
+          version: msg.version || '1.0.0',
+          shopeeTabs: Number(msg.shopeeTabs || 0)
+        });
+      }
+    };
+
+    window.addEventListener('message', onBridgeWindowMessage);
+    detectDataset();
+    pingExtension();
+    const timer = activeTab === 'shopeeScraper' ? setTimeout(pingExtension, 450) : null;
+    return () => {
+      window.removeEventListener('message', onBridgeWindowMessage);
+      if (timer) clearTimeout(timer);
+    };
+  }, [activeTab]);
 
   // Computed metrics
   const totalRevenue = orders.reduce((sum, o) => sum + (o.orderStatus !== 'cancelled' ? o.total : 0), 0);
@@ -692,7 +753,93 @@ export default function AdminDashboard({
   };
 
   // ====== SHOPEE SCRAPER HANDLERS ======
+  const probeBridgeExtension = (timeoutMs = 700) => {
+    if (typeof window === 'undefined') {
+      return Promise.resolve({ installed: false, version: null, shopeeTabs: 0 });
+    }
+    return new Promise((resolve) => {
+      const hasDataset = document.documentElement?.dataset?.snnBridgeInstalled === '1';
+      const datasetVer = document.documentElement?.dataset?.snnBridgeVersion || null;
+      const requestId = `probe_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`;
+      let settled = false;
+
+      const finish = (result) => {
+        if (settled) return;
+        settled = true;
+        window.removeEventListener('message', onMsg);
+        clearTimeout(timer);
+        if (isMountedRef.current && result.installed) {
+          setBridgeStatus(result);
+        }
+        resolve(result);
+      };
+
+      const onMsg = (event) => {
+        if (event.source !== window || event.origin !== window.location.origin) return;
+        const msg = event.data;
+        if (!msg || typeof msg !== 'object' || msg.source !== 'snn-bridge-ext') return;
+        if (msg.type === 'BRIDGE_PONG' && msg.ok && (!msg.requestId || msg.requestId === requestId)) {
+          finish({
+            installed: true,
+            version: msg.version || datasetVer || '1.0.0',
+            shopeeTabs: Number(msg.shopeeTabs || 0)
+          });
+        } else if (msg.type === 'BRIDGE_READY') {
+          finish({
+            installed: true,
+            version: msg.version || datasetVer || '1.0.0',
+            shopeeTabs: 0
+          });
+        }
+      };
+
+      const timer = setTimeout(() => {
+        finish({
+          installed: Boolean(hasDataset),
+          version: hasDataset ? (datasetVer || '1.0.0') : null,
+          shopeeTabs: 0
+        });
+      }, timeoutMs);
+
+      window.addEventListener('message', onMsg);
+      try {
+        window.postMessage(
+          { source: 'snn-webapp', type: 'PING_BRIDGE', requestId },
+          window.location.origin
+        );
+      } catch {
+        finish({
+          installed: Boolean(hasDataset),
+          version: hasDataset ? (datasetVer || '1.0.0') : null,
+          shopeeTabs: 0
+        });
+      }
+    });
+  };
+
+  const handleOpenShopeeViaBridge = () => {
+    if (bridgeStatus.installed) {
+      try {
+        window.postMessage(
+          {
+            source: 'snn-webapp',
+            type: 'OPEN_SHOPEE_TAB',
+            url: 'https://shopee.vn/buyer/login'
+          },
+          window.location.origin
+        );
+        return;
+      } catch {
+        // fallback below
+      }
+    }
+    window.open('https://shopee.vn/buyer/login', '_blank', 'noopener,noreferrer');
+  };
+
   const handleShopeeScrape = async () => {
+    activeBridgeCleanupRef.current?.();
+    activeBridgeCleanupRef.current = null;
+    setScrapeMode('server');
     setShopeeLoading(true);
     setShopeeError(null);
     setShopeeSuccess(null);
@@ -746,6 +893,207 @@ export default function AdminDashboard({
       }
       setShopeeError(err.message || 'Lỗi kết nối — đảm bảo server backend đang chạy và đã cấu hình Scraping API (ZenRows / ScraperAPI / Crawlbase).');
       setShopeeLoading(false);
+    }
+  };
+
+  const handleBridgeScrape = async () => {
+    activeBridgeCleanupRef.current?.();
+    activeBridgeCleanupRef.current = null;
+    setScrapeMode('bridge');
+    setShopeeLoading(true);
+    setShopeeError(null);
+    setShopeeSuccess(null);
+    setShopeeResults([]);
+    setShopeeSelected(new Set());
+    setShopeeProgress('');
+    setShopeeSessionId(null);
+    setShopeeBlockedByBot(false);
+    setShopeeLoginRequired(false);
+    setScraperConfigFeedback(null);
+
+    try {
+      const keywords = splitScrapeInputs(shopeeKeywords);
+      if (keywords.length === 0) {
+        setShopeeError('Vui lòng nhập ít nhất 1 từ khóa hoặc link sản phẩm Shopee hợp lệ để cào qua Chrome Extension.');
+        setShopeeLoading(false);
+        return;
+      }
+
+      const detected = bridgeStatus.installed
+        ? bridgeStatus
+        : await probeBridgeExtension(750);
+
+      if (!isMountedRef.current) return;
+
+      if (!detected.installed) {
+        setBridgeGuideOpen(true);
+        setShopeeError(
+          'Chưa phát hiện Chrome Extension "Tiệm Nhà Nhỏ — Shopee Bridge" trên trình duyệt. Hãy bấm "Tải Extension (.zip)", giải nén và nạp trong chrome://extensions (Load unpacked), sau đó tải lại trang (F5) và thử lại.'
+        );
+        setShopeeLoading(false);
+        return;
+      }
+
+      const online = await ApiClient.isServerOnline(2);
+      setShopeeServerOnline(online);
+      if (!online) {
+        setShopeeError(
+          'Không thể kết nối tới Backend Server trên máy chủ để lọc & lưu ảnh Shopee. Vui lòng đợi 20–40 giây cho Render Free thức dậy rồi thử lại.'
+        );
+        setShopeeLoading(false);
+        return;
+      }
+
+      if (!ApiClient.auth.getToken()) {
+        setShopeeError('Bạn chưa có phiên xác thực Chủ Shop trên máy chủ. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản Chủ Shop để tiếp nhận dữ liệu Extension.');
+        setShopeeLoading(false);
+        return;
+      }
+
+      setShopeeProgress(
+        `[*] Kết nối Chrome Extension Bridge v${detected.version || '1.0.0'} (IP mạng nhà · Cookie thật trên Chrome của bạn)...\n`
+      );
+
+      const requestId = `bridge_${Date.now()}_${Math.random().toString(36).slice(2, 7)}`;
+      const entries = await new Promise((resolve, reject) => {
+        let settled = false;
+
+        const cleanup = () => {
+          window.removeEventListener('message', onBridgeMsg);
+          clearTimeout(timeoutId);
+          if (activeBridgeCleanupRef.current === cleanup) {
+            activeBridgeCleanupRef.current = null;
+          }
+        };
+
+        const onBridgeMsg = (event) => {
+          if (event.source !== window || event.origin !== window.location.origin) return;
+          const msg = event.data;
+          if (!msg || typeof msg !== 'object' || msg.source !== 'snn-bridge-ext') return;
+          if (msg.requestId && msg.requestId !== requestId) return;
+
+          if (msg.type === 'BRIDGE_PROGRESS') {
+            if (isMountedRef.current && msg.line) {
+              setShopeeProgress((prev) => (prev + String(msg.line)).slice(-16000));
+            }
+          } else if (msg.type === 'BRIDGE_COMPLETE') {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            resolve(Array.isArray(msg.entries) ? msg.entries : []);
+          } else if (msg.type === 'BRIDGE_ERROR') {
+            if (settled) return;
+            settled = true;
+            cleanup();
+            reject(new Error(msg.error || 'Chrome Extension gặp lỗi khi cào dữ liệu Shopee.'));
+          }
+        };
+
+        const timeoutId = setTimeout(() => {
+          if (settled) return;
+          settled = true;
+          cleanup();
+          reject(new Error('Quá thời gian chờ (240s) phản hồi từ Chrome Extension Bridge. Hãy thử giảm số từ khóa hoặc mở sẵn 1 tab shopee.vn đã đăng nhập.'));
+        }, 240000);
+
+        activeBridgeCleanupRef.current = cleanup;
+        window.addEventListener('message', onBridgeMsg);
+
+        try {
+          window.postMessage(
+            {
+              source: 'snn-webapp',
+              type: 'START_BRIDGE_SCRAPE',
+              requestId,
+              keywords,
+              limit: shopeeLimit
+            },
+            window.location.origin
+          );
+        } catch (postErr) {
+          settled = true;
+          cleanup();
+          reject(postErr);
+        }
+      });
+
+      if (!isMountedRef.current) return;
+
+      if (!entries || entries.length === 0) {
+        setShopeeError('Chrome Extension không thu thập được phản hồi nào từ Shopee. Hãy kiểm tra kết nối mạng hoặc đăng nhập Shopee trên một tab Chrome trước khi thử lại.');
+        setShopeeLoading(false);
+        return;
+      }
+
+      setShopeeProgress((prev) => (
+        `${prev}\n[*] Đã nhận ${entries.length} gói dữ liệu từ Chrome Extension — đang gửi về máy chủ lọc Zero Hallucination & tải ảnh CDN...\n`
+      ).slice(-16000));
+
+      const sessionData = await ApiClient.shopee.submitBridge({
+        keywords,
+        limit: shopeeLimit,
+        entries
+      });
+
+      if (!isMountedRef.current) return;
+
+      if (sessionData?.sessionId) {
+        setShopeeSessionId(sessionData.sessionId);
+      }
+      if (sessionData?.progress) {
+        setShopeeProgress(sessionData.progress);
+      }
+
+      if (sessionData?.status === 'failed') {
+        setShopeeError(sessionData.error || sessionData.message || 'Máy chủ không thể xử lý dữ liệu từ Chrome Extension.');
+        setShopeeLoading(false);
+        return;
+      }
+
+      if (sessionData?.status === 'login_required' || sessionData?.loginRequired) {
+        setShopeeResults([]);
+        setShopeeLoginRequired(true);
+        setShopeeBlockedByBot(true);
+        setShopeeError(
+          sessionData.message || 'Shopee trên trình duyệt Chrome của bạn đang yêu cầu đăng nhập (/buyer/login). Hãy bấm "Mở Shopee.vn để đăng nhập", đăng nhập xong rồi bấm "⚡ Cào qua Chrome Extension" lại!'
+        );
+        setShopeeLoading(false);
+        return;
+      }
+
+      if (sessionData?.status === 'blocked') {
+        setShopeeResults([]);
+        setShopeeBlockedByBot(true);
+        setShopeeError(
+          sessionData.message || 'Shopee tạm thời hiển thị trang xác minh bảo mật (/verify/) trên trình duyệt. Hãy mở tab Shopee xác minh một lần rồi cào lại.'
+        );
+        setShopeeLoading(false);
+        return;
+      }
+
+      const rawResults = Array.isArray(sessionData?.results) ? sessionData.results : [];
+      const matched = filterShopeeCatalog(rawResults, keywords, shopeeLimit);
+
+      if (matched.length === 0 || sessionData?.status === 'empty') {
+        setShopeeResults([]);
+        setShopeeError(
+          sessionData?.message || `Không tìm thấy sản phẩm mới nào trên Shopee khớp với từ khóa "${keywords.join(', ')}" qua Chrome Extension.`
+        );
+        setShopeeLoading(false);
+        return;
+      }
+
+      setShopeeResults(matched);
+      setShopeeSuccess(
+        `⚡ Phiên ${sessionData.sessionId || 'bridge'}: Chrome Extension Bridge đã cào bằng IP thật của bạn & lọc ${matched.length} sản phẩm Shopee khớp "${keywords.join(', ')}"!`
+      );
+      setShopeeLoading(false);
+    } catch (err) {
+      console.error('Chrome Extension Bridge scrape error:', err);
+      if (isMountedRef.current) {
+        setShopeeError(err.message || 'Không thể hoàn tất phiên cào qua Chrome Extension Bridge.');
+        setShopeeLoading(false);
+      }
     }
   };
 
@@ -1942,6 +2290,102 @@ export default function AdminDashboard({
                   )}
                 </div>
 
+                {/* Chrome Extension Bridge Card (Giải pháp dài hạn — IP mạng nhà & Cookie thật của bạn) */}
+                <div
+                  className={`rounded-2xl border shadow-xs transition-all ${
+                    bridgeStatus.installed
+                      ? 'bg-emerald-50/50 border-emerald-200'
+                      : 'bg-white border-stone-200'
+                  }`}
+                >
+                  <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                      <span
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                          bridgeStatus.installed
+                            ? 'bg-emerald-100 text-emerald-700'
+                            : 'bg-indigo-100 text-indigo-700'
+                        }`}
+                      >
+                        <Puzzle className="w-4 h-4" />
+                      </span>
+                      <div>
+                        <div className="font-bold text-stone-900 flex flex-wrap items-center gap-2">
+                          <span>Chrome Extension Bridge (Cào bằng IP nhà & Cookie thật)</span>
+                          {bridgeStatus.installed ? (
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              ✓ Đã kết nối v{bridgeStatus.version || '1.0.0'}
+                              {bridgeStatus.shopeeTabs > 0 ? ` · ${bridgeStatus.shopeeTabs} tab Shopee` : ''}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 border border-stone-200">
+                              Chưa cài / chưa bật Extension
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-stone-500 mt-0.5">
+                          Chạy lệnh cào Shopee ngay trên trình duyệt Chrome cá nhân của bạn (tránh chặn IP Datacenter) rồi tự động gửi JSON về server lọc & lưu ảnh.
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-2">
+                      <a
+                        href={ApiClient.shopee.getExtensionDownloadUrl()}
+                        download="tiem-nha-nho-shopee-bridge.zip"
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1.5 shadow-xs transition-all"
+                      >
+                        <Download className="w-3.5 h-3.5" />
+                        <span>Tải Extension (.zip)</span>
+                      </a>
+
+                      <button
+                        type="button"
+                        onClick={handleOpenShopeeViaBridge}
+                        className="px-3 py-1.5 rounded-xl text-xs font-semibold border border-stone-200 bg-white hover:bg-stone-50 text-stone-700 flex items-center gap-1.5 transition-all"
+                      >
+                        <ExternalLink className="w-3.5 h-3.5 text-orange-600" />
+                        <span>Mở Shopee.vn</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => probeBridgeExtension(650)}
+                        title="Kiểm tra lại kết nối Extension"
+                        className="px-2.5 py-1.5 rounded-xl text-xs font-medium border border-stone-200 bg-white hover:bg-stone-50 text-stone-600 flex items-center gap-1 transition-all"
+                      >
+                        <RefreshCw className="w-3 h-3" />
+                        <span>Kiểm tra</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => setBridgeGuideOpen((prev) => !prev)}
+                        aria-expanded={bridgeGuideOpen}
+                        className="px-3 py-1.5 rounded-xl text-xs font-bold border border-stone-200 bg-stone-50 hover:bg-stone-100 text-stone-700 flex items-center gap-1 transition-all"
+                      >
+                        <span>{bridgeGuideOpen ? 'Ẩn hướng dẫn' : 'Hướng dẫn cài (4 bước)'}</span>
+                        {bridgeGuideOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  {bridgeGuideOpen && (
+                    <div className="px-4 pb-4 pt-3 border-t border-stone-200/80 text-xs text-stone-700 space-y-2 bg-white/80 rounded-b-2xl">
+                      <p className="font-bold text-stone-900">Cách cài đặt Chrome Extension Bridge (1 lần duy nhất):</p>
+                      <ol className="list-decimal pl-5 space-y-1 text-[11px] leading-relaxed">
+                        <li>Bấm <strong>&quot;Tải Extension (.zip)&quot;</strong> ở trên rồi giải nén ra một thư mục (chứa <code>manifest.json</code>).</li>
+                        <li>Mở Chrome truy cập <code>chrome://extensions</code> và bật công tắc <strong>Developer mode (Chế độ nhà phát triển)</strong> ở góc phải trên.</li>
+                        <li>Bấm <strong>Load unpacked (Tải tiện ích đã giải nén)</strong> và chọn thư mục vừa giải nén.</li>
+                        <li>Mở 1 tab <code>https://shopee.vn</code> bất kỳ đã đăng nhập tài khoản của bạn, tải lại trang Web App (<code>F5</code>) để thấy trạng thái <span className="text-emerald-700 font-semibold">✓ Đã kết nối</span> rồi bấm <strong>⚡ Cào qua Chrome Extension</strong>.</li>
+                      </ol>
+                      <p className="text-[11px] text-stone-500">
+                        🔒 Bảo mật: Extension chỉ sử dụng session ngay bên trong Chrome của bạn (<code>credentials: &apos;include&apos;</code>), tuyệt đối không đọc hay gửi chuỗi Cookie thô lên máy chủ.
+                      </p>
+                    </div>
+                  )}
+                </div>
+
                 {/* Cấu Hình Scraping API Card (Phương Án B: ZenRows / ScraperAPI / Crawlbase) */}
                 {(() => {
                   const isReady = Boolean(scraperConfig?.configured) && !shopeeBlockedByBot;
@@ -1990,9 +2434,11 @@ export default function AdminDashboard({
                               )}
                             </div>
                             <p className="text-[11px] text-stone-500 mt-0.5">
-                              {scraperConfig?.configured
-                                ? 'Dịch vụ bên thứ 3 tự chạy JS, giải quyết token Akamai và xoay IP Việt Nam (VN) cho server.'
-                                : 'Cần ít nhất 1 API Key (ZenRows, ScraperAPI hoặc Crawlbase) để vượt lỗi 403 / Akamai 90309999.'}
+                              {activeProv === 'zenrows_direct'
+                                ? 'Chế độ Direct JSON API: Gọi thẳng /api/v4/search/search_items hoặc /api/v4/pdp/get_pc qua ZenRows (js_render=false — 1-2s, tắt HTML render).'
+                                : scraperConfig?.configured
+                                  ? 'Ưu tiên gọi trực tiếp JSON API (1-2s), tự động leo thang JS/Antibot và xoay IP Việt Nam (VN) nếu cần.'
+                                  : 'Cần ít nhất 1 API Key (ZenRows, ScraperAPI hoặc Crawlbase) để vượt lỗi 403 / Akamai 90309999.'}
                             </p>
                           </div>
                         </div>
@@ -2022,7 +2468,9 @@ export default function AdminDashboard({
                               { id: 'crawlbase', name: 'Crawlbase', note: 'Dùng JavaScript Token', url: 'https://crawlbase.com/' }
                             ].map((item) => {
                               const pMeta = scraperConfig?.providers?.[item.id];
-                              const active = scraperConfig?.activeProvider === item.id;
+                              const active =
+                                scraperConfig?.activeProvider === item.id ||
+                                (item.id === 'zenrows' && scraperConfig?.activeProvider === 'zenrows_direct');
                               return (
                                 <div
                                   key={item.id}
@@ -2082,7 +2530,8 @@ export default function AdminDashboard({
                                   className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 >
                                   <option value="auto">Tự động (ZenRows → ScraperAPI → Crawlbase)</option>
-                                  <option value="zenrows">ZenRows (ZENROWS_API_KEY)</option>
+                                  <option value="zenrows">ZenRows (Direct JSON + JS Fallback)</option>
+                                  <option value="zenrows_direct">ZenRows Direct JSON (Tắt HTML render — 1-2s)</option>
                                   <option value="scraperapi">ScraperAPI (SCRAPERAPI_KEY)</option>
                                   <option value="crawlbase">Crawlbase (CRAWLBASE_TOKEN)</option>
                                 </select>
@@ -2090,7 +2539,10 @@ export default function AdminDashboard({
 
                               <div className="sm:col-span-8">
                                 <label htmlFor="scraper-apikey-input" className="block font-semibold text-stone-800 mb-1">
-                                  API Key / Token cho {scraperProviderInput.toUpperCase()}
+                                  API Key / Token cho{' '}
+                                  {scraperProviderInput === 'zenrows_direct'
+                                    ? 'ZENROWS (Direct JSON API)'
+                                    : scraperProviderInput.toUpperCase()}
                                   {scraperProviderInput === 'auto'
                                     ? ' (dùng tuần tự các key đã cấu hình)'
                                     : selectedMeta?.configured
@@ -2111,7 +2563,9 @@ export default function AdminDashboard({
                                   placeholder={
                                     scraperProviderInput === 'auto'
                                       ? 'Chọn ZenRows / ScraperAPI / Crawlbase bên trái nếu muốn thêm API Key mới'
-                                      : `Dán API Key mới cho ${scraperProviderInput.toUpperCase()} (để trống nếu chỉ đổi provider)`
+                                      : scraperProviderInput === 'zenrows_direct'
+                                        ? 'Dùng chung ZENROWS_API_KEY (để trống nếu chỉ chuyển sang Direct JSON API)'
+                                        : `Dán API Key mới cho ${scraperProviderInput.toUpperCase()} (để trống nếu chỉ đổi provider)`
                                   }
                                   className="w-full font-mono text-xs bg-white border border-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-stone-100"
                                   disabled={scraperConfigSaving || scraperProviderInput === 'auto'}
@@ -2339,15 +2793,16 @@ export default function AdminDashboard({
               
               <div className="flex flex-wrap items-center gap-3 mt-4">
                 <button
+                  type="button"
                   onClick={handleShopeeScrape}
                   disabled={shopeeLoading || !shopeeKeywords.trim()}
-                  className={`px-6 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
                     shopeeLoading
                       ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
                       : 'bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white hover:shadow-md'
                   }`}
                 >
-                  {shopeeLoading ? (
+                  {shopeeLoading && scrapeMode === 'server' ? (
                     <>
                       <Loader2 className="w-4 h-4 animate-spin" />
                       <span>Đang cào dữ liệu...</span>
@@ -2356,6 +2811,36 @@ export default function AdminDashboard({
                     <>
                       <Globe className="w-4 h-4" />
                       <span>Bắt Đầu Cào</span>
+                    </>
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleBridgeScrape}
+                  disabled={shopeeLoading || !shopeeKeywords.trim()}
+                  title={
+                    bridgeStatus.installed
+                      ? `Chạy ngay bằng Chrome cá nhân v${bridgeStatus.version || '1.0.0'} (IP nhà + Cookie thật)`
+                      : 'Cài Chrome Extension Bridge để cào bằng IP mạng nhà của bạn'
+                  }
+                  className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
+                    shopeeLoading
+                      ? 'bg-stone-200 text-stone-500 cursor-not-allowed'
+                      : bridgeStatus.installed
+                        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white hover:shadow-md'
+                        : 'border border-indigo-300 bg-indigo-50 hover:bg-indigo-100 text-indigo-800'
+                  }`}
+                >
+                  {shopeeLoading && scrapeMode === 'bridge' ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      <span>Đang cào qua Extension...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-4 h-4" />
+                      <span>Cào qua Chrome Extension</span>
                     </>
                   )}
                 </button>
@@ -2419,8 +2904,16 @@ export default function AdminDashboard({
                     <Loader2 className="w-5 h-5 text-orange-600 animate-spin" />
                   </div>
                   <div>
-                    <p className="text-sm font-bold text-stone-900">Đang cào dữ liệu từ Shopee...</p>
-                    <p className="text-xs text-stone-500">Quá trình này có thể mất 2-5 phút. Vui lòng không tắt trang.</p>
+                    <p className="text-sm font-bold text-stone-900">
+                      {scrapeMode === 'bridge'
+                        ? 'Đang cào dữ liệu Shopee qua Chrome Extension Bridge (IP nhà)...'
+                        : 'Đang cào dữ liệu từ Shopee...'}
+                    </p>
+                    <p className="text-xs text-stone-500">
+                      {scrapeMode === 'bridge'
+                        ? 'Extension đang gọi Shopee API / mở tab nền trong Chrome cá nhân và đồng bộ về server.'
+                        : 'Quá trình này có thể mất 2-5 phút (hoặc 1-2 giây nếu Direct JSON API thành công). Vui lòng không tắt trang.'}
+                    </p>
                   </div>
                 </div>
                 <div className="w-full bg-stone-100 rounded-full h-2 overflow-hidden">
@@ -2428,7 +2921,9 @@ export default function AdminDashboard({
                 </div>
                 <div className="mt-3 grid grid-cols-3 gap-2 text-center">
                   <div className="bg-orange-50 rounded-lg p-2">
-                    <p className="text-xs text-orange-800 font-medium">🌐 Qua Scraping API</p>
+                    <p className="text-xs text-orange-800 font-medium">
+                      {scrapeMode === 'bridge' ? '⚡ Qua Chrome Extension' : '🌐 Qua Scraping API'}
+                    </p>
                   </div>
                   <div className="bg-amber-50 rounded-lg p-2">
                     <p className="text-xs text-amber-800 font-medium">🔍 Tìm sản phẩm</p>
@@ -2452,7 +2947,7 @@ export default function AdminDashboard({
                 <div className="bg-white rounded-2xl border border-stone-200 shadow-xs p-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3 flex-wrap">
                     <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg border bg-emerald-50 text-emerald-800 border-emerald-200">
-                      {`🌐 Cào trực tiếp${shopeeSessionId ? ` · ${shopeeSessionId}` : ''}`}
+                      {`${scrapeMode === 'bridge' ? '⚡ Chrome Extension Bridge' : '🌐 Cào trực tiếp'}${shopeeSessionId ? ` · ${shopeeSessionId}` : ''}`}
                     </span>
                     <button
                       onClick={toggleShopeeSelectAll}

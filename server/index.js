@@ -6,7 +6,8 @@ import { db, hashPassword, verifyPassword } from './db.js';
 import { createSession, destroySession, authenticateUser, requireAuth, requireRole } from './auth.js';
 import { filterShopeeCatalog } from '../src/utils/shopeeFilter.js';
 import { normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
-import { scrapeShopeeLive } from './shopeeScraper.js';
+import { processBridgeShopeePayloads, scrapeShopeeLive } from './shopeeScraper.js';
+import { getChromeExtensionZipBuffer } from './extensionZip.js';
 import { spawn } from 'child_process';
 import { readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
@@ -26,7 +27,8 @@ const GEMINI_REQUEST_TIMEOUT_MS = 60 * 1000;
 const PYTHON_BIN = process.env.PYTHON_BIN || 'python';
 const SCRAPE_TIMEOUT_MS = 360 * 1000; // 6 phút cho Scraping API render JS & dự phòng retry
 
-const SCRAPING_PROVIDERS = ['zenrows', 'scraperapi', 'crawlbase'];
+const SCRAPING_PROVIDERS = ['zenrows', 'zenrows_direct', 'scraperapi', 'crawlbase'];
+const KEYED_SCRAPING_PROVIDERS = ['zenrows', 'scraperapi', 'crawlbase'];
 
 function maskSecretValue(raw) {
   const s = String(raw || '').trim();
@@ -67,8 +69,10 @@ function getEffectiveScraperConfig() {
     return { key: '', source: null };
   };
 
+  const zenrowsResolved = resolveKey('zenrows', 'ZENROWS_API_KEY');
   const resolvedMap = {
-    zenrows: resolveKey('zenrows', 'ZENROWS_API_KEY'),
+    zenrows: zenrowsResolved,
+    zenrows_direct: zenrowsResolved,
     scraperapi: resolveKey('scraperapi', 'SCRAPERAPI_KEY'),
     crawlbase: resolveKey('crawlbase', 'CRAWLBASE_TOKEN', 'CRAWLBASE_API_KEY')
   };
@@ -79,7 +83,7 @@ function getEffectiveScraperConfig() {
       activeProvider = selectedProvider;
     }
   } else {
-    activeProvider = SCRAPING_PROVIDERS.find(p => Boolean(resolvedMap[p]?.key)) || null;
+    activeProvider = KEYED_SCRAPING_PROVIDERS.find(p => Boolean(resolvedMap[p]?.key)) || null;
   }
 
   return {
@@ -99,6 +103,11 @@ function getEffectiveScraperConfig() {
       updatedAt: local.updatedAt || null,
       providers: {
         zenrows: {
+          configured: Boolean(resolvedMap.zenrows.key),
+          keyMasked: maskSecretValue(resolvedMap.zenrows.key),
+          source: resolvedMap.zenrows.source
+        },
+        zenrows_direct: {
           configured: Boolean(resolvedMap.zenrows.key),
           keyMasked: maskSecretValue(resolvedMap.zenrows.key),
           source: resolvedMap.zenrows.source
@@ -140,7 +149,14 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
-app.use(express.json({ limit: '2mb' }));
+const jsonBody2mb = express.json({ limit: '2mb' });
+const jsonBody10mb = express.json({ limit: '10mb' });
+app.use((req, res, next) => {
+  if (req.path === '/api/shopee/bridge-submit') {
+    return jsonBody10mb(req, res, next);
+  }
+  return jsonBody2mb(req, res, next);
+});
 app.use(authenticateUser);
 
 // ============================================================================
@@ -1526,9 +1542,10 @@ app.put('/api/shopee/scraper-config', requireRole('admin'), (req, res) => {
   const normalizedProv = String(provider || 'auto').trim().toLowerCase();
 
   if (!['auto', ...SCRAPING_PROVIDERS].includes(normalizedProv)) {
-    return res.status(400).json({ error: 'Nhà cung cấp Scraping API không hợp lệ (hỗ trợ: auto, zenrows, scraperapi, crawlbase).' });
+    return res.status(400).json({ error: 'Nhà cung cấp Scraping API không hợp lệ (hỗ trợ: auto, zenrows, zenrows_direct, scraperapi, crawlbase).' });
   }
 
+  const keySlot = normalizedProv === 'zenrows_direct' ? 'zenrows' : normalizedProv;
   const currentLocal = loadLocalScraperOverride();
   const nextKeys = { ...(currentLocal.keys || {}) };
 
@@ -1536,7 +1553,7 @@ app.put('/api/shopee/scraper-config', requireRole('admin'), (req, res) => {
     if (normalizedProv === 'auto') {
       SCRAPING_PROVIDERS.forEach(p => { delete nextKeys[p]; });
     } else {
-      delete nextKeys[normalizedProv];
+      delete nextKeys[keySlot];
     }
   } else if (typeof apiKey === 'string' && apiKey.trim().length > 0) {
     if (normalizedProv === 'auto') {
@@ -1546,7 +1563,7 @@ app.put('/api/shopee/scraper-config', requireRole('admin'), (req, res) => {
     if (cleanedKey.length < 8 || /\s/.test(cleanedKey)) {
       return res.status(400).json({ error: 'API Key không hợp lệ (cần tối thiểu 8 ký tự và không chứa khoảng trắng).' });
     }
-    nextKeys[normalizedProv] = cleanedKey;
+    nextKeys[keySlot] = cleanedKey;
   }
 
   const nextPayload = {
@@ -1576,6 +1593,130 @@ app.put('/api/shopee/scraper-config', requireRole('admin'), (req, res) => {
     });
   } catch (err) {
     return res.status(500).json({ error: `Không thể lưu cấu hình Scraping API: ${err.message}` });
+  }
+});
+
+// Sync scraped raw payloads from Chrome Extension Bridge (user's home IP & real session)
+app.post('/api/shopee/bridge-submit', requireRole('admin'), async (req, res) => {
+  if (scrapeState.running) {
+    return res.status(409).json({
+      error: 'Đang có phiên cào chạy trên máy chủ. Vui lòng chờ phiên hiện tại hoàn tất.',
+      sessionId: scrapeState.sessionId
+    });
+  }
+
+  const { keywords, limit, entries } = req.body || {};
+  const safeEntries = Array.isArray(entries) ? entries.filter((e) => e && typeof e === 'object').slice(0, 25) : [];
+  if (safeEntries.length === 0) {
+    return res.status(400).json({ error: 'Thiếu dữ liệu entries từ Chrome Extension Bridge.' });
+  }
+
+  const rawKeywords = Array.isArray(keywords) && keywords.length > 0
+    ? keywords
+    : safeEntries.map((e) => e.keyword);
+  const kwList = [...new Set(rawKeywords.map((k) => String(k || '').trim()).filter(Boolean))];
+  if (kwList.length === 0) {
+    return res.status(400).json({ error: 'Vui lòng cung cấp ít nhất 1 từ khóa hoặc link Shopee hợp lệ.' });
+  }
+
+  const numLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 5), 60);
+  const sessionId = `bridge_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
+  const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
+  let progressLog = `Đang tiếp nhận & lọc Zero Hallucination dữ liệu từ Chrome Extension Bridge (${safeEntries.length} mục tiêu)...\n`;
+
+  scrapeState = {
+    running: true,
+    sessionId,
+    status: 'running',
+    engine: 'chrome_bridge',
+    provider: 'chrome_extension',
+    requestedKeywords: kwList,
+    limit: numLimit,
+    startedAt: new Date().toISOString(),
+    finishedAt: null,
+    progress: progressLog,
+    message: 'Đang kiểm duyệt dữ liệu & tải ảnh thật từ Shopee CDN...',
+    error: null,
+    configRequired: false,
+    loginRequired: false,
+    noNewData: false,
+    count: 0,
+    results: []
+  };
+  saveSessionSnapshot(scrapeState);
+
+  try {
+    const outcome = await processBridgeShopeePayloads({
+      keywords: kwList,
+      totalLimit: numLimit,
+      entries: safeEntries,
+      imgDir: join(PROJECT_ROOT, 'public', 'products', 'shopee_live'),
+      onProgress: (line) => {
+        progressLog = (progressLog + String(line || '')).slice(-16000);
+      }
+    });
+
+    const payload = {
+      sessionId,
+      crawledAt: new Date().toISOString(),
+      requestedKeywords: kwList,
+      limit: numLimit,
+      provider: outcome.provider || 'chrome_extension',
+      status: outcome.status,
+      message: outcome.message,
+      antiBotBlocked: Boolean(outcome.anti_bot_blocked),
+      loginRequired: Boolean(outcome.login_required),
+      configRequired: false,
+      perKeywordCounts: outcome.per_keyword_counts || {},
+      count: Array.isArray(outcome.products) ? outcome.products.length : 0,
+      products: outcome.products || []
+    };
+
+    try {
+      writeFileSync(outputPath, JSON.stringify(payload, null, 2), 'utf8');
+    } catch (writeErr) {
+      console.warn(`[BridgeScraper][${sessionId}] Không thể ghi shopee_scraped.json:`, writeErr.message);
+    }
+
+    scrapeState.running = false;
+    scrapeState.finishedAt = new Date().toISOString();
+    scrapeState.progress = progressLog;
+    applyScraperResultPayload(sessionId, kwList, numLimit, payload);
+
+    db.logAudit(
+      req.user?.id || 'admin',
+      req.user?.name || 'Admin',
+      req.user?.role || 'admin',
+      'SHOPEE_BRIDGE_SCRAPE',
+      sessionId,
+      `Chrome Extension Bridge: ${scrapeState.count} sản phẩm cho ${JSON.stringify(kwList)} (${scrapeState.status})`
+    );
+
+    return res.json(scrapeState);
+  } catch (err) {
+    scrapeState.running = false;
+    scrapeState.finishedAt = new Date().toISOString();
+    scrapeState.status = 'failed';
+    scrapeState.error = `Lỗi xử lý dữ liệu Chrome Extension Bridge: ${err.message}`;
+    scrapeState.message = scrapeState.error;
+    scrapeState.results = [];
+    scrapeState.count = 0;
+    scrapeState.progress = progressLog + `\n[ERROR] ${scrapeState.error}`;
+    saveSessionSnapshot(scrapeState);
+    return res.status(500).json({ error: scrapeState.error, sessionId });
+  }
+});
+
+// Download packed Chrome Extension Bridge as ZIP (1-click install via chrome://extensions -> Load unpacked)
+app.get('/api/shopee/extension.zip', (req, res) => {
+  try {
+    const zipBuffer = getChromeExtensionZipBuffer(join(PROJECT_ROOT, 'chrome-extension'));
+    res.setHeader('Content-Type', 'application/zip');
+    res.setHeader('Content-Disposition', 'attachment; filename="tiem-nha-nho-shopee-bridge.zip"');
+    res.setHeader('Cache-Control', 'no-store');
+    return res.send(zipBuffer);
+  } catch (err) {
+    return res.status(500).json({ error: `Không thể đóng gói Chrome Extension: ${err.message}` });
   }
 });
 

@@ -25,13 +25,14 @@ import {
   scoreProductMatch
 } from '../src/utils/shopeeFilter.js';
 
-export const SUPPORTED_PROVIDERS = ['zenrows', 'scraperapi', 'crawlbase'];
+export const SUPPORTED_PROVIDERS = ['zenrows', 'zenrows_direct', 'scraperapi', 'crawlbase'];
+const AUTO_PROVIDER_CHAIN = ['zenrows', 'scraperapi', 'crawlbase'];
 
 const UA =
   'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36';
 
 const SECRET_QUERY_RE = /((?:apikey|api_key|token)=)[^&\s'"]+/gi;
-const COOKIE_LINE_RE = /(cookie\s*:\s*)[^\r\n]+/gi;
+const COOKIE_LINE_RE = /((?:cookie|x-csrftoken)\s*:\s*)[^\r\n]+/gi;
 const SHOPEE_HREF_RE = /(?:-i\.(\d+)\.(\d+)|\/product\/(\d+)\/(\d+))/i;
 const SHOPEE_HREF_GLOBAL_RE = /(?:-i\.(\d+)\.(\d+)|\/product\/(\d+)\/(\d+))/g;
 
@@ -59,8 +60,10 @@ function redactUrlForLogs(rawUrl) {
 
 export function resolveScrapingProvider(preferred = null, env = process.env) {
   const choice = String(preferred || env?.SCRAPING_PROVIDER || 'auto').trim().toLowerCase();
+  const zenrowsKey = String(env?.ZENROWS_API_KEY || '').trim();
   const keys = {
-    zenrows: String(env?.ZENROWS_API_KEY || '').trim(),
+    zenrows: zenrowsKey,
+    zenrows_direct: zenrowsKey,
     scraperapi: String(env?.SCRAPERAPI_KEY || '').trim(),
     crawlbase: String(env?.CRAWLBASE_TOKEN || env?.CRAWLBASE_API_KEY || '').trim()
   };
@@ -71,7 +74,7 @@ export function resolveScrapingProvider(preferred = null, env = process.env) {
     return [choice, key];
   }
 
-  for (const prov of SUPPORTED_PROVIDERS) {
+  for (const prov of AUTO_PROVIDER_CHAIN) {
     if (keys[prov]) return [prov, keys[prov]];
   }
   return [null, null];
@@ -79,8 +82,10 @@ export function resolveScrapingProvider(preferred = null, env = process.env) {
 
 export function resolveConfiguredProviders(preferred = null, env = process.env) {
   const choice = String(preferred || env?.SCRAPING_PROVIDER || 'auto').trim().toLowerCase();
+  const zenrowsKey = String(env?.ZENROWS_API_KEY || '').trim();
   const keys = {
-    zenrows: String(env?.ZENROWS_API_KEY || '').trim(),
+    zenrows: zenrowsKey,
+    zenrows_direct: zenrowsKey,
     scraperapi: String(env?.SCRAPERAPI_KEY || '').trim(),
     crawlbase: String(env?.CRAWLBASE_TOKEN || env?.CRAWLBASE_API_KEY || '').trim()
   };
@@ -92,7 +97,7 @@ export function resolveConfiguredProviders(preferred = null, env = process.env) 
   }
 
   const configured = [];
-  for (const prov of SUPPORTED_PROVIDERS) {
+  for (const prov of AUTO_PROVIDER_CHAIN) {
     if (keys[prov]) configured.push([prov, keys[prov]]);
   }
   return configured;
@@ -2405,12 +2410,72 @@ function buildZenrowsSearchSubmitScript(searchKw) {
   );
 }
 
+function extractCookieValue(cookieHeader, targetName) {
+  const target = String(targetName || '').trim().toLowerCase();
+  if (!cookieHeader || !target) return '';
+  for (const seg of String(cookieHeader).split(';')) {
+    const eq = seg.indexOf('=');
+    if (eq <= 0) continue;
+    const name = seg.slice(0, eq).trim().toLowerCase();
+    if (name === target) {
+      return seg.slice(eq + 1).trim();
+    }
+  }
+  return '';
+}
+
+function hasRedactedPdpPriceInJson(root) {
+  if (!root || typeof root !== 'object') return false;
+  const dp = root.data && typeof root.data === 'object' ? root.data : root;
+  const it = dp.item && typeof dp.item === 'object' ? dp.item : dp;
+  const hasRemoved =
+    Array.isArray(dp.removed_fields) ||
+    Array.isArray(dp.removedFields) ||
+    dp.detail_level !== undefined ||
+    dp.detailLevel !== undefined;
+  const noPrice =
+    (it?.price === null || it?.price === undefined) &&
+    (it?.price_min === null || it?.price_min === undefined) &&
+    (dp?.product_price === null || dp?.product_price === undefined) &&
+    (dp?.productPrice === null || dp?.productPrice === undefined);
+  return Boolean(hasRemoved && noPrice);
+}
+
+export function buildShopeeDirectApiUrl(targetInfo, kw, maxItems = 20) {
+  const apiCap = Math.min(60, Math.max(20, Number(maxItems) || 20));
+  if (targetInfo?.kind === 'product' && targetInfo.shopId && targetInfo.itemId) {
+    return `https://shopee.vn/api/v4/pdp/get_pc?item_id=${encodeURIComponent(targetInfo.itemId)}&shop_id=${encodeURIComponent(targetInfo.shopId)}`;
+  }
+  if (targetInfo?.kind === 'category' && targetInfo.categoryId) {
+    const leafCatId = String(targetInfo.categoryId).split('.').filter(Boolean).pop();
+    if (leafCatId) {
+      return `https://shopee.vn/api/v4/search/search_items?by=pop&limit=${apiCap}&match_id=${encodeURIComponent(leafCatId)}&newest=0&order=desc&page_type=search`;
+    }
+  }
+  const searchTerm = targetInfo?.kind === 'search' ? targetInfo.keywordText : kw;
+  if (searchTerm && !/^https?:\/\//i.test(searchTerm)) {
+    return `https://shopee.vn/api/v4/search/search_items?by=relevancy&keyword=${encodeURIComponent(searchTerm)}&limit=${apiCap}&newest=0&order=desc&page_type=search`;
+  }
+  return '';
+}
+
+function buildShopeeItemFallbackApiUrl(targetInfo) {
+  if (targetInfo?.kind === 'product' && targetInfo.shopId && targetInfo.itemId) {
+    return `https://shopee.vn/api/v4/item/get?itemid=${encodeURIComponent(targetInfo.itemId)}&shopid=${encodeURIComponent(targetInfo.shopId)}`;
+  }
+  return '';
+}
+
 export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const {
     fetchImpl = fetch,
+    env = process.env,
     cookieHeader = '',
-    onProgress = () => {}
+    onProgress = () => {},
+    directApiFirst = true,
+    directApiOnly: directApiOnlyOpt = false
   } = options;
+  const directApiOnly = Boolean(directApiOnlyOpt || String(env?.ZENROWS_DIRECT_API_ONLY || '').trim() === '1');
 
   const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const targetInfo = resolveTargetForInput(kw);
@@ -2438,14 +2503,14 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     if (resp.timedOut) {
       anyTimeout = true;
       const secs = Math.round((resp.timeoutMs || 90000) / 1000);
-      log(`    [!] [${attemptLabel}] Quá thời gian chờ (${secs}s) — đang chuyển phương án dự phòng...`);
+      log(`    [!] [${attemptLabel}] Quá thời gian chờ (${secs}s)${directApiOnly ? '.' : ' — đang chuyển phương án dự phòng...'}`);
       return { items: [], blocked: false, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: true, code: 'TIMEOUT', httpStatus: 0, xhrCount: 0, htmlLen: 0 };
     }
 
     const fatalCheck = handleZenrowsFatalStatus(resp.status, resp.jsonBody, resp.text, { allowTarget403 });
     if (fatalCheck.target403) {
       anyBlocked = true;
-      log(`    [!] [${attemptLabel}] Shopee trả HTTP 403 trên API trực tiếp — leo thang sang trình duyệt antibot...`);
+      log(`    [!] [${attemptLabel}] Shopee trả HTTP 403 trên API trực tiếp${directApiOnly ? '.' : ' — leo thang sang trình duyệt antibot...'}`);
       return { items: [], blocked: true, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: false, code: '403', httpStatus: 403, xhrCount: 0, htmlLen: 0 };
     }
 
@@ -2535,15 +2600,22 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         log(`    [!] [${attemptLabel}] Shopee JSON error=${jsonErr}${errMsg}`);
       }
       const { matched } = keepMatchingOnly(items, ['DIRECT_API_JSON']);
+      const redactedJson = isDirectProduct && matched.length === 0 && !hasErr && hasRedactedPdpPriceInJson(resp.jsonBody);
+      if (redactedJson) {
+        anyPriceRedacted = true;
+      }
       if (!hasErr && matched.length === 0) {
-        log(`    [i] [${attemptLabel}] HTTP 200 JSON 0 items (keys=${Object.keys(resp.jsonBody).slice(0, 6).join('|')})`);
+        log(
+          `    [i] [${attemptLabel}] HTTP 200 JSON 0 items (keys=${Object.keys(resp.jsonBody).slice(0, 6).join('|')})` +
+            `${redactedJson ? ' · PHÁT HIỆN ẨN GIÁ KHI CHƯA COOKIE' : ''}`
+        );
       }
       return {
         items: matched,
         blocked: hasErr && !isLoginErr,
         loginRequired: isLoginErr,
         notFound: false,
-        priceRedactedNoAuth: false,
+        priceRedactedNoAuth: redactedJson,
         timedOut: false,
         code: hasErr ? `ERR_${jsonErr}` : '200',
         httpStatus: 200,
@@ -2577,6 +2649,110 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     }
     return { ...htmlRes, items: matched, timedOut: false, code: '200', httpStatus: 200, xhrCount: 0, htmlLen: resp.text.length };
   };
+
+  // Attempt 0 (Fast Direct Internal JSON API — tắt js_render=false để nhận JSON thuần 1-2s)
+  const directApiUrl = (directApiFirst || directApiOnly) ? buildShopeeDirectApiUrl(targetInfo, kw, maxItems) : '';
+  if (directApiUrl) {
+    const directCookie = coreCookie || cookieHeader;
+    const csrfToken = extractCookieValue(cookieHeader, 'csrftoken') || extractCookieValue(directCookie, 'csrftoken');
+    const directHeaders = {
+      'User-Agent': UA,
+      Accept: 'application/json, text/plain, */*',
+      'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8',
+      Referer: targetInfo.targetUrl,
+      'X-Shopee-Language': 'vi',
+      'X-Api-Source': 'pc',
+      'X-Requested-With': 'XMLHttpRequest',
+      ...(csrfToken ? { 'X-CSRFToken': csrfToken } : {}),
+      ...(directCookie ? { Cookie: directCookie } : {})
+    };
+    log(
+      `    [*] Thu ZenRows DirectAPI (js_render=false · bo render HTML${directCookie ? ' + Cookie/UA' : ' + UA chuan'}) cho '${kw}'...`
+    );
+    const r0 = await callZenrowsOnce({
+      apiKey,
+      paramsObj: {
+        url: directApiUrl,
+        premium_proxy: 'true',
+        proxy_country: 'vn',
+        js_render: 'false',
+        custom_headers: 'true'
+      },
+      extraHeaders: directHeaders,
+      timeoutMs: 25000,
+      fetchImpl
+    });
+    const p0 = inspectAndParse('ZenRows DirectAPI', r0, { allowTarget403: true });
+    if (p0.items.length > 0) {
+      return {
+        items: p0.items.slice(0, maxItems),
+        blocked: false,
+        loginRequired: false,
+        notFound: false,
+        priceRedactedNoAuth: false,
+        timedOut: false,
+        directApiUsed: true
+      };
+    }
+
+    const fallbackItemUrl =
+      isDirectProduct && !p0.timedOut && p0.httpStatus === 200 && p0.code !== 'REQS002' && !p0.loginRequired
+        ? buildShopeeItemFallbackApiUrl(targetInfo)
+        : '';
+    if (fallbackItemUrl) {
+      const r0b = await callZenrowsOnce({
+        apiKey,
+        paramsObj: {
+          url: fallbackItemUrl,
+          premium_proxy: 'true',
+          proxy_country: 'vn',
+          js_render: 'false',
+          custom_headers: 'true'
+        },
+        extraHeaders: directHeaders,
+        timeoutMs: 25000,
+        fetchImpl
+      });
+      const p0b = inspectAndParse('ZenRows DirectAPI item/get', r0b, { allowTarget403: true });
+      if (p0b.items.length > 0) {
+        return {
+          items: p0b.items.slice(0, maxItems),
+          blocked: false,
+          loginRequired: false,
+          notFound: false,
+          priceRedactedNoAuth: false,
+          timedOut: false,
+          directApiUsed: true
+        };
+      }
+    }
+
+    const hitReqs002 = p0.code === 'REQS002';
+    if (directApiOnly) {
+      return {
+        items: [],
+        blocked: Boolean(anyBlocked || hitReqs002),
+        loginRequired: anyLoginRequired,
+        notFound: anyNotFound,
+        priceRedactedNoAuth: anyPriceRedacted,
+        timedOut: anyTimeout,
+        directApiOnly: true,
+        directReqs002: hitReqs002
+      };
+    }
+    log(`    [*] DirectAPI chua lay duoc san pham — leo thang ZenRows #1 Antibot (js_render=true)...`);
+  } else if (directApiOnly) {
+    return {
+      items: [],
+      blocked: false,
+      loginRequired: false,
+      notFound: false,
+      priceRedactedNoAuth: false,
+      timedOut: false,
+      directApiOnly: true,
+      directReqs002: false
+    };
+  }
 
   // Attempt 1 (Direct Stealth Browser): antibot=true + fresh VN residential proxy (no sticky session reuse) + network spy + CSP-safe data-sr-eval DOM/Fiber extractor
   const r1 = await callZenrowsOnce({
@@ -3137,6 +3313,7 @@ export async function scrapeShopeeLive({
   let anyNotFound = false;
   let anyTimeout = false;
   let anyPriceRedacted = false;
+  let anyDirectReqs002 = false;
   let activeUsedProvider = primaryProvider;
   const attemptedProviders = new Set();
   const disabledProviders = new Set();
@@ -3157,6 +3334,7 @@ export async function scrapeShopeeLive({
     let kwNotFound = false;
     let kwTimeout = false;
     let kwPriceRedacted = false;
+    let kwDirectReqs002 = false;
     for (let pIdx = 0; pIdx < configuredProviders.length; pIdx++) {
       const [provName, provKey] = configuredProviders[pIdx];
       if (disabledProviders.has(provName)) continue;
@@ -3165,11 +3343,13 @@ export async function scrapeShopeeLive({
       onProgress(`[*] [${provName.toUpperCase()}] Đang cào Shopee cho ${label}...\n`);
       let res = null;
       try {
-        if (provName === 'zenrows') {
+        if (provName === 'zenrows' || provName === 'zenrows_direct') {
           res = await fetchViaZenrows(kw, provKey, perKwCap, {
             fetchImpl,
+            env,
             cookieHeader: cookieInfo.normalizedHeader,
-            onProgress
+            onProgress,
+            directApiOnly: provName === 'zenrows_direct'
           });
         } else if (provName === 'scraperapi') {
           res = await fetchViaScraperApi(kw, provKey, perKwCap, {
@@ -3241,6 +3421,7 @@ export async function scrapeShopeeLive({
       if (res?.notFound) kwNotFound = true;
       if (res?.timedOut) kwTimeout = true;
       if (res?.priceRedactedNoAuth) kwPriceRedacted = true;
+      if (res?.directReqs002) kwDirectReqs002 = true;
       activeUsedProvider = provName;
 
       if (items.length > 0) {
@@ -3250,6 +3431,7 @@ export async function scrapeShopeeLive({
         kwNotFound = false;
         kwTimeout = false;
         kwPriceRedacted = false;
+        kwDirectReqs002 = false;
         onProgress(`    ✓ [${provName.toUpperCase()}] Bóc tách được ${kwItems.length} sản phẩm cho '${kw}'.\n`);
         break;
       }
@@ -3270,6 +3452,7 @@ export async function scrapeShopeeLive({
       if (kwNotFound) anyNotFound = true;
       if (kwTimeout) anyTimeout = true;
       if (kwPriceRedacted) anyPriceRedacted = true;
+      if (kwDirectReqs002) anyDirectReqs002 = true;
     }
     capturedByKw[kw] = kwItems;
 
@@ -3349,25 +3532,30 @@ export async function scrapeShopeeLive({
     status = 'login_required';
     message =
       `Shopee đang ẩn toàn bộ giá sản phẩm (trả price: null / removed_fields khi truy cập chưa đăng nhập) đối với ${targetDesc} qua ${provLabel}. ` +
-      'Vui lòng dán Cookie Shopee đã đăng nhập từ trình duyệt vào mục "Cookie Shopee" rồi bấm Bắt Đầu Cào lại.' +
+      'Vui lòng dán Cookie Shopee đã đăng nhập từ trình duyệt vào mục "Cookie Shopee" hoặc dùng Chrome Extension Bridge để cào bằng phiên đăng nhập thật.' +
       noCookieNote;
   } else if (anyLoginRequired) {
     status = 'login_required';
     message =
       `Shopee đang yêu cầu đăng nhập tài khoản (/buyer/login) khi ${provLabel} truy cập ${targetDesc}. ` +
-      'Vui lòng dán Cookie Shopee đã đăng nhập từ trình duyệt vào mục "Cookie Shopee" rồi bấm Bắt Đầu Cào lại.' +
+      'Vui lòng dán Cookie Shopee đã đăng nhập từ trình duyệt vào mục "Cookie Shopee" hoặc dùng Chrome Extension Bridge.' +
       noCookieNote;
+  } else if (anyDirectReqs002) {
+    status = 'blocked';
+    message =
+      `ZenRows từ chối chế độ tắt JS render (js_render=false) trên domain Shopee.vn (mã REQS002: bắt buộc bật js_render hoặc nâng cấp gói). ` +
+      'Hãy dùng nút ⚡ "Cào qua Chrome Extension" (chạy trực tiếp bằng IP nhà & Cookie thật của bạn) hoặc chuyển nhà cung cấp về ZenRows (Auto/JS)!';
   } else if (anyBlocked) {
     status = 'blocked';
     message =
       `Shopee tạm thời trả trang xác minh chống bot khi ${provLabel} truy cập ${targetDesc}. ` +
-      'Bạn hãy bổ sung Cookie Shopee từ trình duyệt đã đăng nhập (hoặc dán Link sản phẩm / Danh mục cụ thể).' +
+      'Hãy bấm nút ⚡ "Cào qua Chrome Extension" (cào bằng IP nhà & Chrome thật) hoặc bổ sung Cookie Shopee từ trình duyệt đã đăng nhập.' +
       noCookieNote;
   } else if (anyTimeout) {
     status = 'failed';
     message =
       `Yêu cầu cào Shopee qua ${provLabel} bị quá thời gian chờ ở các lượt thử. ` +
-      'Bạn hãy thử lại, giảm số từ khóa mỗi lần, hoặc dán Link chi tiết 1 sản phẩm Shopee cụ thể để tải nhanh hơn.';
+      'Bạn hãy thử lại, dùng ⚡ "Cào qua Chrome Extension", hoặc dán Link chi tiết 1 sản phẩm Shopee cụ thể để tải nhanh hơn.';
   }
 
   return {
@@ -3378,6 +3566,173 @@ export async function scrapeShopeeLive({
     login_required: Boolean(anyLoginRequired || redactedLoginRequired),
     config_required: false,
     provider: activeUsedProvider,
+    per_keyword_counts: perKeywordCounts
+  };
+}
+
+/**
+ * Xử lý dữ liệu thô thu thập từ Chrome Extension Bridge (IP nhà & Cookie thật của chủ shop),
+ * áp dụng đầy đủ bộ lọc Zero Hallucination (giá >= 1000, đúng từ khóa/itemId, stock=0, status='draft')
+ * và tải ảnh thật từ Shopee CDN lưu vào máy chủ.
+ */
+export async function processBridgeShopeePayloads({
+  keywords = [],
+  totalLimit = 20,
+  entries = [],
+  imgDir = 'public/products/shopee_live',
+  fetchImpl = fetch,
+  onProgress = () => {}
+} = {}) {
+  const safeEntries = Array.isArray(entries) ? entries.filter((e) => e && typeof e === 'object') : [];
+  const rawKeywords = Array.isArray(keywords) && keywords.length > 0
+    ? keywords
+    : safeEntries.map((e) => e.keyword);
+  const cleanKeywords = [...new Set(rawKeywords.map((k) => String(k || '').trim()).filter(Boolean))];
+
+  if (cleanKeywords.length === 0 || safeEntries.length === 0) {
+    return {
+      products: [],
+      status: 'failed',
+      message: 'Chrome Extension chưa gửi dữ liệu hoặc thiếu từ khóa mục tiêu.',
+      anti_bot_blocked: false,
+      login_required: false,
+      config_required: false,
+      provider: 'chrome_extension',
+      per_keyword_counts: {}
+    };
+  }
+
+  onProgress(`[*] Chrome Extension Bridge đã thu thập ${safeEntries.length} mục tiêu — đang lọc Zero Hallucination trên server...\n`);
+
+  const perKwCap = Math.max(6, Math.trunc((totalLimit / cleanKeywords.length) * 1.5) + 4);
+  const capturedByKw = {};
+  let anyBlocked = false;
+  let anyLoginRequired = false;
+  let anyNotFound = false;
+  let anyPriceRedacted = false;
+
+  for (const kw of cleanKeywords) {
+    capturedByKw[kw] = [];
+  }
+
+  for (const entry of safeEntries) {
+    const kw = String(entry.keyword || '').trim();
+    if (!kw) continue;
+    const directProduct = parseShopeeProductUrl(kw);
+    const seenIds = new Set();
+    const collected = [];
+
+    if (entry.loginRequired) anyLoginRequired = true;
+    if (entry.blocked) anyBlocked = true;
+    if (entry.notFound) anyNotFound = true;
+
+    const apiPayloads = Array.isArray(entry.apiPayloads) ? entry.apiPayloads : [];
+    for (const apiObj of apiPayloads) {
+      if (!apiObj || typeof apiObj !== 'object') continue;
+      const errCode = Number(apiObj.error);
+      if (errCode && errCode !== 0) {
+        if (errCode === 19 || errCode === 10002) anyLoginRequired = true;
+        else anyBlocked = true;
+        onProgress(`    [!] [Bridge API] Shopee error=${errCode} cho '${kw}'.\n`);
+      }
+      collectShopeeItemsFromObject(apiObj, kw, seenIds, collected, Math.max(perKwCap, 60));
+      if (directProduct && hasRedactedPdpPriceInJson(apiObj)) {
+        anyPriceRedacted = true;
+      }
+    }
+
+    if (entry.evalPayload && typeof entry.evalPayload === 'object') {
+      const normEval = normalizeEvalPayload(entry.evalPayload);
+      const evalUrl = String(normEval.url || entry.pageUrl || '');
+      if (/\/buyer\/login/i.test(evalUrl)) anyLoginRequired = true;
+      if (/\/verify\//i.test(evalUrl)) anyBlocked = true;
+      const evalItems = parseEvalPayloadToItems(normEval, kw, Math.max(perKwCap, 60));
+      for (const it of evalItems) {
+        if (it?.shopee_id && !seenIds.has(it.shopee_id)) {
+          seenIds.add(it.shopee_id);
+          collected.push(it);
+        }
+      }
+    }
+
+    if (entry.html && typeof entry.html === 'string') {
+      const htmlParsed = parseShopeeHtml(entry.html, kw, Math.max(perKwCap, 60), entry.pageUrl || '');
+      if (htmlParsed.loginRequired) anyLoginRequired = true;
+      if (htmlParsed.blocked) anyBlocked = true;
+      if (htmlParsed.notFound) anyNotFound = true;
+      if (htmlParsed.priceRedactedNoAuth) anyPriceRedacted = true;
+      for (const it of htmlParsed.items) {
+        if (it?.shopee_id && !seenIds.has(it.shopee_id)) {
+          seenIds.add(it.shopee_id);
+          collected.push(it);
+        }
+      }
+    }
+
+    const matched = collected.filter((it) => scoreProductMatch(it, kw) > 0).map((it) => ({
+      ...it,
+      via: 'chrome_extension'
+    }));
+    const existing = capturedByKw[kw] || [];
+    capturedByKw[kw] = [...existing, ...matched].slice(0, perKwCap);
+    onProgress(`    ✓ [Bridge] '${kw}': khớp ${matched.length}/${collected.length} sản phẩm đạt chuẩn.\n`);
+  }
+
+  const selectedProducts = allocateProductsFairly(capturedByKw, cleanKeywords, totalLimit);
+
+  if (selectedProducts.length > 0) {
+    onProgress(`[*] Đang tải & lưu ${selectedProducts.length} ảnh sản phẩm thật từ Shopee CDN...\n`);
+    const CONCURRENCY = 5;
+    for (let i = 0; i < selectedProducts.length; i += CONCURRENCY) {
+      const batch = selectedProducts.slice(i, i + CONCURRENCY);
+      await Promise.all(
+        batch.map(async (item, offset) => {
+          item.id = `shopee-bridge-${String(i + offset + 1).padStart(3, '0')}`;
+          item.images = await downloadImage(
+            item.image_id || '',
+            item.shopee_id,
+            item.image_url || '',
+            imgDir,
+            fetchImpl
+          );
+        })
+      );
+    }
+  }
+
+  const perKeywordCounts = {};
+  for (const prod of selectedProducts) {
+    const kwKey = prod.keyword || '';
+    perKeywordCounts[kwKey] = (perKeywordCounts[kwKey] || 0) + 1;
+  }
+
+  let status = 'empty';
+  let message = 'Chrome Extension không tìm thấy sản phẩm nào khớp từ khóa yêu cầu.';
+
+  if (selectedProducts.length > 0) {
+    status = 'completed';
+    message = `Đã cào & đồng bộ thành công ${selectedProducts.length} sản phẩm thật từ Shopee qua Chrome Extension Bridge!`;
+  } else if (anyNotFound && !anyBlocked && !anyLoginRequired && !anyPriceRedacted) {
+    status = 'empty';
+    message = 'Sản phẩm Shopee này không tồn tại hoặc đã bị gỡ bởi người bán.';
+  } else if (anyLoginRequired || anyPriceRedacted) {
+    status = 'login_required';
+    message =
+      'Trình duyệt Chrome của bạn chưa đăng nhập Shopee (hoặc phiên Shopee đã hết hạn). Hãy mở shopee.vn, đăng nhập tài khoản Shopee rồi bấm "Cào qua Chrome Extension" lại!';
+  } else if (anyBlocked) {
+    status = 'blocked';
+    message =
+      'Shopee hiển thị yêu cầu xác minh (slider / captcha) trên trình duyệt của bạn. Hãy mở tab shopee.vn giải xác minh một lần rồi thử lại.';
+  }
+
+  return {
+    products: selectedProducts,
+    status,
+    message,
+    anti_bot_blocked: selectedProducts.length === 0 ? anyBlocked : false,
+    login_required: selectedProducts.length === 0 ? Boolean(anyLoginRequired || anyPriceRedacted) : false,
+    config_required: false,
+    provider: 'chrome_extension',
     per_keyword_counts: perKeywordCounts
   };
 }

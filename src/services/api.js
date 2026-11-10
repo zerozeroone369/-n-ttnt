@@ -309,6 +309,11 @@ export const ApiClient = {
         ...(provider ? { provider } : {})
       })
     }),
+    submitBridge: (payload) => request('/shopee/bridge-submit', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
+    getExtensionDownloadUrl: () => `${API_BASE}/shopee/extension.zip`,
     importProducts: (products) => request('/shopee/import', {
       method: 'POST',
       body: JSON.stringify({ products })
