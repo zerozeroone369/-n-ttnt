@@ -668,11 +668,9 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
     const pPrice = dp.product_price || dp.productPrice || root.product_price || root.productPrice || {};
     const pImages = dp.product_images || dp.productImages || root.product_images || root.productImages || {};
     const pReview = dp.product_review || dp.productReview || root.product_review || root.productReview || {};
-    const firstModel = Array.isArray(it.models)
-      ? it.models[0]
-      : Array.isArray(dp.models)
-        ? dp.models[0]
-        : null;
+    const modelsList = Array.isArray(it.models) ? it.models : Array.isArray(dp.models) ? dp.models : [];
+    const modelWithPrice =
+      modelsList.find((m) => pickNumericPriceCandidate(m?.price || m?.price_info || m?.priceInfo || m) > 0) || modelsList[0] || null;
     const priceVal =
       pickNumericPriceCandidate(it.price) ||
       pickNumericPriceCandidate(it.price_min) ||
@@ -682,12 +680,15 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
       pickNumericPriceCandidate(it.current_price) ||
       pickNumericPriceCandidate(it.currentPrice) ||
       pickNumericPriceCandidate(it.price_info) ||
+      pickNumericPriceCandidate(it.priceInfo) ||
+      pickNumericPriceCandidate(it.price_range) ||
       pickNumericPriceCandidate(pPrice?.price) ||
+      pickNumericPriceCandidate(pPrice?.price_range) ||
       pickNumericPriceCandidate(pPrice?.discount_price) ||
       pickNumericPriceCandidate(pPrice) ||
       pickNumericPriceCandidate(dp.price_info) ||
       pickNumericPriceCandidate(dp.price) ||
-      pickNumericPriceCandidate(firstModel?.price) ||
+      pickNumericPriceCandidate(modelWithPrice?.price || modelWithPrice?.price_info || modelWithPrice?.priceInfo || modelWithPrice) ||
       0;
     const origVal =
       pickNumericPriceCandidate(it.price_before_discount) ||
@@ -696,8 +697,8 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
       pickNumericPriceCandidate(pPrice?.price_before_discount) ||
       pickNumericPriceCandidate(pPrice?.priceBeforeDiscount) ||
       pickNumericPriceCandidate(pPrice?.origin_price) ||
-      pickNumericPriceCandidate(firstModel?.price_before_discount) ||
-      pickNumericPriceCandidate(firstModel?.priceBeforeDiscount) ||
+      pickNumericPriceCandidate(modelWithPrice?.price_before_discount) ||
+      pickNumericPriceCandidate(modelWithPrice?.priceBeforeDiscount) ||
       0;
     const tierImgs = Array.isArray(it.tier_variations?.[0]?.images)
       ? it.tier_variations[0].images
@@ -1560,11 +1561,25 @@ function extractPdpHtmlDiag(html, directProduct = null) {
       if (initState && typeof initState === 'object') {
         extra += `,mfeKeys=[${Object.keys(initState).slice(0, 10).join('|')}]`;
         const dp = initState.DOMAIN_PDP;
-        const dpStr = dp ? sanitizeErrorText(JSON.stringify(dp)).slice(0, 320) : '';
-        if (dpStr) extra += `,dp=${dpStr}`;
-        const sv = initState.DOMAIN_SELECT_VARIATION;
-        const svStr = sv ? sanitizeErrorText(JSON.stringify(sv)).slice(0, 180) : '';
-        if (svStr) extra += `,sv=${svStr}`;
+        const cMap = dp?.data?.PDP_BFF_DATA?.cachedMap || dp?.data?.cachedMap;
+        const firstEntry = cMap && typeof cMap === 'object' ? Object.values(cMap)[0] : null;
+        if (firstEntry && typeof firstEntry === 'object') {
+          extra += `,ceKeys=[${Object.keys(firstEntry).join('|')}]`;
+          const ceItem = firstEntry.item && typeof firstEntry.item === 'object' ? firstEntry.item : {};
+          const ceItemPriceKeys = Object.entries(ceItem)
+            .filter(([k]) => /(?:price|model|tier|img|sold|rating|hidden)/i.test(k))
+            .slice(0, 12)
+            .map(([k, v]) => `${k}:${Array.isArray(v) ? `arr[${v.length}]` : typeof v === 'object' && v !== null ? `{${Object.keys(v).slice(0, 4).join(',')}}` : v}`);
+          extra += `,ceIt=[${ceItemPriceKeys.join(',')}]`;
+          extra += `,ceP=${sanitizeErrorText(JSON.stringify(firstEntry.product_price ?? firstEntry.productPrice ?? null)).slice(0, 200)}`;
+        } else {
+          const dpStr = dp ? sanitizeErrorText(JSON.stringify(dp)).slice(0, 260) : '';
+          if (dpStr) extra += `,dp=${dpStr}`;
+        }
+        const itemSlice = initState.item;
+        if (itemSlice && typeof itemSlice === 'object') {
+          extra += `,itSliceKeys=[${Object.keys(itemSlice).slice(0, 8).join('|')}]`;
+        }
       }
     } else if (bestCtx) {
       extra += `,ctx="${bestCtx.slice(0, 160)}"`;
