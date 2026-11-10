@@ -108,3 +108,30 @@ export function normalizeShopeeCookieHeader(rawInput) {
   };
 }
 
+const CORE_AUTH_COOKIE_NAMES = new Set([
+  'SPC_ST',
+  'SPC_U',
+  'SPC_EC',
+  'SPC_T_ID',
+  'SPC_T_IV',
+  'SPC_R_T_ID',
+  'SPC_R_T_IV',
+  'csrftoken',
+  'language',
+  'ssr-tz'
+]);
+
+/**
+ * Extracts only core Shopee auth/locale cookies, omitting browser-bound anti-bot/tracking
+ * fingerprint cookies (SPC_F, SPC_SI, SPC_SEC_SI, shopee_webUnique_ccd, ds) that expire or
+ * mismatch across proxy IPs.
+ */
+export function extractCoreAuthCookieHeader(rawInput) {
+  const parsed = normalizeShopeeCookieHeader(rawInput);
+  if (!parsed.ok || !parsed.hasAuthToken) return '';
+  const core = parsed.cookies.filter((c) => CORE_AUTH_COOKIE_NAMES.has(c.name));
+  if (core.length === 0) return '';
+  return core.map((c) => `${c.name}=${c.value}`).join('; ');
+}
+
+

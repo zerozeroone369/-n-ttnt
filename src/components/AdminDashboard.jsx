@@ -144,7 +144,9 @@ export default function AdminDashboard({
       const meta = await ApiClient.shopee.getScraperConfig();
       if (isMountedRef.current) {
         setScraperConfig(meta);
-        if (meta?.activeProvider) {
+        if (meta?.selectedProvider === 'auto') {
+          setScraperProviderInput('auto');
+        } else if (meta?.activeProvider) {
           setScraperProviderInput(meta.activeProvider);
         }
         if (!meta?.configured) {
@@ -161,7 +163,7 @@ export default function AdminDashboard({
   const handleSaveScraperConfig = async (e) => {
     e.preventDefault();
     setScraperConfigFeedback(null);
-    const trimmedKey = scraperApiKeyInput.trim();
+    const trimmedKey = scraperProviderInput === 'auto' ? '' : scraperApiKeyInput.trim();
     if (trimmedKey && (trimmedKey.length < 8 || /\s/.test(trimmedKey))) {
       setScraperConfigFeedback({
         ok: false,
@@ -2079,6 +2081,7 @@ export default function AdminDashboard({
                                   disabled={scraperConfigSaving}
                                   className="w-full bg-white border border-stone-300 rounded-xl px-3 py-2 text-xs font-semibold text-stone-800 focus:outline-none focus:ring-2 focus:ring-orange-500"
                                 >
+                                  <option value="auto">Tự động (ZenRows → ScraperAPI → Crawlbase)</option>
                                   <option value="zenrows">ZenRows (ZENROWS_API_KEY)</option>
                                   <option value="scraperapi">ScraperAPI (SCRAPERAPI_KEY)</option>
                                   <option value="crawlbase">Crawlbase (CRAWLBASE_TOKEN)</option>
@@ -2088,21 +2091,30 @@ export default function AdminDashboard({
                               <div className="sm:col-span-8">
                                 <label htmlFor="scraper-apikey-input" className="block font-semibold text-stone-800 mb-1">
                                   API Key / Token cho {scraperProviderInput.toUpperCase()}
-                                  {selectedMeta?.configured ? ` (đang có: ${selectedMeta.keyMasked})` : ''}:
+                                  {scraperProviderInput === 'auto'
+                                    ? ' (dùng tuần tự các key đã cấu hình)'
+                                    : selectedMeta?.configured
+                                      ? ` (đang có: ${selectedMeta.keyMasked})`
+                                      : ''}
+                                  :
                                 </label>
                                 <input
                                   id="scraper-apikey-input"
                                   type="password"
-                                  value={scraperApiKeyInput}
+                                  value={scraperProviderInput === 'auto' ? '' : scraperApiKeyInput}
                                   onChange={(e) => {
                                     setScraperApiKeyInput(e.target.value);
                                     if (scraperConfigFeedback) setScraperConfigFeedback(null);
                                   }}
                                   autoComplete="off"
                                   spellCheck={false}
-                                  placeholder={`Dán API Key mới cho ${scraperProviderInput.toUpperCase()} (để trống nếu chỉ đổi provider)`}
-                                  className="w-full font-mono text-xs bg-white border border-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500"
-                                  disabled={scraperConfigSaving}
+                                  placeholder={
+                                    scraperProviderInput === 'auto'
+                                      ? 'Chọn ZenRows / ScraperAPI / Crawlbase bên trái nếu muốn thêm API Key mới'
+                                      : `Dán API Key mới cho ${scraperProviderInput.toUpperCase()} (để trống nếu chỉ đổi provider)`
+                                  }
+                                  className="w-full font-mono text-xs bg-white border border-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 disabled:bg-stone-100"
+                                  disabled={scraperConfigSaving || scraperProviderInput === 'auto'}
                                 />
                               </div>
                             </div>
@@ -2128,7 +2140,12 @@ export default function AdminDashboard({
                               <div className="flex items-center gap-2">
                                 <button
                                   type="submit"
-                                  disabled={scraperConfigSaving || (!scraperApiKeyInput.trim() && !selectedMeta?.configured)}
+                                  disabled={
+                                    scraperConfigSaving ||
+                                    (scraperProviderInput === 'auto'
+                                      ? !scraperConfig?.configured
+                                      : !scraperApiKeyInput.trim() && !selectedMeta?.configured)
+                                  }
                                   className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all disabled:opacity-50"
                                 >
                                   {scraperConfigSaving ? (

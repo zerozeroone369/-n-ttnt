@@ -16,9 +16,10 @@
 import fs from 'node:fs';
 import fsPromises from 'node:fs/promises';
 import path from 'node:path';
-import { normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
+import { extractCoreAuthCookieHeader, normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
 import {
   normalizeText,
+  parseShopeeCategoryUrl,
   parseShopeeProductUrl,
   parseShopeeSearchUrl,
   scoreProductMatch
@@ -76,6 +77,27 @@ export function resolveScrapingProvider(preferred = null, env = process.env) {
   return [null, null];
 }
 
+export function resolveConfiguredProviders(preferred = null, env = process.env) {
+  const choice = String(preferred || env?.SCRAPING_PROVIDER || 'auto').trim().toLowerCase();
+  const keys = {
+    zenrows: String(env?.ZENROWS_API_KEY || '').trim(),
+    scraperapi: String(env?.SCRAPERAPI_KEY || '').trim(),
+    crawlbase: String(env?.CRAWLBASE_TOKEN || env?.CRAWLBASE_API_KEY || '').trim()
+  };
+  const genericKey = String(env?.SCRAPING_API_KEY || '').trim();
+
+  if (SUPPORTED_PROVIDERS.includes(choice)) {
+    const key = keys[choice] || genericKey || null;
+    return key ? [[choice, key]] : [];
+  }
+
+  const configured = [];
+  for (const prov of SUPPORTED_PROVIDERS) {
+    if (keys[prov]) configured.push([prov, keys[prov]]);
+  }
+  return configured;
+}
+
 export function loadShopeeCookieHeader(cookieFilePath = '', env = process.env) {
   let rawCookie = '';
   if (cookieFilePath && fs.existsSync(cookieFilePath)) {
@@ -119,6 +141,16 @@ export function resolveTargetForInput(kw) {
       targetUrl: searchUrlObj.targetUrl,
       fallbackUrl: searchUrlObj.targetUrl,
       keywordText: searchUrlObj.keyword
+    };
+  }
+  const categoryUrlObj = parseShopeeCategoryUrl(kw);
+  if (categoryUrlObj) {
+    const sep = categoryUrlObj.targetUrl.includes('?') ? '&' : '?';
+    return {
+      kind: 'category',
+      targetUrl: categoryUrlObj.targetUrl,
+      fallbackUrl: `${categoryUrlObj.targetUrl}${sep}page=0&sortBy=pop`,
+      categoryId: categoryUrlObj.categoryId
     };
   }
   const searchUrl = `https://shopee.vn/search?keyword=${encodeURIComponent(kw)}`;
@@ -313,15 +345,74 @@ export function parseShopeeItem(rawItem, kw) {
   };
 }
 
+function stripTagBlocks(html, tagNames) {
+  let current = String(html || '');
+  if (!current) return '';
+  for (const tag of tagNames) {
+    const low = current.toLowerCase();
+    const openToken = `<${tag}`;
+    const closeToken = `</${tag}>`;
+    if (!low.includes(openToken)) continue;
+    const parts = [];
+    let cursor = 0;
+    while (cursor < current.length) {
+      const start = low.indexOf(openToken, cursor);
+      if (start === -1) {
+        parts.push(current.slice(cursor));
+        break;
+      }
+      const nextCh = low[start + openToken.length] || '';
+      if (nextCh && !/[\s/>]/.test(nextCh)) {
+        parts.push(current.slice(cursor, start + openToken.length));
+        cursor = start + openToken.length;
+        continue;
+      }
+      parts.push(current.slice(cursor, start));
+      const openEnd = low.indexOf('>', start + openToken.length);
+      if (openEnd === -1) {
+        cursor = current.length;
+        break;
+      }
+      const closeStart = low.indexOf(closeToken, openEnd + 1);
+      if (closeStart === -1) {
+        // Unclosed block tag: skip tag itself so rest of document isn't swallowed or backtracked
+        cursor = openEnd + 1;
+      } else {
+        cursor = closeStart + closeToken.length;
+      }
+    }
+    current = parts.join(' ');
+  }
+  return current;
+}
+
+function extractMetaPropertyContent(html, propName) {
+  const target = String(propName || '').toLowerCase();
+  const metaRe = /<meta\b([^>]*)>/gi;
+  let m;
+  while ((m = metaRe.exec(html)) !== null) {
+    const attrs = m[1];
+    const propMatch = attrs.match(/\b(?:property|name)=["']([^"']+)["']/i);
+    if (!propMatch || propMatch[1].toLowerCase() !== target) continue;
+    const contentMatch = attrs.match(/\bcontent=(["'])([^"']*)\1/i);
+    if (contentMatch) return decodeHtmlEntities(contentMatch[2]);
+  }
+  return '';
+}
+
 export function extractVisibleBodySnippet(html, maxChars = 220) {
   if (!html || typeof html !== 'string') return '';
-  const bodyMatch = html.match(/<body[^>]*>([\s\S]*?)<\/body>/i);
-  const region = bodyMatch ? bodyMatch[1] : html;
-  const cleaned = region
-    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, ' ')
-    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, ' ')
-    .replace(/<noscript\b[^>]*>[\s\S]*?<\/noscript>/gi, ' ')
-    .replace(/<svg\b[^>]*>[\s\S]*?<\/svg>/gi, ' ');
+  const low = html.toLowerCase();
+  const bodyOpen = low.indexOf('<body');
+  let region = html;
+  if (bodyOpen !== -1) {
+    const bodyStart = low.indexOf('>', bodyOpen);
+    const bodyEnd = low.lastIndexOf('</body>');
+    if (bodyStart !== -1) {
+      region = bodyEnd > bodyStart ? html.slice(bodyStart + 1, bodyEnd) : html.slice(bodyStart + 1);
+    }
+  }
+  const cleaned = stripTagBlocks(region, ['script', 'style', 'noscript', 'svg']);
   const text = stripTags(cleaned);
   return sanitizeErrorText(text).slice(0, maxChars);
 }
@@ -332,20 +423,32 @@ export function isLoginRedirectHtml(html, finalUrl = '') {
   if (lowUrl.includes('/buyer/login') || lowUrl.includes('shopee.vn/buyer/login')) {
     return true;
   }
-  if (/<title[^>]*>[^<]*(đăng nhập|login)[^<]*<\/title>/i.test(html)) {
+  const titleMatch = html.match(/<title[^>]*>([^<]*)<\/title>/i);
+  if (titleMatch && /(đăng nhập|login)/i.test(titleMatch[1])) {
     return true;
   }
-  if (/<(?:link|meta)[^>]*(?:rel=["']canonical["']|property=["']og:url["'])[^>]*\/buyer\/login/i.test(html)) {
-    return true;
+  const linkMetaRe = /<(?:link|meta)\b([^>]*)>/gi;
+  let lm;
+  while ((lm = linkMetaRe.exec(html)) !== null) {
+    const attrs = lm[1];
+    if (
+      (/(?:rel=["']canonical["']|property=["']og:url["'])/i.test(attrs)) &&
+      /\/buyer\/login/i.test(attrs)
+    ) {
+      return true;
+    }
   }
-  if (SHOPEE_HREF_RE.test(html)) return false;
   const visibleLow = extractVisibleBodySnippet(html, 4000).toLowerCase();
+  if (visibleLow.includes('đã bán') || /data-sqe=["']item["']/i.test(html)) {
+    return false;
+  }
   if (
     visibleLow.includes('đăng nhập bằng mã qr') ||
     visibleLow.includes('quét mã qr để đăng nhập') ||
+    visibleLow.includes('có vẻ như bạn chưa đăng nhập') ||
+    (visibleLow.includes('cần đăng nhập') && visibleLow.includes('đăng nhập để tiếp tục')) ||
     (visibleLow.includes('đăng nhập') &&
-      (visibleLow.includes('mật khẩu') || visibleLow.includes('số điện thoại/email') || visibleLow.includes('tên đăng nhập')) &&
-      !visibleLow.includes('đã bán'))
+      (visibleLow.includes('mật khẩu') || visibleLow.includes('số điện thoại/email') || visibleLow.includes('tên đăng nhập')))
   ) {
     return true;
   }
@@ -358,9 +461,10 @@ export function isAntibotChallengeHtml(html, finalUrl = '') {
   if (lowUrl.includes('/verify/') || lowUrl.includes('shopee.vn/verify')) {
     return true;
   }
-  if (SHOPEE_HREF_RE.test(html)) return false;
-  const low = html.toLowerCase();
   const visibleLow = extractVisibleBodySnippet(html, 4000).toLowerCase();
+  if (visibleLow.includes('đã bán') || /data-sqe=["']item["']/i.test(html)) {
+    return false;
+  }
   const bodyMarkers = [
     'xác minh bảo mật',
     'hệ thống phát hiện truy cập bất thường',
@@ -371,6 +475,7 @@ export function isAntibotChallengeHtml(html, finalUrl = '') {
     'access denied'
   ];
   if (bodyMarkers.some((m) => visibleLow.includes(m))) return true;
+  const low = html.toLowerCase();
   const rawMarkers = [
     '"error":90309999',
     '"redirect_to_error_page":true',
@@ -450,6 +555,9 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems) {
 
   extractPdpItemFromObject(root, kw, seenIds, outItems);
   if (outItems.length >= maxItems) return;
+  if (parseShopeeProductUrl(kw) && outItems.some((it) => scoreProductMatch(it, kw) > 0)) {
+    return;
+  }
 
   const queue = [{ node: root, depth: 0 }];
   const visited = new Set();
@@ -752,35 +860,26 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
 
 function extractPdpMetaFallback(html, directProduct, kw) {
   if (!directProduct || !html) return [];
-  const mainHtml = html.replace(
-    /<(header|nav|footer|script|style|svg|noscript)\b[\s\S]*?<\/\1>/gi,
-    ' '
-  );
-  const h1Match = mainHtml.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
-  const ogTitleMatch =
-    html.match(/<meta[^>]+property=["']og:title["'][^>]+content=(["'])([\s\S]*?)\1/i) ||
-    html.match(/<meta[^>]+content=(["'])([\s\S]*?)\1[^>]+property=["']og:title["']/i);
+  const mainHtml = stripTagBlocks(html, ['header', 'nav', 'footer', 'script', 'style', 'svg', 'noscript']);
+  const h1Match = mainHtml.match(/<h1\b[^>]*>([\s\S]{0,1000}?)<\/h1>/i);
+  const ogTitle = extractMetaPropertyContent(html, 'og:title');
   const docTitle = extractHtmlTitle(html);
 
-  let rawTitle = stripTags((h1Match && h1Match[1]) || (ogTitleMatch && ogTitleMatch[2]) || docTitle || '');
+  let rawTitle = stripTags((h1Match && h1Match[1]) || ogTitle || docTitle || '');
   rawTitle = rawTitle.replace(/\s*\|\s*Shopee.*$/i, '').replace(/^Mua ngay\s+/i, '').trim();
   if (!rawTitle || rawTitle.length < 5 || /^shopee việt nam$/i.test(rawTitle) || /đăng nhập/i.test(rawTitle)) {
     return [];
   }
 
-  const metaPriceMatch =
-    html.match(/<meta[^>]+property=["']product:price:amount["'][^>]+content=(["'])([\s\S]*?)\1/i) ||
-    html.match(/<meta[^>]+content=(["'])([\s\S]*?)\1[^>]+property=["']product:price:amount["']/i);
-  let price = metaPriceMatch ? parseVndPrice(metaPriceMatch[2]) : 0;
+  const metaPrice = extractMetaPropertyContent(html, 'product:price:amount');
+  let price = metaPrice ? parseVndPrice(metaPrice) : 0;
   if (!price) {
     price = extractCardPrices(mainHtml).price;
   }
   if (!price || price < 1000) return [];
 
-  const ogImgMatch =
-    html.match(/<meta[^>]+property=["']og:image["'][^>]+content=(["'])([\s\S]*?)\1/i) ||
-    html.match(/<meta[^>]+content=(["'])([\s\S]*?)\1[^>]+property=["']og:image["']/i);
-  let [imageId, cdnUrl] = ogImgMatch ? extractImageRef(decodeHtmlEntities(ogImgMatch[2])) : ['', ''];
+  const ogImg = extractMetaPropertyContent(html, 'og:image');
+  let [imageId, cdnUrl] = ogImg ? extractImageRef(ogImg) : ['', ''];
   if (!cdnUrl) {
     [imageId, cdnUrl] = extractCardImage(mainHtml);
   }
@@ -843,12 +942,15 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
   const parsed = [];
   const seenIds = new Set();
   // Exclude header/nav/footer chrome so mini-cart popovers or user menu links are never harvested
-  const mainHtml = html.replace(/<(header|nav|footer)\b[\s\S]*?<\/\1>/gi, ' ');
-  const anchorRe = /<a\b[^>]*href=(["'])([^"']+)\1[^>]*>([\s\S]*?)<\/a>/gi;
+  const mainHtml = stripTagBlocks(html, ['header', 'nav', 'footer', 'script', 'style', 'svg', 'noscript']);
+  const mainLow = mainHtml.toLowerCase();
+  const anchorOpenRe = /<a\b([^>]*)>/gi;
   let match;
 
-  while ((match = anchorRe.exec(mainHtml)) !== null && parsed.length < maxItems) {
-    const href = decodeHtmlEntities(match[2]);
+  while ((match = anchorOpenRe.exec(mainHtml)) !== null && parsed.length < maxItems) {
+    const hrefAttrMatch = match[1].match(/\bhref=(["'])([^"']+)\1/i);
+    if (!hrefAttrMatch) continue;
+    const href = decodeHtmlEntities(hrefAttrMatch[2]);
     const hrefM = href.match(SHOPEE_HREF_RE);
     if (!hrefM) continue;
 
@@ -856,7 +958,13 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
     const itemId = hrefM[2] || hrefM[4] || '';
     if (!itemId || seenIds.has(itemId)) continue;
 
-    const fragment = findCardFragmentAroundAnchor(mainHtml, match.index, match.index + match[0].length);
+    const openEndIdx = match.index + match[0].length;
+    const closeAnchorIdx = mainLow.indexOf('</a>', openEndIdx);
+    const anchorEndIdx =
+      closeAnchorIdx !== -1 && closeAnchorIdx - openEndIdx <= 3000
+        ? closeAnchorIdx + 4
+        : Math.min(mainHtml.length, openEndIdx + 1200);
+    const fragment = findCardFragmentAroundAnchor(mainHtml, match.index, anchorEndIdx);
     const name = extractCardName(fragment);
     if (!name || name.length < 3) continue;
 
@@ -1302,9 +1410,21 @@ async function callZenrowsOnce({ apiKey, paramsObj, extraHeaders = {}, timeoutMs
   return { status, text: rawText, jsonBody, timedOut: false };
 }
 
-function handleZenrowsFatalStatus(status, jsonBody) {
-  if (status === 401 || status === 403) {
+function handleZenrowsFatalStatus(status, jsonBody, rawText = '', { allowTarget403 = false } = {}) {
+  if (status === 401) {
     throw new ProviderFatalError(`ZenRows từ chối API Key (HTTP ${status}). Vui lòng kiểm tra ZENROWS_API_KEY.`);
+  }
+  if (status === 403) {
+    const code = String(jsonBody?.code || '').toUpperCase();
+    const lowBody = String(rawText || jsonBody?.title || jsonBody?.detail || '').toLowerCase();
+    const looksLikeTargetBlock =
+      allowTarget403 &&
+      !code.startsWith('AUTH') &&
+      (Boolean(jsonBody?.error) || !lowBody.includes('zenrows') && (lowBody.includes('shopee') || lowBody.includes('access denied') || lowBody.includes('captcha') || lowBody.includes('cloudflare') || lowBody === ''));
+    if (!looksLikeTargetBlock) {
+      throw new ProviderFatalError(`ZenRows từ chối API Key (HTTP ${status}). Vui lòng kiểm tra ZENROWS_API_KEY.`);
+    }
+    return { target403: true };
   }
   if (status === 402) {
     throw new ProviderFatalError('Tài khoản ZenRows đã hết credit hoặc hạn mức miễn phí (HTTP 402).');
@@ -1315,6 +1435,25 @@ function handleZenrowsFatalStatus(status, jsonBody) {
   if (status === 400 && jsonBody?.code === 'REQS001') {
     throw new ProviderFatalError('ZenRows không cho phép truy cập domain mục tiêu (REQS001).');
   }
+  return { target403: false };
+}
+
+function buildShopeeDirectApiUrl(targetInfo, kw, maxItems = 20) {
+  const apiCap = Math.min(60, Math.max(20, Number(maxItems) || 20));
+  if (targetInfo.kind === 'product' && targetInfo.shopId && targetInfo.itemId) {
+    return `https://shopee.vn/api/v4/pdp/get_pc?item_id=${encodeURIComponent(targetInfo.itemId)}&shop_id=${encodeURIComponent(targetInfo.shopId)}`;
+  }
+  if (targetInfo.kind === 'category' && targetInfo.categoryId) {
+    const leafCatId = String(targetInfo.categoryId).split('.').filter(Boolean).pop();
+    if (leafCatId) {
+      return `https://shopee.vn/api/v4/search/search_items?by=pop&limit=${apiCap}&match_id=${encodeURIComponent(leafCatId)}&newest=0&order=desc&page_type=search&scenario=PAGE_OTHERS&version=2`;
+    }
+  }
+  const searchTerm = targetInfo.kind === 'search' ? targetInfo.keywordText : kw;
+  if (searchTerm && !/^https?:\/\//i.test(searchTerm)) {
+    return `https://shopee.vn/api/v4/search/search_items?by=relevancy&keyword=${encodeURIComponent(searchTerm)}&limit=${apiCap}&newest=0&order=desc&page_type=search&scenario=PAGE_GLOBAL_SEARCH&version=2`;
+  }
+  return '';
 }
 
 export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
@@ -1327,6 +1466,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const targetInfo = resolveTargetForInput(kw);
   const isDirectProduct = targetInfo.kind === 'product';
+  const coreCookie = cookieHeader ? extractCoreAuthCookieHeader(cookieHeader) : '';
   const jsInstructionsPrimary = JSON.stringify(
     isDirectProduct
       ? [{ wait: 4500 }, { scroll_y: 650 }, { wait: 2500 }]
@@ -1340,33 +1480,38 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   let anyLoginRequired = false;
   let anyTimeout = false;
 
-  const inspectAndParse = (attemptLabel, resp) => {
+  const inspectAndParse = (attemptLabel, resp, { allowTarget403 = false } = {}) => {
     if (resp.timedOut) {
       anyTimeout = true;
       const secs = Math.round((resp.timeoutMs || 90000) / 1000);
       log(`    [!] [${attemptLabel}] Quá thời gian chờ (${secs}s) — đang chuyển phương án dự phòng...`);
-      return { items: [], blocked: false, loginRequired: false, timedOut: true, code: 'TIMEOUT' };
+      return { items: [], blocked: false, loginRequired: false, timedOut: true, code: 'TIMEOUT', httpStatus: 0, xhrCount: 0, htmlLen: 0 };
     }
 
-    handleZenrowsFatalStatus(resp.status, resp.jsonBody);
+    const fatalCheck = handleZenrowsFatalStatus(resp.status, resp.jsonBody, resp.text, { allowTarget403 });
+    if (fatalCheck.target403) {
+      anyBlocked = true;
+      log(`    [!] [${attemptLabel}] Shopee trả HTTP 403 trên API trực tiếp — leo thang sang trình duyệt antibot...`);
+      return { items: [], blocked: true, loginRequired: false, timedOut: false, code: '403', httpStatus: 403, xhrCount: 0, htmlLen: 0 };
+    }
 
     if (resp.status === 422) {
       anyBlocked = true;
       const errCode = resp.jsonBody?.code ? ` (${resp.jsonBody.code})` : '';
       log(`    [!] [${attemptLabel}] ZenRows trả HTTP 422${errCode}: mục tiêu tạm chặn hoặc chưa render xong.`);
-      return { items: [], blocked: true, loginRequired: false, timedOut: false, code: resp.jsonBody?.code || '422' };
+      return { items: [], blocked: true, loginRequired: false, timedOut: false, code: resp.jsonBody?.code || '422', httpStatus: 422, xhrCount: 0, htmlLen: 0 };
     }
 
     if (resp.status === 400) {
       const code = resp.jsonBody?.code || 'HTTP_400';
       const title = sanitizeErrorText(resp.jsonBody?.title || resp.jsonBody?.detail || resp.text.slice(0, 160));
       log(`    [!] [${attemptLabel}] ZenRows HTTP 400 (${code}): ${title}`);
-      return { items: [], blocked: code === 'REQS002', loginRequired: false, timedOut: false, code };
+      return { items: [], blocked: code === 'REQS002', loginRequired: false, timedOut: false, code, httpStatus: 400, xhrCount: 0, htmlLen: 0 };
     }
 
     if (resp.status !== 200) {
       log(`    [!] [${attemptLabel}] ZenRows HTTP ${resp.status} cho '${kw}'.`);
-      return { items: [], blocked: false, loginRequired: false, timedOut: false, code: String(resp.status) };
+      return { items: [], blocked: false, loginRequired: false, timedOut: false, code: String(resp.status), httpStatus: resp.status, xhrCount: 0, htmlLen: 0 };
     }
 
     const keepMatchingOnly = (itemsList, sourceList = []) => {
@@ -1404,18 +1549,35 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
             `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
         );
       }
-      return { ...parsed, items: matched, timedOut: false, code: '200' };
+      return { ...parsed, items: matched, timedOut: false, code: '200', httpStatus: 200, xhrCount: xhrLen, htmlLen };
     }
 
     if (resp.jsonBody && typeof resp.jsonBody === 'object') {
       const items = [];
       collectShopeeItemsFromObject(resp.jsonBody, kw, new Set(), items, maxItems);
-      if (resp.jsonBody.error && resp.jsonBody.error !== 0) {
-        anyBlocked = true;
-        log(`    [!] [${attemptLabel}] Shopee JSON error=${resp.jsonBody.error}`);
+      const jsonErr = resp.jsonBody.error;
+      const hasErr = jsonErr !== undefined && jsonErr !== null && Number(jsonErr) !== 0;
+      const isLoginErr = Number(jsonErr) === 19 || Number(jsonErr) === 10002;
+      const errMsg = resp.jsonBody.error_msg ? ` (${sanitizeErrorText(String(resp.jsonBody.error_msg).slice(0, 80))})` : '';
+      if (hasErr) {
+        if (isLoginErr) anyLoginRequired = true;
+        else anyBlocked = true;
+        log(`    [!] [${attemptLabel}] Shopee JSON error=${jsonErr}${errMsg}`);
       }
-      const { matched } = keepMatchingOnly(items, ['JSON']);
-      return { items: matched, blocked: Boolean(resp.jsonBody.error), loginRequired: false, timedOut: false, code: '200' };
+      const { matched } = keepMatchingOnly(items, ['DIRECT_API_JSON']);
+      if (!hasErr && matched.length === 0) {
+        log(`    [i] [${attemptLabel}] HTTP 200 JSON 0 items (keys=${Object.keys(resp.jsonBody).slice(0, 6).join('|')})`);
+      }
+      return {
+        items: matched,
+        blocked: hasErr && !isLoginErr,
+        loginRequired: isLoginErr,
+        timedOut: false,
+        code: hasErr ? `ERR_${jsonErr}` : '200',
+        httpStatus: 200,
+        xhrCount: 0,
+        htmlLen: 0
+      };
     }
 
     const htmlRes = parseShopeeHtml(resp.text, kw, maxItems, targetInfo.targetUrl);
@@ -1432,10 +1594,45 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
           `${htmlRes.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
       );
     }
-    return { ...htmlRes, items: matched, timedOut: false, code: '200' };
+    return { ...htmlRes, items: matched, timedOut: false, code: '200', httpStatus: 200, xhrCount: 0, htmlLen: resp.text.length };
   };
 
-  // Attempt 1 (Direct Stealth): antibot=true + VN residential proxy + full assets (no block_resources) + Cookie
+  // Attempt 0 (Fast Direct Internal API): js_render=false + VN residential proxy + custom_headers (2–4s)
+  const directApiUrl = buildShopeeDirectApiUrl(targetInfo, kw, maxItems);
+  if (directApiUrl) {
+    const directCookie = coreCookie || cookieHeader;
+    log(
+      `    [*] Thu ZenRows DirectAPI (js_render=false + API noi bo${directCookie ? ' + CoreCookie' : ''}) cho '${kw}'...`
+    );
+    const r0 = await callZenrowsOnce({
+      apiKey,
+      paramsObj: {
+        url: directApiUrl,
+        js_render: 'false',
+        premium_proxy: 'true',
+        proxy_country: 'vn',
+        custom_headers: 'true'
+      },
+      extraHeaders: {
+        Accept: 'application/json, text/plain, */*',
+        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8',
+        Referer: targetInfo.targetUrl,
+        'X-Shopee-Language': 'vi',
+        'X-Api-Source': 'pc',
+        'X-Requested-With': 'XMLHttpRequest',
+        ...(directCookie ? { Cookie: directCookie } : {})
+      },
+      timeoutMs: 30000,
+      fetchImpl
+    });
+    const p0 = inspectAndParse('ZenRows DirectAPI', r0, { allowTarget403: true });
+    if (p0.items.length > 0) {
+      return { items: p0.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
+    }
+    log(`    [*] DirectAPI chua lay duoc san pham — leo thang ZenRows #1 Antibot (js_render=true)...`);
+  }
+
+  // Attempt 1 (Direct Stealth Browser): antibot=true + VN residential proxy + full assets + Cookie
   const r1 = await callZenrowsOnce({
     apiKey,
     paramsObj: {
@@ -1451,7 +1648,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       js_instructions: jsInstructionsPrimary
     },
     extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
-    timeoutMs: 110000,
+    timeoutMs: 105000,
     fetchImpl
   });
   const p1 = inspectAndParse('ZenRows #1 Antibot', r1);
@@ -1459,13 +1656,29 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { items: p1.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
   }
 
-  // Attempt 2: Full resources unlocked (block_resources=none) + selector wait_for (or Adaptive mode if no-cookie hit login wall)
+  // Attempt 2: Smart bounded recovery (CoreCookie when full Cookie blocked/login-gated; wait_for ONLY on 422 or incomplete shell)
   const useModeAutoOnAttempt2 = !cookieHeader && p1.loginRequired;
-  const attempt2UseCookie = Boolean(cookieHeader) && !p1.loginRequired;
+  const shouldUseCoreCookieOn2 =
+    Boolean(cookieHeader) &&
+    (p1.blocked || p1.loginRequired || p1.timedOut) &&
+    Boolean(coreCookie) &&
+    coreCookie !== cookieHeader;
+  const attempt2Cookie = shouldUseCoreCookieOn2
+    ? coreCookie
+    : Boolean(cookieHeader) && !p1.loginRequired
+      ? cookieHeader
+      : '';
+  const shouldUseWaitForOn2 =
+    !p1.timedOut &&
+    !p1.loginRequired &&
+    p1.httpStatus !== 400 &&
+    (p1.httpStatus === 422 || (!p1.blocked && ((p1.xhrCount || 0) === 0 || (p1.htmlLen || 0) < 50000)));
+
   log(
     useModeAutoOnAttempt2
       ? `    [*] Thu ZenRows #2 (mode=auto · phien sach) cho '${kw}'...`
-      : `    [*] Leo thang ZenRows #2 (antibot=true + block_resources=none + wait_for${attempt2UseCookie ? ' + Cookie Shopee' : ''}) cho '${kw}'...`
+      : `    [*] Leo thang ZenRows #2 (antibot=true + block_resources=none + ${shouldUseWaitForOn2 ? 'wait_for' : 'wait=9s'}` +
+          `${shouldUseCoreCookieOn2 ? ' + CoreCookie' : attempt2Cookie ? ' + Cookie Shopee' : ''}) cho '${kw}'...`
   );
   const attempt2Params = useModeAutoOnAttempt2
     ? {
@@ -1485,17 +1698,20 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         block_resources: 'none',
         window_width: '1366',
         window_height: '900',
-        ...(p1.timedOut || p1.code === '400' ? { wait: '9000' } : { wait_for: waitSelector }),
-        ...(attempt2UseCookie ? { custom_headers: 'true' } : {})
+        ...(shouldUseWaitForOn2 ? { wait_for: waitSelector } : { wait: '9000' }),
+        ...(attempt2Cookie ? { custom_headers: 'true' } : {})
       };
   const r2 = await callZenrowsOnce({
     apiKey,
     paramsObj: attempt2Params,
-    extraHeaders: attempt2UseCookie ? { Cookie: cookieHeader } : {},
+    extraHeaders: attempt2Cookie ? { Cookie: attempt2Cookie } : {},
     timeoutMs: 95000,
     fetchImpl
   });
-  const p2 = inspectAndParse(useModeAutoOnAttempt2 ? 'ZenRows #2 Auto' : 'ZenRows #2 FullWait', r2);
+  const p2 = inspectAndParse(
+    useModeAutoOnAttempt2 ? 'ZenRows #2 Auto' : shouldUseCoreCookieOn2 ? 'ZenRows #2 CoreWait' : 'ZenRows #2 FullWait',
+    r2
+  );
   if (p2.items.length > 0) {
     return { items: p2.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
   }
@@ -1536,51 +1752,152 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
 }
 
 export async function fetchViaScraperApi(kw, apiKey, maxItems, options = {}) {
-  const { fetchImpl = fetch, env = process.env, onProgress = () => {} } = options;
+  const { fetchImpl = fetch, env = process.env, cookieHeader = '', onProgress = () => {} } = options;
+  const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const targetInfo = resolveTargetForInput(kw);
   const useUltra = String(env?.SCRAPERAPI_ULTRA_PREMIUM ?? 'true').trim().toLowerCase() !== 'false';
+  const coreCookie = cookieHeader ? extractCoreAuthCookieHeader(cookieHeader) : '';
+  const tierCookie = coreCookie || cookieHeader;
 
-  const qs = new URLSearchParams({
-    api_key: apiKey,
-    url: targetInfo.targetUrl,
-    render: 'true',
-    country_code: 'vn',
-    ...(useUltra ? { ultra_premium: 'true' } : { premium: 'true' })
-  });
+  const tiers = [
+    ...(useUltra
+      ? [
+          {
+            label: 'ScraperAPI #1 UltraVN',
+            params: { render: 'true', country_code: 'vn', ultra_premium: 'true' },
+            cookie: tierCookie
+          }
+        ]
+      : []),
+    {
+      label: 'ScraperAPI #2 PremiumVN',
+      params: { render: 'true', country_code: 'vn', premium: 'true' },
+      cookie: tierCookie
+    },
+    {
+      label: 'ScraperAPI #3 PremiumGlobal',
+      params: { render: 'true', premium: 'true' },
+      cookie: tierCookie
+    },
+    {
+      label: 'ScraperAPI #4 StandardClean',
+      params: { render: 'true' },
+      cookie: ''
+    }
+  ];
 
-  const out = await fetchWithExplicitTimeout(
-    `https://api.scraperapi.com?${qs.toString()}`,
-    { method: 'GET' },
-    95000,
-    fetchImpl
-  );
-  if (out.timedOut || !out.res) {
-    onProgress(`    [!] ScraperAPI quá thời gian chờ (95s) cho '${kw}'.\n`);
-    return { items: [], blocked: false, loginRequired: false, timedOut: true };
+  let anyBlocked = false;
+  let anyLoginRequired = false;
+  let anyTimeout = false;
+  let totalTiers = 0;
+  let http403Count = 0;
+  let last403Snippet = '';
+
+  for (let i = 0; i < tiers.length; i++) {
+    const tier = tiers[i];
+    // Avoid burning extra StandardClean call if an earlier tier already got HTTP 200 without Cookie
+    if (tier.label === 'ScraperAPI #4 StandardClean' && !tierCookie && http403Count === 0) {
+      continue;
+    }
+
+    totalTiers++;
+    log(`    [*] [${tier.label}] Goi ScraperAPI${tier.cookie ? ' (+ CoreCookie)' : ''} cho '${kw}'...`);
+    const qs = new URLSearchParams({
+      api_key: apiKey,
+      url: i === 0 ? targetInfo.targetUrl : targetInfo.fallbackUrl,
+      ...tier.params,
+      ...(tier.cookie ? { keep_headers: 'true' } : {})
+    });
+
+    const out = await fetchWithExplicitTimeout(
+      `https://api.scraperapi.com?${qs.toString()}`,
+      {
+        method: 'GET',
+        headers: tier.cookie ? { Cookie: tier.cookie } : {}
+      },
+      85000,
+      fetchImpl
+    );
+
+    if (out.timedOut || !out.res) {
+      anyTimeout = true;
+      log(`    [!] [${tier.label}] Quá thời gian chờ (85s) cho '${kw}'.`);
+      continue;
+    }
+
+    const { res, text } = out;
+    if (res.status === 401) {
+      throw new ProviderFatalError('ScraperAPI từ chối API Key (HTTP 401). Vui lòng kiểm tra SCRAPERAPI_KEY.');
+    }
+    if (res.status === 429) {
+      throw new ProviderFatalError('ScraperAPI vượt giới hạn request đồng thời / credit (HTTP 429).');
+    }
+
+    if (res.status === 403) {
+      http403Count++;
+      const snippet = sanitizeErrorText(String(text || '').replace(/\s+/g, ' ').trim().slice(0, 180));
+      last403Snippet = snippet;
+      const lowBody = snippet.toLowerCase();
+      if (
+        lowBody.includes('invalid api key') ||
+        lowBody.includes('api key is invalid') ||
+        lowBody.includes('credits exhausted') ||
+        lowBody.includes('account suspended')
+      ) {
+        throw new ProviderFatalError(`ScraperAPI từ chối API Key (HTTP 403): ${snippet}`);
+      }
+      anyBlocked = true;
+      log(`    [!] [${tier.label}] HTTP 403 (${snippet || 'gói chưa hỗ trợ ultra_premium / country_code=vn'}) — thử bậc thấp hơn...`);
+      continue;
+    }
+
+    if (res.status !== 200) {
+      if (res.status >= 500) anyBlocked = true;
+      log(`    [!] [${tier.label}] HTTP ${res.status} cho '${kw}'.`);
+      continue;
+    }
+
+    const parsed = parseShopeeHtml(text, kw, maxItems, targetInfo.targetUrl);
+    if (parsed.blocked) anyBlocked = true;
+    if (parsed.loginRequired) anyLoginRequired = true;
+    const matched = parsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
+    if (matched.length > 0) {
+      log(`    [i] [${tier.label}] Khớp ${matched.length}/${parsed.items.length} item cho '${kw}'.`);
+      return { ...parsed, items: matched, timedOut: false };
+    }
+
+    const title = extractHtmlTitle(text);
+    const bodySnippet = extractVisibleBodySnippet(text, 160);
+    const ds = parsed.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
+    log(
+      `    [i] [${tier.label}] HTTP 200 HTML=${text.length}B · title="${title || 'n/a'}" · ` +
+        `dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs})` +
+        `${bodySnippet ? ` · body="${bodySnippet}"` : ''}` +
+        `${parsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
+        `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
+    );
+
+    // If a tier with country_code=vn succeeded cleanly (HTTP 200) without cookie and hit login/block only, don't retry Global unnecessarily
+    if (!tier.cookie && !parsed.blocked && !parsed.loginRequired && ds.hrefMatches === 0 && text.length > 50000) {
+      break;
+    }
   }
 
-  const { res, text } = out;
-  if (res.status === 401 || res.status === 403) {
+  if (totalTiers > 0 && http403Count === totalTiers) {
     throw new ProviderFatalError(
-      `ScraperAPI từ chối API Key hoặc gói chưa hỗ trợ ultra_premium (HTTP ${res.status}).`
+      `ScraperAPI từ chối API Key hoặc gói hiện tại ở tất cả chế độ (HTTP 403${last403Snippet ? `: ${last403Snippet}` : ''}).`
     );
   }
-  if (res.status === 429) {
-    throw new ProviderFatalError('ScraperAPI vượt giới hạn request đồng thời / credit (HTTP 429).');
-  }
-  if (res.status !== 200) {
-    onProgress(`    [!] ScraperAPI HTTP ${res.status} cho '${kw}'.\n`);
-    return { items: [], blocked: res.status >= 500, loginRequired: false, timedOut: false };
-  }
 
-  const parsed = parseShopeeHtml(text, kw, maxItems, targetInfo.targetUrl);
-  const matched = parsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
-  return { ...parsed, items: matched, timedOut: false };
+  return { items: [], blocked: anyBlocked, loginRequired: anyLoginRequired, timedOut: anyTimeout };
 }
 
 export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
-  const { fetchImpl = fetch, onProgress = () => {} } = options;
+  const { fetchImpl = fetch, cookieHeader = '', onProgress = () => {} } = options;
+  const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const targetInfo = resolveTargetForInput(kw);
+  const coreCookie = cookieHeader ? extractCoreAuthCookieHeader(cookieHeader) : '';
+  const activeCookie = coreCookie || cookieHeader;
 
   const qs = new URLSearchParams({
     token,
@@ -1589,7 +1906,8 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
     format: 'json',
     page_wait: '4000',
     ajax_wait: 'true',
-    scroll: 'true'
+    scroll: 'true',
+    ...(activeCookie ? { cookies: activeCookie } : {})
   });
 
   const out = await fetchWithExplicitTimeout(
@@ -1599,7 +1917,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
     fetchImpl
   );
   if (out.timedOut || !out.res) {
-    onProgress(`    [!] Crawlbase quá thời gian chờ (95s) cho '${kw}'.\n`);
+    log(`    [!] Crawlbase quá thời gian chờ (95s) cho '${kw}'.`);
     return { items: [], blocked: false, loginRequired: false, timedOut: true };
   }
 
@@ -1617,7 +1935,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
   }
 
   if (res.status !== 200) {
-    onProgress(`    [!] Crawlbase HTTP ${res.status} cho '${kw}'.\n`);
+    log(`    [!] Crawlbase HTTP ${res.status} cho '${kw}'.`);
     return { items: [], blocked: false, loginRequired: false, timedOut: false };
   }
 
@@ -1631,14 +1949,24 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
 
   const origStatus = Number(data?.original_status || 200);
   if (origStatus === 403 || origStatus === 429) {
-    onProgress(`    [!] Shopee qua Crawlbase trả về original_status=${origStatus} cho '${kw}'.\n`);
+    log(`    [!] Shopee qua Crawlbase trả về original_status=${origStatus} cho '${kw}'.`);
     return { items: [], blocked: true, loginRequired: false, timedOut: false };
   }
 
-  const bodyParsed = parseShopeeHtml(String(data?.body || ''), kw, maxItems, targetInfo.targetUrl);
+  const bodyHtml = String(data?.body || '');
+  const bodyParsed = parseShopeeHtml(bodyHtml, kw, maxItems, targetInfo.targetUrl);
+  const matched = bodyParsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
+  if (matched.length === 0) {
+    const title = extractHtmlTitle(bodyHtml);
+    const snippet = extractVisibleBodySnippet(bodyHtml, 160);
+    log(
+      `    [i] [Crawlbase] origStatus=${origStatus} HTML=${bodyHtml.length}B · title="${title || 'n/a'}"` +
+        `${snippet ? ` · body="${snippet}"` : ''}`
+    );
+  }
   return {
     ...bodyParsed,
-    items: bodyParsed.items.filter((it) => scoreProductMatch(it, kw) > 0),
+    items: matched,
     timedOut: false
   };
 }
@@ -1670,10 +1998,11 @@ export async function scrapeShopeeLive({
     };
   }
 
-  const [provider, apiKey] = resolveScrapingProvider(preferredProvider, env);
-  if (!provider || !apiKey) {
-    const missingTarget = provider
-      ? `biến môi trường key cho '${provider}'`
+  const configuredProviders = resolveConfiguredProviders(preferredProvider, env);
+  const [primaryProvider, primaryKey] = resolveScrapingProvider(preferredProvider, env);
+  if (!primaryProvider || !primaryKey || configuredProviders.length === 0) {
+    const missingTarget = primaryProvider
+      ? `biến môi trường key cho '${primaryProvider}'`
       : 'ZENROWS_API_KEY, SCRAPERAPI_KEY hoặc CRAWLBASE_TOKEN';
     const msg =
       `Chưa cấu hình Scraping API Key (Phương án B). Vui lòng thiết lập ${missingTarget} ` +
@@ -1686,14 +2015,18 @@ export async function scrapeShopeeLive({
       anti_bot_blocked: false,
       login_required: false,
       config_required: true,
-      provider: provider || null,
+      provider: primaryProvider || null,
       per_keyword_counts: {}
     };
   }
 
   const cookieInfo = loadShopeeCookieHeader(cookieFilePath, env);
+  const isAutoChain = configuredProviders.length > 1;
+  const provBanner = isAutoChain
+    ? `AUTO (${configuredProviders.map(([p]) => p.toUpperCase()).join(' -> ')})`
+    : primaryProvider.toUpperCase();
   onProgress(
-    `[*] Engine Node.js · Scraping API: ${provider.toUpperCase()} | Mục tiêu: ${JSON.stringify(cleanKeywords)} | Giới hạn: ${totalLimit}` +
+    `[*] Engine Node.js · Scraping API: ${provBanner} | Mục tiêu: ${JSON.stringify(cleanKeywords)} | Giới hạn: ${totalLimit}` +
       `${cookieInfo.hasCookie ? ` | Cookie sẵn sàng (${cookieInfo.cookieCount} cặp)` : ''}\n`
   );
 
@@ -1702,76 +2035,144 @@ export async function scrapeShopeeLive({
   let anyBlocked = false;
   let anyLoginRequired = false;
   let anyTimeout = false;
+  let activeUsedProvider = primaryProvider;
+  const disabledProviders = new Set();
+  let lastFatalMsg = '';
 
-  try {
-    for (let i = 0; i < cleanKeywords.length; i++) {
-      const kw = cleanKeywords[i];
-      const targetInfo = resolveTargetForInput(kw);
-      const label = targetInfo.kind === 'product'
-        ? `link sản phẩm (${targetInfo.canonicalUrl})`
+  for (let i = 0; i < cleanKeywords.length; i++) {
+    const kw = cleanKeywords[i];
+    const targetInfo = resolveTargetForInput(kw);
+    const label = targetInfo.kind === 'product'
+      ? `link sản phẩm (${targetInfo.canonicalUrl})`
+      : targetInfo.kind === 'category'
+        ? `danh mục (${targetInfo.targetUrl})`
         : `từ khóa: '${kw}'`;
-      onProgress(`[*] [${provider.toUpperCase()}] Đang cào Shopee cho ${label}...\n`);
 
-      let res;
-      if (provider === 'zenrows') {
-        res = await fetchViaZenrows(kw, apiKey, perKwCap, {
-          fetchImpl,
-          cookieHeader: cookieInfo.normalizedHeader,
-          onProgress
-        });
-      } else if (provider === 'scraperapi') {
-        res = await fetchViaScraperApi(kw, apiKey, perKwCap, {
-          fetchImpl,
-          env,
-          onProgress
-        });
-      } else if (provider === 'crawlbase') {
-        res = await fetchViaCrawlbase(kw, apiKey, perKwCap, {
-          fetchImpl,
-          onProgress
-        });
-      } else {
-        throw new ProviderFatalError(`Provider không được hỗ trợ: ${provider}`);
+    let kwItems = [];
+    let kwBlocked = false;
+    let kwLoginRequired = false;
+    let kwTimeout = false;
+    for (let pIdx = 0; pIdx < configuredProviders.length; pIdx++) {
+      const [provName, provKey] = configuredProviders[pIdx];
+      if (disabledProviders.has(provName)) continue;
+
+      onProgress(`[*] [${provName.toUpperCase()}] Đang cào Shopee cho ${label}...\n`);
+      let res = null;
+      try {
+        if (provName === 'zenrows') {
+          res = await fetchViaZenrows(kw, provKey, perKwCap, {
+            fetchImpl,
+            cookieHeader: cookieInfo.normalizedHeader,
+            onProgress
+          });
+        } else if (provName === 'scraperapi') {
+          res = await fetchViaScraperApi(kw, provKey, perKwCap, {
+            fetchImpl,
+            env,
+            cookieHeader: cookieInfo.normalizedHeader,
+            onProgress
+          });
+        } else if (provName === 'crawlbase') {
+          res = await fetchViaCrawlbase(kw, provKey, perKwCap, {
+            fetchImpl,
+            cookieHeader: cookieInfo.normalizedHeader,
+            onProgress
+          });
+        } else {
+          throw new ProviderFatalError(`Provider không được hỗ trợ: ${provName}`);
+        }
+      } catch (err) {
+        if (err?.name === 'ProviderFatalError') {
+          const safeMsg = sanitizeErrorText(err.message);
+          lastFatalMsg = safeMsg;
+          disabledProviders.add(provName);
+          onProgress(`[!] Lỗi nhà cung cấp ${provName}: ${safeMsg}\n`);
+          const hasRemaining = configuredProviders.some(([n]) => !disabledProviders.has(n));
+          if (hasRemaining) {
+            onProgress(`[*] Tự động chuyển dự phòng sang nhà cung cấp tiếp theo...\n`);
+            continue;
+          }
+          if (Object.values(capturedByKw).every((arr) => arr.length === 0)) {
+            return {
+              products: [],
+              status: 'failed',
+              message: safeMsg,
+              anti_bot_blocked: false,
+              login_required: false,
+              config_required: true,
+              provider: provName,
+              per_keyword_counts: {}
+            };
+          }
+          break;
+        }
+
+        const safeErr = sanitizeErrorText(err?.message || String(err));
+        onProgress(`[!] Lỗi mạng khi gọi ${provName}: ${safeErr}\n`);
+        const hasRemaining = configuredProviders.slice(pIdx + 1).some(([n]) => !disabledProviders.has(n));
+        if (hasRemaining) {
+          onProgress(`[*] Thử nhà cung cấp dự phòng tiếp theo...\n`);
+          continue;
+        }
+        if (Object.values(capturedByKw).every((arr) => arr.length === 0)) {
+          return {
+            products: [],
+            status: 'failed',
+            message: `Lỗi kết nối tới ${provName.toUpperCase()}: ${safeErr}`,
+            anti_bot_blocked: false,
+            login_required: false,
+            config_required: false,
+            provider: provName,
+            per_keyword_counts: {}
+          };
+        }
+        break;
       }
 
       const items = Array.isArray(res?.items) ? res.items : [];
-      capturedByKw[kw] = items.slice(0, perKwCap);
-      if (res?.blocked) anyBlocked = true;
-      if (res?.loginRequired) anyLoginRequired = true;
-      if (res?.timedOut) anyTimeout = true;
+      if (res?.blocked) kwBlocked = true;
+      if (res?.loginRequired) kwLoginRequired = true;
+      if (res?.timedOut) kwTimeout = true;
+      activeUsedProvider = provName;
 
-      onProgress(`    ✓ [${provider.toUpperCase()}] Bóc tách được ${capturedByKw[kw].length} sản phẩm cho '${kw}'.\n`);
+      if (items.length > 0) {
+        kwItems = items.slice(0, perKwCap);
+        kwBlocked = false;
+        kwLoginRequired = false;
+        kwTimeout = false;
+        onProgress(`    ✓ [${provName.toUpperCase()}] Bóc tách được ${kwItems.length} sản phẩm cho '${kw}'.\n`);
+        break;
+      }
 
-      if (i < cleanKeywords.length - 1) {
-        const waitMs = 1200 + Math.floor(Math.random() * 800);
-        await new Promise((r) => setTimeout(r, waitMs));
+      onProgress(`    ✓ [${provName.toUpperCase()}] Bóc tách được 0 sản phẩm cho '${kw}'.\n`);
+      const hasNextProv = configuredProviders.slice(pIdx + 1).some(([n]) => !disabledProviders.has(n));
+      if (hasNextProv) {
+        onProgress(`[*] [${provName.toUpperCase()}] chưa có kết quả — chuyển sang nhà cung cấp dự phòng cho '${kw}'...\n`);
       }
     }
-  } catch (err) {
-    if (err?.name === 'ProviderFatalError') {
-      const safeMsg = sanitizeErrorText(err.message);
-      onProgress(`[!] Lỗi nhà cung cấp ${provider}: ${safeMsg}\n`);
-      return {
-        products: [],
-        status: 'failed',
-        message: safeMsg,
-        anti_bot_blocked: false,
-        login_required: false,
-        config_required: true,
-        provider,
-        per_keyword_counts: {}
-      };
+
+    if (kwItems.length === 0) {
+      if (kwBlocked) anyBlocked = true;
+      if (kwLoginRequired) anyLoginRequired = true;
+      if (kwTimeout) anyTimeout = true;
     }
-    const safeErr = sanitizeErrorText(err?.message || String(err));
-    onProgress(`[!] Lỗi mạng khi gọi ${provider}: ${safeErr}\n`);
+    capturedByKw[kw] = kwItems;
+
+    if (i < cleanKeywords.length - 1) {
+      const waitMs = 1200 + Math.floor(Math.random() * 800);
+      await new Promise((r) => setTimeout(r, waitMs));
+    }
+  }
+
+  if (lastFatalMsg && Object.values(capturedByKw).every((arr) => arr.length === 0) && disabledProviders.size >= configuredProviders.length) {
     return {
       products: [],
       status: 'failed',
-      message: `Lỗi kết nối tới ${provider.toUpperCase()}: ${safeErr}`,
+      message: lastFatalMsg,
       anti_bot_blocked: false,
       login_required: false,
-      config_required: false,
-      provider,
+      config_required: true,
+      provider: activeUsedProvider,
       per_keyword_counts: {}
     };
   }
@@ -1804,26 +2205,27 @@ export async function scrapeShopeeLive({
     perKeywordCounts[kwKey] = (perKeywordCounts[kwKey] || 0) + 1;
   }
 
+  const provLabel = activeUsedProvider.toUpperCase();
   let status = 'empty';
-  let message = `Không tìm thấy sản phẩm khớp với từ khóa đã yêu cầu qua ${provider.toUpperCase()}.`;
+  let message = `Không tìm thấy sản phẩm khớp với từ khóa đã yêu cầu qua ${provLabel}.`;
 
   if (selectedProducts.length > 0) {
     status = 'completed';
-    message = `Đã cào thành công ${selectedProducts.length} sản phẩm thật từ Shopee qua ${provider.toUpperCase()}.`;
+    message = `Đã cào thành công ${selectedProducts.length} sản phẩm thật từ Shopee qua ${provLabel}.`;
   } else if (anyLoginRequired) {
     status = 'login_required';
     message =
-      `Shopee đang yêu cầu đăng nhập tài khoản (/buyer/login) khi ${provider.toUpperCase()} truy cập trang tìm kiếm. ` +
+      `Shopee đang yêu cầu đăng nhập tài khoản (/buyer/login) khi ${provLabel} truy cập trang tìm kiếm. ` +
       'Vui lòng dán Cookie Shopee đã đăng nhập từ trình duyệt vào mục "Cookie Shopee" rồi bấm Bắt Đầu Cào lại.';
   } else if (anyBlocked) {
     status = 'blocked';
     message =
-      `Shopee tạm thời trả trang xác minh chống bot khi ${provider.toUpperCase()} truy cập. ` +
+      `Shopee tạm thời trả trang xác minh chống bot khi ${provLabel} truy cập. ` +
       'Bạn có thể bổ sung Cookie Shopee từ trình duyệt đã đăng nhập hoặc kiểm tra lại gói antibot/credit của Scraping API.';
   } else if (anyTimeout) {
     status = 'failed';
     message =
-      `Yêu cầu cào Shopee qua ${provider.toUpperCase()} bị quá thời gian chờ ở các lượt thử. ` +
+      `Yêu cầu cào Shopee qua ${provLabel} bị quá thời gian chờ ở các lượt thử. ` +
       'Bạn hãy thử lại, giảm số từ khóa mỗi lần, hoặc dán Link chi tiết 1 sản phẩm Shopee cụ thể để tải nhanh hơn.';
   }
 
@@ -1834,7 +2236,7 @@ export async function scrapeShopeeLive({
     anti_bot_blocked: anyBlocked,
     login_required: anyLoginRequired,
     config_required: false,
-    provider,
+    provider: activeUsedProvider,
     per_keyword_counts: perKeywordCounts
   };
 }

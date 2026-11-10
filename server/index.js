@@ -274,7 +274,7 @@ app.post('/api/products/:id/reviews', (req, res) => {
   // và có đơn hàng thành công (status: delivered) chứa sản phẩm này trong lịch sử mua hàng.
   let isVerifiedBuyer = false;
   if (req.user) {
-    const deliveredOrder = db.findOne('orders', o => 
+    const deliveredOrder = db.findOne('orders', o =>
       o.customerId === req.user.id &&
       o.orderStatus === 'delivered' &&
       Array.isArray(o.items) &&
@@ -345,7 +345,7 @@ app.post('/api/orders/track', (req, res) => {
   }
 
   const cleanPhone = String(phone).replace(/\D/g, '');
-  const order = db.findOne('orders', o => 
+  const order = db.findOne('orders', o =>
     o.id.toLowerCase() === String(orderId).trim().toLowerCase() &&
     String(o.customer?.phone || '').replace(/\D/g, '') === cleanPhone
   );
@@ -383,8 +383,8 @@ app.post('/api/orders', (req, res) => {
     }
 
     if (Number(product.stock) < quantity) {
-      return res.status(400).json({ 
-        error: `Sản phẩm "${product.name}" không đủ hàng trong kho (Còn: ${product.stock}, yêu cầu: ${quantity}).` 
+      return res.status(400).json({
+        error: `Sản phẩm "${product.name}" không đủ hàng trong kho (Còn: ${product.stock}, yêu cầu: ${quantity}).`
       });
     }
 
@@ -529,8 +529,8 @@ app.put('/api/orders/:id/status', requireRole(['admin', 'staff']), (req, res) =>
 
   const validNextStates = ALLOWED_TRANSITIONS[currentOrder.orderStatus] || [];
   if (!validNextStates.includes(status)) {
-    return res.status(400).json({ 
-      error: `Chuyển trạng thái từ "${statusLabels[currentOrder.orderStatus] || currentOrder.orderStatus}" sang "${statusLabels[status] || status}" không hợp lệ.` 
+    return res.status(400).json({
+      error: `Chuyển trạng thái từ "${statusLabels[currentOrder.orderStatus] || currentOrder.orderStatus}" sang "${statusLabels[status] || status}" không hợp lệ.`
     });
   }
 
@@ -804,9 +804,9 @@ app.post('/api/chat', async (req, res) => {
 
   const catLabels = {
     fashion: '👕 Thời Trang & Phụ Kiện',
-    decor:   '🏡 Decor & Nến Thơm & Gốm Sứ',
-    coffee:  '☕ Cà Phê & Thực Phẩm Đặc Sản',
-    tech:    '⌨️ Phụ Kiện Công Nghệ Gỗ'
+    decor: '🏡 Decor & Nến Thơm & Gốm Sứ',
+    coffee: '☕ Cà Phê & Thực Phẩm Đặc Sản',
+    tech: '⌨️ Phụ Kiện Công Nghệ Gỗ'
   };
 
   const byCategory = {};
@@ -837,8 +837,8 @@ app.post('/api/chat', async (req, res) => {
 
     ordersText = scopedOrders.length > 0
       ? scopedOrders.map(o =>
-          `  • ${o.id} | Trạng thái: ${o.orderStatus} | Tổng: ${vnd(o.total)} | ${o.trackingCarrier || 'GHTK'} ${o.trackingCode || ''}`
-        ).join('\n')
+        `  • ${o.id} | Trạng thái: ${o.orderStatus} | Tổng: ${vnd(o.total)} | ${o.trackingCarrier || 'GHTK'} ${o.trackingCode || ''}`
+      ).join('\n')
       : '  (Tài khoản hiện chưa có đơn hàng nào)';
   }
 
@@ -1094,18 +1094,18 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   }
 
   const scraperCfg = getEffectiveScraperConfig();
-  const requestedProv = provider && SCRAPING_PROVIDERS.includes(String(provider).toLowerCase())
-    ? String(provider).toLowerCase()
-    : null;
-  const hasRequestedKey = requestedProv
-    ? Boolean(scraperCfg.publicMeta.providers[requestedProv]?.configured)
+  const normalizedRequestedProv = provider ? String(provider).trim().toLowerCase() : '';
+  const explicitProv = SCRAPING_PROVIDERS.includes(normalizedRequestedProv) ? normalizedRequestedProv : null;
+  const preferredScrapeProv = normalizedRequestedProv === 'auto' ? 'auto' : explicitProv;
+  const hasRequestedKey = explicitProv
+    ? Boolean(scraperCfg.publicMeta.providers[explicitProv]?.configured)
     : scraperCfg.configured;
 
   if (!hasRequestedKey && process.env.SCRAPING_ALLOW_DIRECT_FALLBACK !== '1') {
     return res.status(400).json({
       code: 'SCRAPER_CONFIG_REQUIRED',
-      error: requestedProv
-        ? `Chưa cấu hình API Key cho ${requestedProv.toUpperCase()}. Vui lòng nhập key trong bảng Cấu Hình Scraping API hoặc biến môi trường trên máy chủ.`
+      error: explicitProv
+        ? `Chưa cấu hình API Key cho ${explicitProv.toUpperCase()}. Vui lòng nhập key trong bảng Cấu Hình Scraping API hoặc biến môi trường trên máy chủ.`
         : 'Chưa cấu hình Scraping API Key (Phương án B: ZenRows / ScraperAPI / Crawlbase). Vui lòng nhập API Key ngay phía trên hoặc thiết lập ZENROWS_API_KEY / SCRAPERAPI_KEY / CRAWLBASE_TOKEN trên Render/.env.'
     });
   }
@@ -1114,14 +1114,14 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
   const engine = String(process.env.SCRAPER_ENGINE || 'node').trim().toLowerCase();
 
-  const activeProvLabel = (requestedProv || scraperCfg.activeProvider || 'auto').toUpperCase();
+  const activeProvLabel = (preferredScrapeProv || scraperCfg.activeProvider || 'auto').toUpperCase();
   const sessionId = `scrape_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
   scrapeState = {
     running: true,
     sessionId,
     status: 'running',
     engine,
-    provider: requestedProv || scraperCfg.activeProvider || null,
+    provider: explicitProv || (preferredScrapeProv === 'auto' ? 'auto' : scraperCfg.activeProvider) || null,
     requestedKeywords: kwList,
     limit: numLimit,
     startedAt: new Date().toISOString(),
@@ -1152,7 +1152,7 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
       '--session-id', sessionId,
       '--output', outputPath,
       '--limit', String(numLimit),
-      ...(requestedProv ? ['--provider', requestedProv] : []),
+      ...(explicitProv ? ['--provider', explicitProv] : []),
       '--keywords', ...kwList
     ];
 
@@ -1240,8 +1240,12 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
         const outcome = await scrapeShopeeLive({
           keywords: kwList,
           totalLimit: numLimit,
-          preferredProvider: requestedProv || null,
-          env: { ...process.env, ...scraperCfg.envVars },
+          preferredProvider: preferredScrapeProv || null,
+          env: {
+            ...process.env,
+            ...scraperCfg.envVars,
+            ...(preferredScrapeProv === 'auto' ? { SCRAPING_PROVIDER: 'auto' } : {})
+          },
           cookieFilePath: SHOPEE_COOKIE_PATH,
           imgDir: join(PROJECT_ROOT, 'public', 'products', 'shopee_live'),
           onProgress: (line) => {
@@ -1318,13 +1322,13 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
   const existingProducts = db.get('products') || [];
   const insertedProducts = [];
   let skippedDuplicates = 0;
-  
+
   products.forEach((product, index) => {
     const rawName = (product.name || '').trim();
     if (!rawName) return;
 
     // Chống trùng lặp: Kiểm tra theo Mã Shopee hoặc Tên sản phẩm đã có
-    const isDuplicate = existingProducts.some(p => 
+    const isDuplicate = existingProducts.some(p =>
       (product.shopee_id && p.specs?.['Mã Shopee'] === product.shopee_id) ||
       p.name.toLowerCase() === rawName.toLowerCase()
     );
@@ -1359,9 +1363,9 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
       variants: { colors: ['Mặc định'], sizes: ['Tiêu chuẩn'] },
       shortDesc: product.shortDesc || `Sản phẩm tham khảo Shopee - ${rawName.substring(0, 60)}`,
       desc: product.desc || rawName,
-      specs: { 
-        'Nguồn gốc': 'Shopee', 
-        'Mã Shopee': product.shopee_id || '', 
+      specs: {
+        'Nguồn gốc': 'Shopee',
+        'Mã Shopee': product.shopee_id || '',
         'URL gốc': product.source_url || '',
         'Từ khóa': product.keyword || '',
         'Trạng thái kiểm duyệt': 'Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán'
@@ -1375,26 +1379,26 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
       ],
       reviews: []
     };
-    
+
     db.insert('products', mappedProduct);
     insertedProducts.push(mappedProduct);
     existingProducts.push(mappedProduct);
   });
 
   db.logAudit(
-    req.user?.id || 'admin', 
-    req.user?.name || 'Admin', 
-    req.user?.role || 'admin', 
-    'SHOPEE_IMPORT', 
-    'batch', 
+    req.user?.id || 'admin',
+    req.user?.name || 'Admin',
+    req.user?.role || 'admin',
+    'SHOPEE_IMPORT',
+    'batch',
     `Nhập ${insertedProducts.length} sản phẩm từ Shopee (Bỏ qua ${skippedDuplicates} sản phẩm trùng lặp)`
   );
 
-  res.json({ 
-    success: true, 
-    imported: insertedProducts.length, 
+  res.json({
+    success: true,
+    imported: insertedProducts.length,
     skippedDuplicates,
-    products: insertedProducts 
+    products: insertedProducts
   });
 });
 
@@ -1614,4 +1618,5 @@ if (existsSync(DIST_PATH)) {
 app.listen(PORT, () => {
   console.log(`🚀 [Backend Server] Database REST API running at http://localhost:${PORT}`);
 });
+
 

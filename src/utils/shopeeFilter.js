@@ -108,6 +108,49 @@ export function parseShopeeSearchUrl(input) {
 }
 
 /**
+ * Parse a Shopee category/collection URL (e.g. `https://shopee.vn/Thoi-Trang-Nam-cat.11035567`).
+ * Returns null if not a valid shopee.vn category URL.
+ */
+export function parseShopeeCategoryUrl(input) {
+  const cleaned = String(input || '').trim().replace(/^[<"']+|[>"']+$/g, '');
+  if (!cleaned || /\s/.test(cleaned)) return null;
+
+  let candidate = cleaned;
+  if (/^(?:www\.)?shopee\.vn\//i.test(candidate)) {
+    candidate = `https://${candidate}`;
+  }
+  if (!/^https?:\/\//i.test(candidate)) return null;
+
+  let u;
+  try {
+    u = new URL(candidate);
+  } catch {
+    return null;
+  }
+
+  const host = u.hostname.toLowerCase();
+  if (host !== 'shopee.vn' && !host.endsWith('.shopee.vn')) return null;
+
+  const catMatch = u.pathname.match(/-cat\.(\d+(?:\.\d+)*)\/?$/i);
+  if (!catMatch) return null;
+
+  const categoryId = catMatch[1];
+  let decodedSlug = u.pathname.replace(/-cat\.[\d.]+\/?$/i, '').replace(/^\/+/, '');
+  try {
+    decodedSlug = decodeURIComponent(decodedSlug);
+  } catch {
+    // keep raw slug
+  }
+
+  return {
+    isUrl: true,
+    categoryId,
+    slug: decodedSlug.replace(/-/g, ' ').trim(),
+    targetUrl: `https://shopee.vn${u.pathname}${u.search}`
+  };
+}
+
+/**
  * Split user input into keywords and/or direct Shopee URLs without breaking commas inside URL slugs.
  */
 export function splitScrapeInputs(rawText) {
@@ -125,6 +168,7 @@ export function splitScrapeInputs(rawText) {
         prev &&
         /^https?:\/\/[^\s]*shopee\.vn\//i.test(prev) &&
         !parseShopeeProductUrl(prev) &&
+        !parseShopeeCategoryUrl(prev) &&
         !/^https?:\/\//i.test(part)
       ) {
         merged[merged.length - 1] = `${prev},${part}`;
@@ -156,6 +200,18 @@ export function scoreProductMatch(item, rawKeyword) {
       return 3;
     }
     return 0;
+  }
+
+  const categoryUrlInfo = parseShopeeCategoryUrl(rawKeyword);
+  if (categoryUrlInfo) {
+    const sid = String(item?.shopee_id || '').trim();
+    const price = Number(item?.price || 0);
+    const nameStr = String(item?.name || '').trim();
+    if (!/^\d+$/.test(sid) || price <= 0 || nameStr.length < 3) return 0;
+    const normSlug = normalizeText(categoryUrlInfo.slug);
+    const normName = normalizeText(nameStr);
+    if (normSlug && containsWholePhrase(normName, normSlug)) return 3;
+    return 2;
   }
 
   const searchUrlInfo = parseShopeeSearchUrl(rawKeyword);
