@@ -457,7 +457,7 @@ export function extractVisibleBodySnippet(html, maxChars = 220, { skipHeaderNav 
   }
   if (skipHeaderNav) {
     const mainCleaned = stripTagBlocks(region, ['header', 'nav', 'footer', 'script', 'style', 'noscript', 'svg']);
-    const mainText = sanitizeErrorText(stripTags(mainCleaned));
+    const mainText = sanitizeErrorText(stripTags(mainCleaned)).replace(/^(?:bỏ qua nội dung chính|skip to main content)\s*/i, '').trim();
     if (mainText) return mainText.slice(0, maxChars);
   }
   const cleaned = stripTagBlocks(region, ['script', 'style', 'noscript', 'svg']);
@@ -1754,7 +1754,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const isDirectProduct = targetInfo.kind === 'product';
   const searchKwText = targetInfo.keywordText || kw;
   const coreCookie = cookieHeader ? extractCoreAuthCookieHeader(cookieHeader) : '';
-  const stickySessionId = String(Math.floor(100000 + Math.random() * 899999));
+  const stickySessionId = String(1000 + Math.floor(Math.random() * 9000));
   const domEvalScript = buildZenrowsDomEvalScript();
   const jsInstructionsPrimary = JSON.stringify(
     isDirectProduct
@@ -1972,7 +1972,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       proxy_country: 'vn',
       antibot: 'true',
       json_response: 'true',
-      session_id: stickySessionId,
+      ...(p1.httpStatus !== 400 ? { session_id: stickySessionId } : {}),
       window_width: '1366',
       window_height: '900',
       ...(attempt2Cookie ? { custom_headers: 'true' } : {}),
@@ -1997,7 +1997,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       proxy_country: 'vn',
       antibot: 'true',
       json_response: 'true',
-      session_id: stickySessionId,
+      ...(p1.httpStatus !== 400 ? { session_id: stickySessionId } : {}),
       block_resources: 'none',
       window_width: '1366',
       window_height: '900',
