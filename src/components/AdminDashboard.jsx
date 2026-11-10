@@ -75,7 +75,6 @@ export default function AdminDashboard({
   const [shopeeImporting, setShopeeImporting] = useState(false);
   const [shopeeError, setShopeeError] = useState(null);
   const [shopeeSuccess, setShopeeSuccess] = useState(null);
-  const [shopeeMode, setShopeeMode] = useState(null); // 'live' | 'static_snapshot' | null
   const [shopeeServerOnline, setShopeeServerOnline] = useState(null);
   const [shopeeSessionId, setShopeeSessionId] = useState(null);
   const [scraperConfig, setScraperConfig] = useState(null);
@@ -86,7 +85,57 @@ export default function AdminDashboard({
   const [scraperConfigSaving, setScraperConfigSaving] = useState(false);
   const [scraperConfigFeedback, setScraperConfigFeedback] = useState(null);
   const [shopeeBlockedByBot, setShopeeBlockedByBot] = useState(false);
+  const [shopeeLoginRequired, setShopeeLoginRequired] = useState(false);
+  const [cookieMeta, setCookieMeta] = useState(null);
+  const [cookiePanelOpen, setCookiePanelOpen] = useState(false);
+  const [shopeeCookieInput, setShopeeCookieInput] = useState('');
+  const [cookieSaving, setCookieSaving] = useState(false);
+  const [cookieFeedback, setCookieFeedback] = useState(null);
+  const [retryingBackend, setRetryingBackend] = useState(false);
   const isMountedRef = useRef(true);
+
+  const loadCookieStatus = async () => {
+    if (!ApiClient.auth.getToken() || currentUser?.role !== 'admin') return;
+    try {
+      const meta = await ApiClient.shopee.getCookieStatus();
+      if (isMountedRef.current) setCookieMeta(meta);
+    } catch (err) {
+      console.warn('Fetch cookie status error:', err);
+    }
+  };
+
+  const handleSaveShopeeCookie = async (e) => {
+    e.preventDefault();
+    setCookieFeedback(null);
+    const raw = shopeeCookieInput.trim();
+    if (!raw) {
+      setCookieFeedback({ ok: false, message: 'Vui lòng dán chuỗi Cookie Shopee từ trình duyệt đã đăng nhập.' });
+      return;
+    }
+    if (!ApiClient.auth.getToken()) {
+      setCookieFeedback({ ok: false, message: 'Vui lòng đăng nhập tài khoản Chủ Shop trên backend để lưu cookie.' });
+      return;
+    }
+    setCookieSaving(true);
+    try {
+      const saved = await ApiClient.shopee.updateCookie(raw);
+      if (!isMountedRef.current) return;
+      setCookieMeta(saved);
+      setShopeeCookieInput('');
+      setShopeeLoginRequired(false);
+      setShopeeBlockedByBot(false);
+      setCookieFeedback({
+        ok: true,
+        message: `✅ Đã lưu ${saved.cookieCount} cookie Shopee lên máy chủ (${saved.hasAuthToken ? 'có token đăng nhập SPC' : 'cookie phiên khách'}). Bây giờ bạn có thể bấm "Bắt Đầu Cào" lại!`
+      });
+    } catch (err) {
+      if (isMountedRef.current) {
+        setCookieFeedback({ ok: false, message: err.message || 'Không thể lưu Cookie Shopee.' });
+      }
+    } finally {
+      if (isMountedRef.current) setCookieSaving(false);
+    }
+  };
 
   const loadScraperConfig = async () => {
     if (!ApiClient.auth.getToken() || currentUser?.role !== 'admin') return;
@@ -218,12 +267,24 @@ export default function AdminDashboard({
       return;
     }
 
+    if (finalState.status === 'login_required' || finalState.loginRequired) {
+      setShopeeResults([]);
+      setShopeeLoginRequired(true);
+      setShopeeBlockedByBot(true);
+      setCookiePanelOpen(true);
+      setShopeeError(
+        finalState.message || 'Shopee đang yêu cầu đăng nhập (/buyer/login) để xem tìm kiếm. Vui lòng dán Cookie Shopee đã đăng nhập vào mục Cookie phía trên rồi thử lại.'
+      );
+      setShopeeLoading(false);
+      return;
+    }
+
     if (finalState.status === 'blocked') {
       setShopeeResults([]);
       setShopeeBlockedByBot(true);
-      setScraperConfigOpen(true);
+      setCookiePanelOpen(true);
       setShopeeError(
-        finalState.message || 'Shopee tạm thời giới hạn phản hồi qua Scraping API. Vui lòng thử lại hoặc kiểm tra gói proxy/render của provider.'
+        finalState.message || 'Shopee tạm thời giới hạn phản hồi qua Scraping API. Bạn có thể bổ sung Cookie Shopee hoặc kiểm tra gói antibot/proxy của provider.'
       );
       setShopeeLoading(false);
       return;
@@ -304,44 +365,49 @@ export default function AdminDashboard({
       })();
     }
 
-    if (activeTab === 'shopeeScraper') {
-      (async () => {
-        const online = await ApiClient.isServerOnline();
+    const initShopeeTab = async () => {
+      const online = await ApiClient.isServerOnline();
+      if (!isMountedRef.current) return;
+      setShopeeServerOnline(online);
+      if (!online) {
+        return;
+      }
+      loadScraperConfig();
+      loadCookieStatus();
+      try {
+        const st = await ApiClient.shopee.getStatus();
         if (!isMountedRef.current) return;
-        setShopeeServerOnline(online);
-        if (!online) {
-          setShopeeMode('static_snapshot');
-          return;
+        if (st?.running && st?.sessionId) {
+          setShopeeSessionId(st.sessionId);
+          setShopeeLoading(true);
+          setShopeeProgress(st.progress || '');
+          pollScrapeSession(st.sessionId, st.requestedKeywords || [], st.limit || shopeeLimit);
+        } else if (st?.status === 'config_required') {
+          setShopeeSessionId(st.sessionId || null);
+          setScraperConfigOpen(true);
+        } else if (st?.status === 'login_required') {
+          setShopeeSessionId(st.sessionId || null);
+          setShopeeLoginRequired(true);
+          setShopeeBlockedByBot(true);
+          setCookiePanelOpen(true);
+          if (st.progress) setShopeeProgress(st.progress);
+        } else if (st?.status === 'blocked') {
+          setShopeeSessionId(st.sessionId || null);
+          setShopeeBlockedByBot(true);
+          setCookiePanelOpen(true);
+          if (st.progress) setShopeeProgress(st.progress);
+        } else if (st?.status === 'completed' && Array.isArray(st.results) && st.results.length > 0 && shopeeResults.length === 0) {
+          setShopeeSessionId(st.sessionId || null);
+          setShopeeResults(st.results);
+          setShopeeSuccess(`Phiên ${st.sessionId}: đã nạp ${st.results.length} sản phẩm cào trực tiếp gần nhất trên máy chủ.`);
         }
-        loadScraperConfig();
-        try {
-          const st = await ApiClient.shopee.getStatus();
-          if (!isMountedRef.current) return;
-          if (st?.running && st?.sessionId) {
-            setShopeeMode('live');
-            setShopeeSessionId(st.sessionId);
-            setShopeeLoading(true);
-            setShopeeProgress(st.progress || '');
-            pollScrapeSession(st.sessionId, st.requestedKeywords || [], st.limit || shopeeLimit);
-          } else if (st?.status === 'config_required') {
-            setShopeeMode('live');
-            setShopeeSessionId(st.sessionId || null);
-            setScraperConfigOpen(true);
-          } else if (st?.status === 'blocked') {
-            setShopeeMode('live');
-            setShopeeSessionId(st.sessionId || null);
-            setShopeeBlockedByBot(true);
-            setScraperConfigOpen(true);
-          } else if (st?.status === 'completed' && Array.isArray(st.results) && st.results.length > 0 && shopeeResults.length === 0) {
-            setShopeeMode('live');
-            setShopeeSessionId(st.sessionId || null);
-            setShopeeResults(st.results);
-            setShopeeSuccess(`Phiên ${st.sessionId}: đã nạp ${st.results.length} sản phẩm cào trực tiếp gần nhất trên máy chủ.`);
-          }
-        } catch (err) {
-          console.warn('Fetch shopee status error:', err);
-        }
-      })();
+      } catch (err) {
+        console.warn('Fetch shopee status error:', err);
+      }
+    };
+
+    if (activeTab === 'shopeeScraper') {
+      initShopeeTab();
     }
   }, [activeTab]);
 
@@ -591,6 +657,21 @@ export default function AdminDashboard({
     }
   };
 
+  const handleRetryBackendConnection = async () => {
+    setRetryingBackend(true);
+    setShopeeError(null);
+    const online = await ApiClient.isServerOnline(2);
+    if (!isMountedRef.current) return;
+    setShopeeServerOnline(online);
+    setRetryingBackend(false);
+    if (online) {
+      loadScraperConfig();
+      loadCookieStatus();
+    } else {
+      setShopeeError('Backend server chưa phản hồi (nếu dùng Render Free, server có thể đang khởi động lại mất 20–40 giây). Vui lòng thử lại.');
+    }
+  };
+
   // ====== SHOPEE SCRAPER HANDLERS ======
   const handleShopeeScrape = async () => {
     setShopeeLoading(true);
@@ -601,6 +682,7 @@ export default function AdminDashboard({
     setShopeeProgress('');
     setShopeeSessionId(null);
     setShopeeBlockedByBot(false);
+    setShopeeLoginRequired(false);
     setScraperConfigFeedback(null);
 
     try {
@@ -615,44 +697,23 @@ export default function AdminDashboard({
         return;
       }
 
-      const online = await ApiClient.isServerOnline();
+      const online = await ApiClient.isServerOnline(2);
       setShopeeServerOnline(online);
 
       if (!online) {
-        // Chế độ web tĩnh (Vercel chưa gắn VITE_API_BASE / Backend Offline): đọc từ dữ liệu mẫu đóng gói
-        setShopeeMode('static_snapshot');
-        const snapshot = await ApiClient.shopee.getStaticSnapshot();
-        const allItems = Array.isArray(snapshot?.results) ? snapshot.results : [];
-        if (allItems.length === 0) {
-          setShopeeError('Không tìm thấy tệp dữ liệu mẫu đã đóng gói (/shopee_scraped.json) trên web tĩnh.');
-          setShopeeLoading(false);
-          return;
-        }
-
-        const filtered = filterShopeeCatalog(allItems, keywords, shopeeLimit);
-        if (filtered.length === 0) {
-          setShopeeError(
-            `Không có sản phẩm nào trong dữ liệu mẫu đã lưu khớp với từ khóa "${keywords.join(', ')}". Hãy thử từ khóa khác hoặc cấu hình VITE_API_BASE kết nối backend Render để cào trực tiếp từ Shopee.`
-          );
-          setShopeeLoading(false);
-          return;
-        }
-
-        setShopeeResults(filtered);
-        setShopeeSuccess(
-          `📦 Dữ liệu mẫu đã lưu cục bộ (chế độ Web tĩnh — không cào Shopee trực tiếp): tìm thấy ${filtered.length} sản phẩm khớp từ khóa "${keywords.join(', ')}".`
+        setShopeeError(
+          'Không thể kết nối tới Backend Scraper trên máy chủ (Render Free có thể đang thức dậy sau 20–40 giây). Hệ thống không hiển thị dữ liệu giả hay sản phẩm có sẵn trong giỏ — vui lòng đợi vài giây rồi bấm "Bắt Đầu Cào" lại.'
         );
         setShopeeLoading(false);
         return;
       }
 
       if (!ApiClient.auth.getToken()) {
-        setShopeeError('Bạn đang ở chế độ Demo Offline nên chưa có phiên xác thực máy chủ. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản Chủ Shop trên backend để chạy trình cào.');
+        setShopeeError('Bạn chưa có phiên xác thực Chủ Shop trên máy chủ. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản Chủ Shop để chạy trình cào.');
         setShopeeLoading(false);
         return;
       }
 
-      setShopeeMode('live');
       const job = await ApiClient.shopee.scrape(keywords, shopeeLimit);
       const activeSessionId = job?.sessionId;
       if (!activeSessionId) {
@@ -683,67 +744,16 @@ export default function AdminDashboard({
 
     try {
       const selectedProducts = shopeeResults.filter((_, i) => shopeeSelected.has(i));
-      const online = await ApiClient.isServerOnline();
+      const online = await ApiClient.isServerOnline(1);
       setShopeeServerOnline(online);
 
       if (!online) {
-        // Lưu bản nháp vào trình duyệt khi không có backend
-        const currentProducts = StorageService.getProducts();
-        const existingShopeeIds = new Set(
-          currentProducts.map(p => p.shopee_id || p.shopeeId || p.specs?.['Mã Shopee']).filter(Boolean)
-        );
-        const existingNames = new Set(
-          currentProducts.map(p => String(p.name || '').trim().toLowerCase()).filter(Boolean)
-        );
-
-        let importedCount = 0;
-        let skipped = 0;
-        const newItems = [];
-
-        for (const item of selectedProducts) {
-          const itemNameLower = String(item.name || '').trim().toLowerCase();
-          if ((item.shopee_id && existingShopeeIds.has(item.shopee_id)) || (itemNameLower && existingNames.has(itemNameLower))) {
-            skipped++;
-            continue;
-          }
-          const draft = {
-            id: `sp-shopee-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`,
-            name: item.name || 'Sản phẩm Shopee',
-            category: item.category || 'fashion',
-            price: Number(item.price) || 0,
-            originalPrice: item.orig ? Number(item.orig) : null,
-            stock: 0,
-            stockNeedsReview: true,
-            status: 'draft',
-            images: Array.isArray(item.images) && item.images.length > 0 ? item.images : ['/placeholder.svg'],
-            rating: item.rating || 5.0,
-            reviewsCount: item.reviews || 0,
-            soldCount: item.sold || 0,
-            shopeeId: item.shopee_id,
-            sourceUrl: item.source_url,
-            specs: {
-              'Nguồn gốc': 'Shopee',
-              'Mã Shopee': item.shopee_id || ''
-            }
-          };
-          newItems.push(draft);
-          if (item.shopee_id) existingShopeeIds.add(item.shopee_id);
-          if (itemNameLower) existingNames.add(itemNameLower);
-          importedCount++;
-        }
-
-        const updatedList = [...currentProducts, ...newItems];
-        StorageService.saveProducts(updatedList);
-        setProducts(updatedList);
-        setShopeeSuccess(
-          `📦 (Chế độ trình duyệt cục bộ — chưa đồng bộ lên máy chủ) Đã lưu ${importedCount} sản phẩm Bản Nháp vào localStorage. Đã bỏ qua ${skipped} sản phẩm trùng.`
-        );
-        setShopeeSelected(new Set());
+        setShopeeError('Máy chủ backend đang ngoại tuyến hoặc đang khởi động lại. Vui lòng kết nối lại backend trước khi nhập sản phẩm Shopee vào kho.');
         return;
       }
 
       if (!ApiClient.auth.getToken()) {
-        setShopeeError('Bạn đang dùng tài khoản Demo Offline. Vui lòng đăng nhập lại bằng tài khoản Chủ Shop trên backend để lưu sản phẩm vào CSDL máy chủ.');
+        setShopeeError('Bạn chưa đăng nhập tài khoản Chủ Shop trên backend để lưu sản phẩm vào CSDL máy chủ.');
         return;
       }
 
@@ -1146,7 +1156,7 @@ export default function AdminDashboard({
                     />
                   </div>
 
-                  <div className="flex items-center gap-2 pt-6">
+                  <div className="flex flex-wrap items-center gap-4 pt-6">
                     <label className="flex items-center gap-2 cursor-pointer">
                       <input
                         type="checkbox"
@@ -1155,6 +1165,19 @@ export default function AdminDashboard({
                         className="rounded text-rose-600 focus:ring-rose-500"
                       />
                       <span className="font-semibold text-rose-700">Gắn nhãn Flash Sale</span>
+                    </label>
+                    <label className="flex items-center gap-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        checked={editingProduct.status === 'draft' || Boolean(editingProduct.isDraft)}
+                        onChange={(e) => setEditingProduct({
+                          ...editingProduct,
+                          status: e.target.checked ? 'draft' : 'active',
+                          isDraft: e.target.checked
+                        })}
+                        className="rounded text-amber-700 focus:ring-amber-600"
+                      />
+                      <span className="font-semibold text-amber-800">Giữ ở Bản Nháp (ẩn khỏi storefront)</span>
                     </label>
                   </div>
 
@@ -1865,16 +1888,27 @@ export default function AdminDashboard({
               </div>
             </div>
 
-            {/* Backend Online vs Static Mode Banner */}
+            {/* Backend Online vs Offline Banner */}
             {shopeeServerOnline === false && (
-              <div className="bg-amber-50 border border-amber-200 rounded-xl p-4 flex items-start gap-3 text-xs text-amber-900">
-                <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-                <div>
-                  <p className="font-bold">Đang chạy chế độ Web Tĩnh (Backend / Python Scraper Offline)</p>
-                  <p className="mt-0.5 text-amber-800">
-                    Khi bấm tìm kiếm ở chế độ này, hệ thống chỉ lọc từ <strong>dữ liệu mẫu đã đóng gói cục bộ</strong> (<code>/shopee_scraped.json</code>), không kết nối Shopee trực tiếp; sản phẩm nhập sẽ lưu Bản Nháp vào <code>localStorage</code> trên trình duyệt.
-                  </p>
+              <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex flex-wrap items-center justify-between gap-3 text-xs text-amber-900">
+                <div className="flex items-start gap-3">
+                  <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="font-bold">Backend Scraper chưa phản hồi (Server có thể đang ngủ hoặc đang khởi động lại)</p>
+                    <p className="mt-0.5 text-amber-800">
+                      Hệ thống chỉ cào dữ liệu thật từ Shopee qua máy chủ backend (tuyệt đối không dùng dữ liệu giả/sản phẩm có sẵn). Nếu dùng Render Free, vui lòng đợi 20–40 giây rồi thử kết nối lại.
+                    </p>
+                  </div>
                 </div>
+                <button
+                  type="button"
+                  onClick={handleRetryBackendConnection}
+                  disabled={retryingBackend}
+                  className="px-3.5 py-2 rounded-xl bg-amber-900 hover:bg-amber-800 text-white font-bold text-xs flex items-center gap-1.5 disabled:opacity-60"
+                >
+                  {retryingBackend ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+                  <span>{retryingBackend ? 'Đang kết nối...' : 'Thử kết nối lại'}</span>
+                </button>
               </div>
             )}
 
@@ -2106,20 +2140,138 @@ export default function AdminDashboard({
                     </div>
                   );
                 })()}
+
+                {/* Optional Shopee Cookie Panel (Dùng khi Shopee bắt đăng nhập /buyer/login) */}
+                <div
+                  className={`rounded-2xl border shadow-xs transition-all ${
+                    shopeeLoginRequired
+                      ? 'bg-orange-50/80 border-orange-300'
+                      : 'bg-white border-stone-200'
+                  }`}
+                >
+                  <div className="px-4 py-3 flex flex-wrap items-center justify-between gap-3">
+                    <div className="flex flex-wrap items-center gap-2.5 text-xs">
+                      <span
+                        className={`w-8 h-8 rounded-xl flex items-center justify-center ${
+                          cookieMeta?.hasCookie ? 'bg-emerald-100 text-emerald-700' : 'bg-stone-100 text-stone-600'
+                        }`}
+                      >
+                        🍪
+                      </span>
+                      <div>
+                        <div className="font-bold text-stone-900 flex flex-wrap items-center gap-2">
+                          <span>Cookie Shopee (Tùy chọn — bổ sung nếu Shopee yêu cầu đăng nhập)</span>
+                          {cookieMeta?.hasCookie ? (
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-100 text-emerald-800 border border-emerald-200">
+                              Đã lưu {cookieMeta.cookieCount} cookie{cookieMeta.hasAuthToken ? ' (có SPC)' : ''}
+                            </span>
+                          ) : (
+                            <span className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-stone-100 text-stone-600 border border-stone-200">
+                              Chưa gắn cookie
+                            </span>
+                          )}
+                        </div>
+                        <p className="text-[11px] text-stone-500 mt-0.5">
+                          Nếu Shopee chuyển hướng sang trang đăng nhập (/buyer/login), hãy copy header Cookie từ trình duyệt đã đăng nhập Shopee và dán tại đây.
+                        </p>
+                      </div>
+                    </div>
+
+                    <button
+                      type="button"
+                      onClick={() => setCookiePanelOpen((prev) => !prev)}
+                      aria-expanded={cookiePanelOpen}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all ${
+                        shopeeLoginRequired
+                          ? 'bg-orange-600 hover:bg-orange-700 text-white border-orange-600 shadow-xs'
+                          : 'bg-stone-50 hover:bg-stone-100 text-stone-700 border-stone-200'
+                      }`}
+                    >
+                      <span>{cookiePanelOpen ? 'Thu gọn' : 'Cập nhật Cookie'}</span>
+                      {cookiePanelOpen ? <ChevronUp className="w-3.5 h-3.5" /> : <ChevronDown className="w-3.5 h-3.5" />}
+                    </button>
+                  </div>
+
+                  {cookiePanelOpen && (
+                    <form onSubmit={handleSaveShopeeCookie} className="px-4 pb-4 pt-3 border-t border-stone-200/80 space-y-2.5 text-xs">
+                      <label htmlFor="shopee-cookie-input" className="block font-semibold text-stone-800">
+                        Dán chuỗi Cookie từ tab Network (Request Headers &rarr; Cookie) trên Shopee.vn:
+                      </label>
+                      <textarea
+                        id="shopee-cookie-input"
+                        rows={2}
+                        value={shopeeCookieInput}
+                        onChange={(e) => {
+                          setShopeeCookieInput(e.target.value);
+                          if (cookieFeedback) setCookieFeedback(null);
+                        }}
+                        spellCheck={false}
+                        autoComplete="off"
+                        placeholder="Ví dụ: SPC_F=...; SPC_ST=...; csrftoken=..."
+                        className="w-full font-mono text-[11px] bg-white border border-stone-300 rounded-xl px-3 py-2 focus:outline-none focus:ring-2 focus:ring-orange-500 resize-none"
+                        disabled={cookieSaving}
+                      />
+
+                      {cookieFeedback && (
+                        <div
+                          className={`p-2.5 rounded-xl border text-xs flex items-start gap-2 ${
+                            cookieFeedback.ok
+                              ? 'bg-emerald-50 border-emerald-200 text-emerald-800'
+                              : 'bg-rose-50 border-rose-200 text-rose-800'
+                          }`}
+                        >
+                          {cookieFeedback.ok ? (
+                            <CheckCircle className="w-4 h-4 text-emerald-600 shrink-0 mt-0.5" />
+                          ) : (
+                            <XCircle className="w-4 h-4 text-rose-600 shrink-0 mt-0.5" />
+                          )}
+                          <span>{cookieFeedback.message}</span>
+                        </div>
+                      )}
+
+                      <div className="flex flex-wrap items-center justify-between gap-2">
+                        <button
+                          type="submit"
+                          disabled={cookieSaving || !shopeeCookieInput.trim()}
+                          className="px-4 py-2 rounded-xl bg-stone-900 hover:bg-stone-800 text-white font-bold text-xs flex items-center gap-1.5 transition-all disabled:opacity-50"
+                        >
+                          {cookieSaving ? (
+                            <>
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                              <span>Đang lưu...</span>
+                            </>
+                          ) : (
+                            <span>Lưu Cookie Shopee</span>
+                          )}
+                        </button>
+                        <span className="text-[11px] text-stone-500">
+                          🔒 Cookie chỉ lưu tạm an toàn trên backend, không hiển thị lại ra giao diện.
+                        </span>
+                      </div>
+                    </form>
+                  )}
+                </div>
               </div>
             )}
 
             {/* Error Alert */}
             {shopeeError && (
-              <div className="bg-red-50 border border-red-200 rounded-xl p-4 flex items-start gap-3">
-                <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-red-800">Không có kết quả hoặc có lỗi</p>
-                  <p className="text-sm text-red-700 mt-0.5">{shopeeError}</p>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4 space-y-2">
+                <div className="flex items-start gap-3">
+                  <XCircle className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" />
+                  <div className="flex-1">
+                    <p className="text-sm font-semibold text-red-800">Không có kết quả hoặc có lỗi</p>
+                    <p className="text-sm text-red-700 mt-0.5">{shopeeError}</p>
+                  </div>
+                  <button onClick={() => setShopeeError(null)} className="ml-auto text-red-400 hover:text-red-600">
+                    <XCircle className="w-4 h-4" />
+                  </button>
                 </div>
-                <button onClick={() => setShopeeError(null)} className="ml-auto text-red-400 hover:text-red-600">
-                  <XCircle className="w-4 h-4" />
-                </button>
+                {!shopeeLoading && shopeeProgress && (
+                  <pre className="mt-2 p-2.5 bg-stone-900 text-stone-200 rounded-xl text-[11px] font-mono max-h-40 overflow-y-auto whitespace-pre-wrap">
+                    {shopeeProgress}
+                  </pre>
+                )}
               </div>
             )}
 
@@ -2128,9 +2280,7 @@ export default function AdminDashboard({
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
                 <div>
-                  <p className="text-sm font-semibold text-emerald-800">
-                    {shopeeMode === 'static_snapshot' ? 'Dữ liệu mẫu cục bộ' : 'Hoàn tất phiên cào'}
-                  </p>
+                  <p className="text-sm font-semibold text-emerald-800">Hoàn tất phiên cào trực tiếp</p>
                   <p className="text-sm text-emerald-700 mt-0.5">{shopeeSuccess}</p>
                 </div>
                 <button onClick={() => setShopeeSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-600">
@@ -2269,14 +2419,8 @@ export default function AdminDashboard({
                 {/* Action Bar */}
                 <div className="bg-white rounded-2xl border border-stone-200 shadow-xs p-4 flex flex-wrap items-center justify-between gap-3">
                   <div className="flex items-center gap-3 flex-wrap">
-                    <span className={`text-[11px] font-bold px-2.5 py-1 rounded-lg border ${
-                      shopeeMode === 'static_snapshot'
-                        ? 'bg-amber-50 text-amber-800 border-amber-200'
-                        : 'bg-emerald-50 text-emerald-800 border-emerald-200'
-                    }`}>
-                      {shopeeMode === 'static_snapshot'
-                        ? '📦 Dữ liệu mẫu / đã lưu cục bộ'
-                        : `🌐 Cào trực tiếp${shopeeSessionId ? ` · ${shopeeSessionId}` : ''}`}
+                    <span className="text-[11px] font-bold px-2.5 py-1 rounded-lg border bg-emerald-50 text-emerald-800 border-emerald-200">
+                      {`🌐 Cào trực tiếp${shopeeSessionId ? ` · ${shopeeSessionId}` : ''}`}
                     </span>
                     <button
                       onClick={toggleShopeeSelectAll}

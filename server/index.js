@@ -6,6 +6,7 @@ import { db, hashPassword, verifyPassword } from './db.js';
 import { createSession, destroySession, authenticateUser, requireAuth, requireRole } from './auth.js';
 import { filterShopeeCatalog } from '../src/utils/shopeeFilter.js';
 import { normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
+import { scrapeShopeeLive } from './shopeeScraper.js';
 import { spawn } from 'child_process';
 import { readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'fs';
 import { join, dirname } from 'path';
@@ -1011,7 +1012,70 @@ function saveSessionSnapshot(state) {
   }
 }
 
-// Trigger the Python scraper asynchronously with session tracking (Option B: Scraping API)
+function applyScraperResultPayload(sessionId, kwList, numLimit, rawContent) {
+  if (!rawContent || Array.isArray(rawContent) || rawContent.sessionId !== sessionId) {
+    scrapeState.status = 'failed';
+    scrapeState.noNewData = true;
+    scrapeState.error = 'File kết quả không thuộc phiên cào hiện tại — bỏ qua dữ liệu cũ để tránh hiển thị sai.';
+    scrapeState.message = scrapeState.error;
+    scrapeState.results = [];
+    scrapeState.count = 0;
+    saveSessionSnapshot(scrapeState);
+    return;
+  }
+
+  if (rawContent.provider) {
+    scrapeState.provider = rawContent.provider;
+  }
+  scrapeState.loginRequired = Boolean(rawContent.loginRequired);
+
+  if (rawContent.status === 'config_required' || rawContent.status === 'failed') {
+    scrapeState.status = rawContent.status;
+    scrapeState.configRequired = Boolean(rawContent.configRequired);
+    scrapeState.noNewData = true;
+    scrapeState.error = rawContent.message || 'Phiên cào Shopee qua Scraping API thất bại.';
+    scrapeState.message = scrapeState.error;
+    scrapeState.results = [];
+    scrapeState.count = 0;
+    scrapeState.progress += `\n[ERROR] ${scrapeState.message}`;
+    saveSessionSnapshot(scrapeState);
+    return;
+  }
+
+  const rawProducts = Array.isArray(rawContent.products) ? rawContent.products : [];
+  // Áp dụng bộ lọc chuẩn xác trên dữ liệu vừa cào (NGOÀI điều kiện kiểm tra rỗng)
+  const filteredResults = rawProducts.length > 0
+    ? filterShopeeCatalog(rawProducts, kwList, numLimit)
+    : [];
+
+  if (filteredResults.length === 0) {
+    if (rawContent.status === 'login_required' || rawContent.loginRequired) {
+      scrapeState.status = 'login_required';
+    } else if (rawContent.status === 'blocked' || rawContent.antiBotBlocked) {
+      scrapeState.status = 'blocked';
+    } else {
+      scrapeState.status = 'empty';
+    }
+    scrapeState.noNewData = true;
+    scrapeState.results = [];
+    scrapeState.count = 0;
+    scrapeState.message = rawContent.message
+      || `Không tìm thấy sản phẩm mới nào khớp với từ khóa "${kwList.join(', ')}" trong phiên này.`;
+    scrapeState.error = null;
+    scrapeState.progress += `\n[DONE] ${scrapeState.message}`;
+  } else {
+    scrapeState.status = 'completed';
+    scrapeState.noNewData = false;
+    scrapeState.results = filteredResults;
+    scrapeState.count = filteredResults.length;
+    scrapeState.error = null;
+    scrapeState.message = `Đã cào và lọc thành công ${filteredResults.length} sản phẩm khớp từ khóa từ Shopee.`;
+    scrapeState.progress += `\n[DONE] ${scrapeState.message}`;
+  }
+  saveSessionSnapshot(scrapeState);
+}
+
+// Trigger the scraper asynchronously with session tracking (Option B: Scraping API)
 app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   if (scrapeState.running) {
     return res.status(409).json({
@@ -1047,12 +1111,8 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   }
 
   const numLimit = Math.min(Math.max(parseInt(limit, 10) || 20, 5), 60);
-  const scraperPath = join(PROJECT_ROOT, 'shopee_scraper.py');
   const outputPath = join(PROJECT_ROOT, 'shopee_scraped.json');
-
-  if (!existsSync(scraperPath)) {
-    return res.status(500).json({ error: 'Không tìm thấy script shopee_scraper.py trên máy chủ.' });
-  }
+  const engine = String(process.env.SCRAPER_ENGINE || 'node').trim().toLowerCase();
 
   const activeProvLabel = (requestedProv || scraperCfg.activeProvider || 'auto').toUpperCase();
   const sessionId = `scrape_${Date.now()}_${crypto.randomBytes(3).toString('hex')}`;
@@ -1060,94 +1120,89 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
     running: true,
     sessionId,
     status: 'running',
+    engine,
     provider: requestedProv || scraperCfg.activeProvider || null,
     requestedKeywords: kwList,
     limit: numLimit,
     startedAt: new Date().toISOString(),
     finishedAt: null,
-    progress: `Đang kết nối Scraping API (${activeProvLabel} · Phương án B) để lấy dữ liệu Shopee...\n`,
+    progress: `Đang kết nối Scraping API (${activeProvLabel} · Phương án B · Engine ${engine.toUpperCase()}) để lấy dữ liệu Shopee...\n`,
     message: `Đang thu thập sản phẩm qua ${activeProvLabel}...`,
     error: null,
     configRequired: false,
+    loginRequired: false,
     noNewData: false,
     count: 0,
     results: []
   };
   saveSessionSnapshot(scrapeState);
 
-  const scriptArgs = [
-    scraperPath,
-    '--session-id', sessionId,
-    '--output', outputPath,
-    '--limit', String(numLimit),
-    ...(requestedProv ? ['--provider', requestedProv] : []),
-    '--keywords', ...kwList
-  ];
+  console.log(`[Shopee Scrape] Bắt đầu phiên ${sessionId} (${activeProvLabel}, engine=${engine}): keywords=${JSON.stringify(kwList)}, limit=${numLimit}`);
 
-  console.log(`[Shopee Scrape] Bắt đầu phiên ${sessionId} (${activeProvLabel}): keywords=${JSON.stringify(kwList)}, limit=${numLimit}`);
-
-  const pythonProcess = spawn(PYTHON_BIN, scriptArgs, {
-    cwd: PROJECT_ROOT,
-    timeout: SCRAPE_TIMEOUT_MS,
-    env: {
-      ...process.env,
-      ...scraperCfg.envVars,
-      PYTHONIOENCODING: 'utf-8',
-      PYTHONUNBUFFERED: '1',
-      SHOPEE_COOKIE_FILE: SHOPEE_COOKIE_PATH
-    }
-  });
-
-  pythonProcess.stdout.on('data', (data) => {
-    const text = data.toString();
-    console.log(`[Scraper stdout][${sessionId}]: ${text.trim()}`);
-    scrapeState.progress += text;
-    saveSessionSnapshot(scrapeState);
-  });
-
-  pythonProcess.stderr.on('data', (data) => {
-    const text = data.toString();
-    console.error(`[Scraper stderr][${sessionId}]: ${text.trim()}`);
-    scrapeState.progress += `[stderr] ${text}`;
-    saveSessionSnapshot(scrapeState);
-  });
-
-  pythonProcess.on('close', (code, signal) => {
-    scrapeState.running = false;
-    scrapeState.finishedAt = new Date().toISOString();
-
-    if (code !== 0) {
-      const reason = signal === 'SIGTERM'
-        ? `Tiến trình cào vượt quá giới hạn ${Math.round(SCRAPE_TIMEOUT_MS / 1000)} giây.`
-        : `Tiến trình cào thoát với mã lỗi ${code}.`;
+  if (engine === 'python') {
+    const scraperPath = join(PROJECT_ROOT, 'shopee_scraper.py');
+    if (!existsSync(scraperPath)) {
+      scrapeState.running = false;
       scrapeState.status = 'failed';
-      scrapeState.error = reason;
-      scrapeState.message = reason;
-      scrapeState.results = [];
-      scrapeState.count = 0;
-      scrapeState.progress += `\n[ERROR] ${reason}`;
-      saveSessionSnapshot(scrapeState);
-      return;
+      return res.status(500).json({ error: 'Không tìm thấy script shopee_scraper.py trên máy chủ.' });
     }
 
-    if (!existsSync(outputPath)) {
-      scrapeState.status = 'failed';
-      scrapeState.error = 'Không tìm thấy file kết quả sau khi cào.';
-      scrapeState.message = scrapeState.error;
-      scrapeState.results = [];
-      scrapeState.count = 0;
+    const scriptArgs = [
+      scraperPath,
+      '--session-id', sessionId,
+      '--output', outputPath,
+      '--limit', String(numLimit),
+      ...(requestedProv ? ['--provider', requestedProv] : []),
+      '--keywords', ...kwList
+    ];
+
+    const pythonProcess = spawn(PYTHON_BIN, scriptArgs, {
+      cwd: PROJECT_ROOT,
+      timeout: SCRAPE_TIMEOUT_MS,
+      env: {
+        ...process.env,
+        ...scraperCfg.envVars,
+        PYTHONIOENCODING: 'utf-8',
+        PYTHONUNBUFFERED: '1',
+        SHOPEE_COOKIE_FILE: SHOPEE_COOKIE_PATH
+      }
+    });
+
+    pythonProcess.stdout.on('data', (data) => {
+      const text = data.toString();
+      console.log(`[Scraper stdout][${sessionId}]: ${text.trim()}`);
+      scrapeState.progress += text;
       saveSessionSnapshot(scrapeState);
-      return;
-    }
+    });
 
-    try {
-      const rawContent = JSON.parse(readFileSync(outputPath, 'utf8'));
+    pythonProcess.stderr.on('data', (data) => {
+      const text = data.toString();
+      console.error(`[Scraper stderr][${sessionId}]: ${text.trim()}`);
+      scrapeState.progress += `[stderr] ${text}`;
+      saveSessionSnapshot(scrapeState);
+    });
 
-      // Xác thực đúng file kết quả thuộc phiên cào hiện tại (ngăn đọc nhầm dữ liệu cũ)
-      if (!rawContent || Array.isArray(rawContent) || rawContent.sessionId !== sessionId) {
+    pythonProcess.on('close', (code, signal) => {
+      scrapeState.running = false;
+      scrapeState.finishedAt = new Date().toISOString();
+
+      if (code !== 0) {
+        const reason = signal === 'SIGTERM'
+          ? `Tiến trình cào vượt quá giới hạn ${Math.round(SCRAPE_TIMEOUT_MS / 1000)} giây.`
+          : `Tiến trình cào thoát với mã lỗi ${code}.`;
         scrapeState.status = 'failed';
-        scrapeState.noNewData = true;
-        scrapeState.error = 'File kết quả không thuộc phiên cào hiện tại — bỏ qua dữ liệu cũ để tránh hiển thị sai.';
+        scrapeState.error = reason;
+        scrapeState.message = reason;
+        scrapeState.results = [];
+        scrapeState.count = 0;
+        scrapeState.progress += `\n[ERROR] ${reason}`;
+        saveSessionSnapshot(scrapeState);
+        return;
+      }
+
+      if (!existsSync(outputPath)) {
+        scrapeState.status = 'failed';
+        scrapeState.error = 'Không tìm thấy file kết quả sau khi cào.';
         scrapeState.message = scrapeState.error;
         scrapeState.results = [];
         scrapeState.count = 0;
@@ -1155,73 +1210,99 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
         return;
       }
 
-      if (rawContent.provider) {
-        scrapeState.provider = rawContent.provider;
-      }
-
-      if (rawContent.status === 'config_required' || rawContent.status === 'failed') {
-        scrapeState.status = rawContent.status;
-        scrapeState.configRequired = Boolean(rawContent.configRequired);
-        scrapeState.noNewData = true;
-        scrapeState.error = rawContent.message || 'Phiên cào Shopee qua Scraping API thất bại.';
+      try {
+        const rawContent = JSON.parse(readFileSync(outputPath, 'utf8'));
+        applyScraperResultPayload(sessionId, kwList, numLimit, rawContent);
+      } catch (e) {
+        scrapeState.status = 'failed';
+        scrapeState.error = `Không thể đọc kết quả JSON của scraper: ${e.message}`;
         scrapeState.message = scrapeState.error;
         scrapeState.results = [];
         scrapeState.count = 0;
-        scrapeState.progress += `\n[ERROR] ${scrapeState.message}`;
         saveSessionSnapshot(scrapeState);
-        return;
       }
+    });
 
-      const rawProducts = Array.isArray(rawContent.products) ? rawContent.products : [];
-      // Áp dụng bộ lọc chuẩn xác trên dữ liệu vừa cào (NGOÀI điều kiện kiểm tra rỗng)
-      const filteredResults = rawProducts.length > 0
-        ? filterShopeeCatalog(rawProducts, kwList, numLimit)
-        : [];
-
-      if (filteredResults.length === 0) {
-        scrapeState.status = rawContent.status === 'blocked' ? 'blocked' : 'empty';
-        scrapeState.noNewData = true;
-        scrapeState.results = [];
-        scrapeState.count = 0;
-        scrapeState.message = rawContent.message
-          || `Không tìm thấy sản phẩm mới nào khớp với từ khóa "${kwList.join(', ')}" trong phiên này.`;
-        scrapeState.error = null;
-        scrapeState.progress += `\n[DONE] ${scrapeState.message}`;
-      } else {
-        scrapeState.status = 'completed';
-        scrapeState.noNewData = false;
-        scrapeState.results = filteredResults;
-        scrapeState.count = filteredResults.length;
-        scrapeState.error = null;
-        scrapeState.message = `Đã cào và lọc thành công ${filteredResults.length} sản phẩm khớp từ khóa từ Shopee.`;
-        scrapeState.progress += `\n[DONE] ${scrapeState.message}`;
-      }
-      saveSessionSnapshot(scrapeState);
-    } catch (e) {
+    pythonProcess.on('error', (err) => {
+      scrapeState.running = false;
+      scrapeState.finishedAt = new Date().toISOString();
       scrapeState.status = 'failed';
-      scrapeState.error = `Không thể đọc kết quả JSON của scraper: ${e.message}`;
+      scrapeState.error = `Không thể khởi chạy tiến trình Python (${PYTHON_BIN}): ${err.message}`;
       scrapeState.message = scrapeState.error;
       scrapeState.results = [];
       scrapeState.count = 0;
       saveSessionSnapshot(scrapeState);
-    }
-  });
+    });
+  } else {
+    // Native Node.js Option B Engine (Zero external dependencies — runs reliably on Render Node & Docker)
+    (async () => {
+      try {
+        const outcome = await scrapeShopeeLive({
+          keywords: kwList,
+          totalLimit: numLimit,
+          preferredProvider: requestedProv || null,
+          env: { ...process.env, ...scraperCfg.envVars },
+          cookieFilePath: SHOPEE_COOKIE_PATH,
+          imgDir: join(PROJECT_ROOT, 'public', 'products', 'shopee_live'),
+          onProgress: (line) => {
+            if (scrapeState.sessionId !== sessionId) return;
+            const text = String(line || '');
+            if (text.trim()) {
+              console.log(`[NodeScraper][${sessionId}] ${text.trim()}`);
+            }
+            scrapeState.progress = (scrapeState.progress + text).slice(-16000);
+            saveSessionSnapshot(scrapeState);
+          }
+        });
 
-  pythonProcess.on('error', (err) => {
-    scrapeState.running = false;
-    scrapeState.finishedAt = new Date().toISOString();
-    scrapeState.status = 'failed';
-    scrapeState.error = `Không thể khởi chạy tiến trình Python (${PYTHON_BIN}): ${err.message}`;
-    scrapeState.message = scrapeState.error;
-    scrapeState.results = [];
-    scrapeState.count = 0;
-    saveSessionSnapshot(scrapeState);
-  });
+        const payload = {
+          sessionId,
+          crawledAt: new Date().toISOString(),
+          requestedKeywords: kwList,
+          limit: numLimit,
+          provider: outcome.provider || null,
+          status: outcome.status,
+          message: outcome.message,
+          antiBotBlocked: Boolean(outcome.anti_bot_blocked),
+          loginRequired: Boolean(outcome.login_required),
+          configRequired: Boolean(outcome.config_required),
+          perKeywordCounts: outcome.per_keyword_counts || {},
+          count: Array.isArray(outcome.products) ? outcome.products.length : 0,
+          products: outcome.products || []
+        };
+
+        try {
+          writeFileSync(outputPath, JSON.stringify(payload, null, 2), 'utf8');
+        } catch (writeErr) {
+          console.warn(`[NodeScraper][${sessionId}] Không thể ghi shopee_scraped.json:`, writeErr.message);
+        }
+
+        if (scrapeState.sessionId === sessionId) {
+          scrapeState.running = false;
+          scrapeState.finishedAt = new Date().toISOString();
+          applyScraperResultPayload(sessionId, kwList, numLimit, payload);
+        }
+      } catch (err) {
+        if (scrapeState.sessionId === sessionId) {
+          scrapeState.running = false;
+          scrapeState.finishedAt = new Date().toISOString();
+          scrapeState.status = 'failed';
+          scrapeState.error = `Lỗi engine Node scraper: ${err.message}`;
+          scrapeState.message = scrapeState.error;
+          scrapeState.results = [];
+          scrapeState.count = 0;
+          scrapeState.progress += `\n[ERROR] ${scrapeState.error}`;
+          saveSessionSnapshot(scrapeState);
+        }
+      }
+    })();
+  }
 
   return res.status(202).json({
     started: true,
     sessionId,
     status: 'running',
+    engine,
     requestedKeywords: kwList,
     limit: numLimit
   });
@@ -1273,8 +1354,8 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
       isDraft: true,
       status: 'draft',
       images: (Array.isArray(product.images) && product.images.length > 0)
-        ? product.images 
-        : ['/products/market/ao_khoac_1.jpg'],
+        ? product.images
+        : ['/placeholder.svg'],
       variants: { colors: ['Mặc định'], sizes: ['Tiêu chuẩn'] },
       shortDesc: product.shortDesc || `Sản phẩm tham khảo Shopee - ${rawName.substring(0, 60)}`,
       desc: product.desc || rawName,
@@ -1480,7 +1561,8 @@ app.get('/api/health', (req, res) => {
     timestamp: new Date().toISOString(),
     scrapingOptionB: {
       configured: getEffectiveScraperConfig().configured,
-      activeProvider: getEffectiveScraperConfig().activeProvider
+      activeProvider: getEffectiveScraperConfig().activeProvider,
+      engine: (process.env.SCRAPER_ENGINE || 'node').trim().toLowerCase()
     },
     collections: {
       users: db.get('users').length,

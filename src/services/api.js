@@ -118,18 +118,36 @@ async function request(endpoint, options = {}) {
 }
 
 export const ApiClient = {
-  // Health check
-  async isServerOnline() {
-    try {
-      const res = await fetch(`${API_BASE}/health`, { method: 'GET', cache: 'no-cache' });
-      if (!res.ok) return false;
-      const contentType = res.headers.get('content-type') || '';
-      if (!contentType.includes('application/json')) return false;
-      const data = await res.json();
-      return data?.status === 'online';
-    } catch {
-      return false;
+  // Health check (tự động thử lại 1 lần nếu Render Free đang khởi động lại)
+  async isServerOnline(retries = 1) {
+    for (let attempt = 0; attempt <= retries; attempt++) {
+      try {
+        const res = await fetch(`${API_BASE}/health`, {
+          method: 'GET',
+          cache: 'no-cache',
+          ...(typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
+            ? { signal: AbortSignal.timeout(15000) }
+            : {})
+        });
+        if (res.ok) {
+          const contentType = res.headers.get('content-type') || '';
+          if (contentType.includes('application/json')) {
+            const data = await res.json();
+            if (data?.status === 'online') return true;
+          }
+          return false;
+        }
+        if (res.status !== 502 && res.status !== 503 && res.status !== 504) {
+          return false;
+        }
+      } catch {
+        // retry on cold start/network blip
+      }
+      if (attempt < retries) {
+        await new Promise((r) => setTimeout(r, 2500));
+      }
     }
+    return false;
   },
 
   // Authentication
@@ -308,21 +326,6 @@ export const ApiClient = {
     updateCookie: (cookie) => request('/shopee/cookie', {
       method: 'PUT',
       body: JSON.stringify({ cookie })
-    }),
-    async getStaticSnapshot() {
-      try {
-        const staticRes = await fetch('/shopee_scraped.json', { cache: 'no-cache' });
-        if (staticRes.ok) {
-          const parsed = await staticRes.json();
-          const results = Array.isArray(parsed)
-            ? parsed
-            : (Array.isArray(parsed?.products) ? parsed.products : []);
-          return { mode: 'static_snapshot', results };
-        }
-      } catch {
-        // Ignored
-      }
-      return { mode: 'static_snapshot', results: [] };
-    }
+    })
   }
 };

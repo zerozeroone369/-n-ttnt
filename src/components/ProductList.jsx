@@ -28,6 +28,11 @@ export default function ProductList({
   // Filter & Sort Logic
   const filteredProducts = useMemo(() => {
     return products.filter((product) => {
+      // 0. Hide Draft products (e.g. unverified Shopee scraped items) from public storefront
+      if (product.status === 'draft' || product.isDraft === true) {
+        return false;
+      }
+
       // 1. Category
       if (activeCategory !== 'all' && product.category !== activeCategory) {
         return false;

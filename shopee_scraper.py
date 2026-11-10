@@ -7,6 +7,8 @@ Shopee Product Scraper - Option B Engine (Third-Party Scraping APIs)
 - Tải và tối ưu ảnh sang WebP (Pillow) vào public/products/shopee_live/
 - Bảo mật: Không hardcode API key, tự động ẩn token/apikey khỏi mọi log lỗi
 """
+from __future__ import annotations
+
 import argparse
 import datetime
 import json
@@ -14,12 +16,62 @@ import os
 import random
 import re
 import time
+import urllib.error
+import urllib.request
 from io import BytesIO
 from pathlib import Path
-from urllib.parse import quote
+from urllib.parse import quote, urlencode
 
-import httpx
-from bs4 import BeautifulSoup
+try:
+    import httpx
+    _HAS_HTTPX = True
+except ImportError:  # pragma: no cover
+    _HAS_HTTPX = False
+
+    class _CompatResponse:
+        def __init__(self, status_code: int, content: bytes, headers: dict):
+            self.status_code = status_code
+            self.content = content
+            self.headers = {k.lower(): v for k, v in (headers or {}).items()}
+            self.text = content.decode("utf-8", errors="replace")
+
+        def json(self):
+            return json.loads(self.text)
+
+    class _CompatClient:
+        def __init__(self, follow_redirects=True, timeout=80):
+            self.timeout = timeout
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *args):
+            return False
+
+        def close(self):
+            pass
+
+        def get(self, url, params=None, headers=None, timeout=None):
+            full_url = f"{url}?{urlencode(params)}" if params else url
+            req = urllib.request.Request(full_url, headers=headers or {}, method="GET")
+            try:
+                with urllib.request.urlopen(req, timeout=timeout or self.timeout) as resp:
+                    return _CompatResponse(resp.status, resp.read(), dict(resp.headers))
+            except urllib.error.HTTPError as e:
+                return _CompatResponse(e.code, e.read(), dict(e.headers or {}))
+            except urllib.error.URLError as e:
+                raise OSError(str(e)) from e
+
+    class _HttpxCompat:
+        HTTPError = OSError
+        Client = _CompatClient
+
+    httpx = _HttpxCompat()  # type: ignore[assignment]
+
+try:
+    from bs4 import BeautifulSoup
+except ImportError:  # pragma: no cover
+    BeautifulSoup = None  # type: ignore[assignment]
 
 try:
     from PIL import Image as PilImage
@@ -53,7 +105,7 @@ def _sanitize_error_text(text: str) -> str:
 # Scraping API Provider Configuration (Option B)
 # ---------------------------------------------------------------------------
 
-def resolve_scraping_provider(preferred: "str | None" = None) -> "tuple[str | None, str | None]":
+def resolve_scraping_provider(preferred: str | None = None) -> tuple[str | None, str | None]:
     """
     Xác định provider Scraping API và API key hợp lệ từ biến môi trường.
     Ưu tiên khi auto: zenrows -> scraperapi -> crawlbase.
@@ -126,7 +178,7 @@ def parse_shopee_cookie_string(raw: str) -> list:
     ]
 
 
-def load_shopee_cookies(cookie_path: "Path | str | None" = None) -> list:
+def load_shopee_cookies(cookie_path: Path | str | None = None) -> list:
     """Tải cookie Shopee từ file shopee_cookie.txt (hoặc đường dẫn chỉ định)."""
     target = Path(cookie_path) if cookie_path is not None else Path(
         os.environ.get("SHOPEE_COOKIE_FILE", "shopee_cookie.txt")
@@ -196,7 +248,7 @@ def parse_vnd_price(text: str) -> int:
     return 0
 
 
-def _extract_image_ref(src: str) -> "tuple[str, str]":
+def _extract_image_ref(src: str) -> tuple[str, str]:
     """Trích xuất (image_id, fallback_cdn_url) từ URL ảnh Shopee CDN."""
     clean = (src or "").strip()
     if not clean:
@@ -210,7 +262,7 @@ def _extract_image_ref(src: str) -> "tuple[str, str]":
     return "", clean if clean.startswith(("http://", "https://")) else ""
 
 
-def parse_shopee_item(raw_item: dict, kw: str) -> "dict | None":
+def parse_shopee_item(raw_item: dict, kw: str) -> dict | None:
     """Phân tích 1 item từ Shopee JSON API (hỗ trợ cả định dạng BFF mới 2026 và v4/search_items)."""
     asset = raw_item.get("item_card_displayed_asset") or {}
     ib = raw_item.get("item_basic") or raw_item
@@ -324,7 +376,7 @@ def _is_antibot_challenge_html(html: str) -> bool:
     return has_marker and not has_product_links
 
 
-def _extract_embedded_json_items(html: str, kw: str) -> "list[dict]":
+def _extract_embedded_json_items(html: str, kw: str) -> list[dict]:
     """Tìm mảng `items` chứa item_basic/item_card_displayed_asset nhúng trong HTML/script."""
     items: list[dict] = []
     seen: set[str] = set()
@@ -348,7 +400,7 @@ def _extract_embedded_json_items(html: str, kw: str) -> "list[dict]":
     return items
 
 
-def parse_shopee_html(html: str, kw: str, max_items: int = 40) -> "tuple[list[dict], bool]":
+def parse_shopee_html(html: str, kw: str, max_items: int = 40) -> tuple[list[dict], bool]:
     """
     Bóc tách danh sách sản phẩm từ HTML đã render JS bởi Scraping API (ZenRows/ScraperAPI/Crawlbase).
     Ưu tiên embedded JSON; nếu không có thì quét thẻ sản phẩm trên DOM qua BeautifulSoup.
@@ -360,6 +412,9 @@ def parse_shopee_html(html: str, kw: str, max_items: int = 40) -> "tuple[list[di
     embedded = _extract_embedded_json_items(html, kw)
     if embedded:
         return embedded[:max_items], False
+
+    if BeautifulSoup is None:
+        return [], _is_antibot_challenge_html(html)
 
     soup = BeautifulSoup(html, "html.parser")
     cards = soup.select(
@@ -479,7 +534,7 @@ def parse_shopee_html(html: str, kw: str, max_items: int = 40) -> "tuple[list[di
     return parsed, False
 
 
-def parse_zenrows_json_payload(payload: dict, kw: str, max_items: int = 40) -> "tuple[list[dict], bool]":
+def parse_zenrows_json_payload(payload: dict, kw: str, max_items: int = 40) -> tuple[list[dict], bool]:
     """
     Bóc tách phản hồi từ ZenRows (`js_render=true&json_response=true`):
     - Ưu tiên bắt JSON từ các XHR request `search_items` / `recommend` trong mảng `xhr`
@@ -653,12 +708,12 @@ class ProviderFatalError(RuntimeError):
     """Lỗi cấu hình / xác thực / hết quota từ phía nhà cung cấp Scraping API."""
 
 
-def _fetch_via_zenrows(kw: str, api_key: str, max_items: int, client: httpx.Client) -> "tuple[list[dict], bool]":
+def _fetch_via_zenrows(kw: str, api_key: str, max_items: int, client: httpx.Client) -> tuple[list[dict], bool]:
     target_url = f"https://shopee.vn/search?keyword={quote(kw)}"
     js_instructions = json.dumps([
-        {"wait": 2500},
-        {"scroll": "down"},
-        {"wait": 1500},
+        {"wait": 3500},
+        {"scroll_y": 1200},
+        {"wait": 2000},
     ])
     params = {
         "apikey": api_key,
@@ -694,7 +749,7 @@ def _fetch_via_zenrows(kw: str, api_key: str, max_items: int, client: httpx.Clie
     return parse_shopee_html(resp.text, kw, max_items=max_items)
 
 
-def _fetch_via_scraperapi(kw: str, api_key: str, max_items: int, client: httpx.Client) -> "tuple[list[dict], bool]":
+def _fetch_via_scraperapi(kw: str, api_key: str, max_items: int, client: httpx.Client) -> tuple[list[dict], bool]:
     target_url = f"https://shopee.vn/search?keyword={quote(kw)}"
     use_ultra = os.environ.get("SCRAPERAPI_ULTRA_PREMIUM", "true").strip().lower() != "false"
     params = {
@@ -725,7 +780,7 @@ def _fetch_via_scraperapi(kw: str, api_key: str, max_items: int, client: httpx.C
     return parse_shopee_html(resp.text, kw, max_items=max_items)
 
 
-def _fetch_via_crawlbase(kw: str, token: str, max_items: int, client: httpx.Client) -> "tuple[list[dict], bool]":
+def _fetch_via_crawlbase(kw: str, token: str, max_items: int, client: httpx.Client) -> tuple[list[dict], bool]:
     target_url = f"https://shopee.vn/search?keyword={quote(kw)}"
     params = {
         "token": token,
@@ -767,8 +822,8 @@ def fetch_keyword_via_provider(
     api_key: str,
     keyword: str,
     per_kw_limit: int,
-    client: "httpx.Client | None" = None,
-) -> "tuple[list[dict], bool]":
+    client: httpx.Client | None = None,
+) -> tuple[list[dict], bool]:
     """Gọi Scraping API tương ứng để thu thập danh sách sản phẩm cho 1 từ khóa."""
     print(f"[*] [{provider.upper()}] Đang cào Shopee cho từ khóa: '{keyword}'...", flush=True)
     own_client = client is None
@@ -801,7 +856,7 @@ def fetch_keyword_via_provider(
 def scrape_shopee_live(
     keywords: list,
     total_limit: int = 20,
-    preferred_provider: "str | None" = None,
+    preferred_provider: str | None = None,
 ) -> dict:
     """
     Cào sản phẩm Shopee thông qua Scraping API bên thứ ba (Phương án B):
