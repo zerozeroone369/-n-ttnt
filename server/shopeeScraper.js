@@ -255,27 +255,48 @@ function stripTags(html) {
 
 export function parseShopeeItem(rawItem, kw) {
   if (!rawItem || typeof rawItem !== 'object') return null;
-  const asset = rawItem.item_card_displayed_asset || {};
-  const ib = rawItem.item_basic || rawItem;
+  const card = rawItem.item_card && typeof rawItem.item_card === 'object' ? rawItem.item_card : rawItem;
+  const asset =
+    card.item_card_displayed_asset ||
+    rawItem.item_card_displayed_asset ||
+    card.displayed_asset_info ||
+    {};
+  const ib = card.item_basic || card.item_data || rawItem.item_basic || rawItem.item_data || card;
 
-  const rawName = asset.name || ib.name || ib.title || rawItem.title || '';
+  const rawName = asset.name || ib.name || ib.title || card.title || rawItem.name || rawItem.title || '';
   const name = String(rawName).trim();
   if (!name || name.length < 3) return null;
 
-  const priceRaw = Number(
-    asset?.display_price?.price || ib.price || ib.price_min || rawItem.price || 0
-  );
+  const rawPriceCand =
+    asset?.display_price?.price ??
+    ib?.item_card_display_price?.price ??
+    ib?.display_price?.price ??
+    ib.price ??
+    ib.price_min ??
+    card.price ??
+    rawItem.price ??
+    0;
+  let priceRaw = Number(rawPriceCand);
+  if (!Number.isFinite(priceRaw) || priceRaw <= 0) {
+    priceRaw = typeof rawPriceCand === 'string' ? parseVndPrice(rawPriceCand) : 0;
+  }
   if (!Number.isFinite(priceRaw) || priceRaw <= 0) return null;
   const price = priceRaw > 99999 ? Math.trunc(priceRaw / 100000) : Math.trunc(priceRaw);
   if (price <= 0) return null;
 
-  const origRaw = Number(
-    asset?.display_price?.strikethrough_price ||
-      ib.price_before_discount ||
-      ib.price_max_before_discount ||
-      rawItem.price_before_discount ||
-      0
-  );
+  const origCand =
+    asset?.display_price?.strikethrough_price ??
+    ib?.item_card_display_price?.strikethrough_price ??
+    ib?.display_price?.strikethrough_price ??
+    ib.price_before_discount ??
+    ib.price_max_before_discount ??
+    card.price_before_discount ??
+    rawItem.price_before_discount ??
+    0;
+  let origRaw = Number(origCand);
+  if (!Number.isFinite(origRaw) || origRaw <= 0) {
+    origRaw = typeof origCand === 'string' ? parseVndPrice(origCand) : 0;
+  }
   let orig = origRaw > 99999 ? Math.trunc(origRaw / 100000) : Math.trunc(origRaw);
   if (!Number.isFinite(orig) || orig <= price) orig = null;
 
@@ -293,6 +314,8 @@ export function parseShopeeItem(rawItem, kw) {
   let sold = 0;
   if (asset?.sold_count?.text) {
     sold = parseSoldCount(asset.sold_count.text);
+  } else if (ib?.item_card_display_sold_count?.historical_sold || ib?.item_card_display_sold_count?.sold) {
+    sold = parseSoldCount(ib.item_card_display_sold_count.historical_sold || ib.item_card_display_sold_count.sold);
   } else if (ib.historical_sold || ib.sold) {
     sold = parseSoldCount(ib.historical_sold || ib.sold);
   }
@@ -307,8 +330,28 @@ export function parseShopeeItem(rawItem, kw) {
     ? extractImageRef(rawPrimaryImg)
     : [rawPrimaryImg, rawPrimaryImg ? `https://down-vn.img.susercontent.com/file/${rawPrimaryImg}` : ''];
 
-  const itemId = String(rawItem.itemid || rawItem.item_id || ib.itemid || ib.item_id || '').trim();
-  const shopId = String(rawItem.shopid || rawItem.shop_id || ib.shopid || ib.shop_id || '').trim();
+  const itemId = String(
+    rawItem.itemid ||
+      rawItem.item_id ||
+      card.itemid ||
+      card.item_id ||
+      ib.itemid ||
+      ib.item_id ||
+      asset.itemid ||
+      asset.item_id ||
+      ''
+  ).trim();
+  const shopId = String(
+    rawItem.shopid ||
+      rawItem.shop_id ||
+      card.shopid ||
+      card.shop_id ||
+      ib.shopid ||
+      ib.shop_id ||
+      asset.shopid ||
+      asset.shop_id ||
+      ''
+  ).trim();
   if (!itemId || !/^\d+$/.test(itemId)) return null;
 
   const sourceUrl = shopId
@@ -400,7 +443,7 @@ function extractMetaPropertyContent(html, propName) {
   return '';
 }
 
-export function extractVisibleBodySnippet(html, maxChars = 220) {
+export function extractVisibleBodySnippet(html, maxChars = 220, { skipHeaderNav = true } = {}) {
   if (!html || typeof html !== 'string') return '';
   const low = html.toLowerCase();
   const bodyOpen = low.indexOf('<body');
@@ -411,6 +454,11 @@ export function extractVisibleBodySnippet(html, maxChars = 220) {
     if (bodyStart !== -1) {
       region = bodyEnd > bodyStart ? html.slice(bodyStart + 1, bodyEnd) : html.slice(bodyStart + 1);
     }
+  }
+  if (skipHeaderNav) {
+    const mainCleaned = stripTagBlocks(region, ['header', 'nav', 'footer', 'script', 'style', 'noscript', 'svg']);
+    const mainText = sanitizeErrorText(stripTags(mainCleaned));
+    if (mainText) return mainText.slice(0, maxChars);
   }
   const cleaned = stripTagBlocks(region, ['script', 'style', 'noscript', 'svg']);
   const text = stripTags(cleaned);
@@ -438,7 +486,7 @@ export function isLoginRedirectHtml(html, finalUrl = '') {
       return true;
     }
   }
-  const visibleLow = extractVisibleBodySnippet(html, 4000).toLowerCase();
+  const visibleLow = extractVisibleBodySnippet(html, 4000, { skipHeaderNav: false }).toLowerCase();
   if (visibleLow.includes('đã bán') || /data-sqe=["']item["']/i.test(html)) {
     return false;
   }
@@ -461,7 +509,7 @@ export function isAntibotChallengeHtml(html, finalUrl = '') {
   if (lowUrl.includes('/verify/') || lowUrl.includes('shopee.vn/verify')) {
     return true;
   }
-  const visibleLow = extractVisibleBodySnippet(html, 4000).toLowerCase();
+  const visibleLow = extractVisibleBodySnippet(html, 4000, { skipHeaderNav: false }).toLowerCase();
   if (visibleLow.includes('đã bán') || /data-sqe=["']item["']/i.test(html)) {
     return false;
   }
@@ -561,7 +609,7 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems) {
 
   const queue = [{ node: root, depth: 0 }];
   const visited = new Set();
-  const MAX_DEPTH = 10;
+  const MAX_DEPTH = 12;
 
   while (queue.length > 0 && outItems.length < maxItems) {
     const { node, depth } = queue.shift();
@@ -584,7 +632,7 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems) {
         }
       }
     } else {
-      if (node.itemid || node.item_id) {
+      if (node.itemid || node.item_id || node.item_card || node.item_data) {
         const parsedObj = parseShopeeItem(node, kw);
         if (parsedObj && !seenIds.has(parsedObj.shopee_id)) {
           seenIds.add(parsedObj.shopee_id);
@@ -602,45 +650,39 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems) {
   }
 }
 
+function findMatchingDelimiterEnd(str, startIdx, openCh, closeCh, maxScan = 2_000_000) {
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  const scanLimit = Math.min(str.length, startIdx + maxScan);
+  for (let i = startIdx; i < scanLimit; i++) {
+    const ch = str[i];
+    if (inString) {
+      if (escaped) escaped = false;
+      else if (ch === '\\') escaped = true;
+      else if (ch === '"') inString = false;
+    } else if (ch === '"') {
+      inString = true;
+    } else if (ch === openCh) {
+      depth++;
+    } else if (ch === closeCh) {
+      depth--;
+      if (depth === 0) return i;
+    }
+  }
+  return -1;
+}
+
 export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
   const items = [];
   const seenIds = new Set();
   if (!html || typeof html !== 'string') return items;
 
-  const markerRe = /"(?:items|item|item_list|units)"\s*:\s*\[/g;
+  const markerRe = /"(?:items|item|item_list|units|sections|feeds|item_cards|cards)"\s*:\s*\[/g;
   let m;
   while ((m = markerRe.exec(html)) !== null && items.length < maxItems) {
     const startIdx = m.index + m[0].length - 1;
-    // Bounded bracket matcher respecting JSON strings
-    let depth = 0;
-    let inString = false;
-    let escaped = false;
-    let endIdx = -1;
-    const scanLimit = Math.min(html.length, startIdx + 2_000_000);
-    for (let i = startIdx; i < scanLimit; i++) {
-      const ch = html[i];
-      if (inString) {
-        if (escaped) {
-          escaped = false;
-        } else if (ch === '\\') {
-          escaped = true;
-        } else if (ch === '"') {
-          inString = false;
-        }
-      } else {
-        if (ch === '"') {
-          inString = true;
-        } else if (ch === '[') {
-          depth++;
-        } else if (ch === ']') {
-          depth--;
-          if (depth === 0) {
-            endIdx = i;
-            break;
-          }
-        }
-      }
-    }
+    const endIdx = findMatchingDelimiterEnd(html, startIdx, '[', ']');
     if (endIdx === -1) continue;
     try {
       const parsedArr = JSON.parse(html.slice(startIdx, endIdx + 1));
@@ -652,7 +694,180 @@ export function extractEmbeddedJsonItems(html, kw, maxItems = 40) {
     }
   }
 
+  // Also check hydrated PDP objects ("data":{"item":{"item_id":...}} or "item":{"item_id":...})
+  if (items.length === 0) {
+    const objMarkerRe = /"(?:data|pdp_info|item_info|item)"\s*:\s*\{/g;
+    let om;
+    while ((om = objMarkerRe.exec(html)) !== null && items.length < maxItems) {
+      const startIdx = om.index + om[0].length - 1;
+      const preview = html.slice(startIdx, startIdx + 350);
+      if (!/"(?:itemid|item_id|product_price)"\s*:/.test(preview)) continue;
+      const endIdx = findMatchingDelimiterEnd(html, startIdx, '{', '}', 600_000);
+      if (endIdx === -1) continue;
+      try {
+        const parsedObj = JSON.parse(html.slice(startIdx, endIdx + 1));
+        if (parsedObj && typeof parsedObj === 'object') {
+          collectShopeeItemsFromObject(parsedObj, kw, seenIds, items, maxItems);
+        }
+      } catch {
+        // Ignore partial script fragment
+      }
+    }
+  }
+
   return items.slice(0, maxItems);
+}
+
+function safeDecodeHref(href) {
+  const raw = String(href || '').trim();
+  if (!raw || !raw.includes('%')) return raw;
+  try {
+    return decodeURIComponent(raw);
+  } catch {
+    return raw;
+  }
+}
+
+export function extractEvalPayloadFromHtml(html) {
+  if (!html || typeof html !== 'string') return null;
+  const idx = html.indexOf('id="__sr_eval"');
+  const altIdx = idx === -1 ? html.indexOf("id='__sr_eval'") : idx;
+  if (altIdx === -1) return null;
+  const openEnd = html.indexOf('>', altIdx);
+  const closeStart = openEnd !== -1 ? html.indexOf('</script>', openEnd + 1) : -1;
+  if (openEnd === -1 || closeStart === -1) return null;
+  try {
+    return JSON.parse(decodeHtmlEntities(html.slice(openEnd + 1, closeStart).trim()));
+  } catch {
+    return null;
+  }
+}
+
+function parseEvalPayloadToItems(evalData, kw, maxItems = 40) {
+  if (!evalData || typeof evalData !== 'object') return [];
+  const results = [];
+  const seenIds = new Set();
+
+  if (Array.isArray(evalData.items)) {
+    for (const card of evalData.items) {
+      if (results.length >= maxItems) break;
+      if (!card || typeof card !== 'object') continue;
+      let shopId = String(card.shopId || '').trim();
+      let itemId = String(card.itemId || '').trim();
+      const hrefStr = safeDecodeHref(decodeHtmlEntities(card.href || ''));
+      if ((!itemId || !/^\d+$/.test(itemId)) && hrefStr) {
+        const hm = hrefStr.match(SHOPEE_HREF_RE);
+        if (hm) {
+          shopId = shopId || hm[1] || hm[3] || '';
+          itemId = hm[2] || hm[4] || '';
+        }
+      }
+      if (!itemId || !/^\d+$/.test(itemId) || seenIds.has(itemId)) continue;
+
+      const name = String(card.name || '').replace(/\s+/g, ' ').trim();
+      const txt = String(card.txt || '');
+      const inferredName =
+        name.length >= 4
+          ? name
+          : txt
+              .split(/(?:₫|\b\d{1,3}\.\d{3}\b|Đã bán)/i)[0]
+              .replace(/\s+/g, ' ')
+              .trim();
+      if (!inferredName || inferredName.length < 4) continue;
+
+      const priceInputHtml =
+        (card.del ? `<del>${String(card.del)}</del> ` : '') +
+        (card.priceTxt ? `<span data-sqe="price">${String(card.priceTxt)}</span> ` : '') +
+        txt;
+      const { price, orig } = extractCardPrices(priceInputHtml);
+      if (!price || price < 1000) continue;
+
+      const soldM =
+        txt.match(/đã bán\s*([\d.,]+\s*k?\+?)/i) || txt.match(/([\d.,]+\s*k?\+?)\s*đã bán/i);
+      const sold = soldM ? parseSoldCount(soldM[1]) : 0;
+      const [imageId, cdnUrl] = extractImageRef(card.img || '');
+
+      seenIds.add(itemId);
+      results.push({
+        shopee_id: itemId,
+        shop_id: shopId,
+        name: inferredName.slice(0, 150),
+        price,
+        orig,
+        rating: 4.9,
+        reviews: sold > 0 ? Math.max(50, Math.trunc(sold * 0.12)) : 20,
+        sold,
+        stock: 0,
+        stock_needs_review: true,
+        images: cdnUrl ? [cdnUrl] : [],
+        image_id: imageId,
+        image_url: cdnUrl,
+        all_image_ids: imageId ? [imageId] : [],
+        category: guessCategory(kw, inferredName),
+        keyword: kw,
+        source: 'shopee',
+        source_url: shopId
+          ? `https://shopee.vn/product/${shopId}/${itemId}`
+          : hrefStr.startsWith('/')
+            ? `https://shopee.vn${hrefStr}`
+            : `https://shopee.vn/search?keyword=${encodeURIComponent(kw)}`,
+        crawled_at: new Date().toISOString(),
+        status: 'draft',
+        is_verified: true
+      });
+    }
+  }
+
+  if (results.length === 0 && evalData.pdp && evalData.pdp.itemId) {
+    const pdp = evalData.pdp;
+    let rawTitle = String(pdp.h1 || pdp.ogTitle || evalData.title || '')
+      .replace(/\s*\|\s*Shopee.*$/i, '')
+      .replace(/^Mua ngay\s+/i, '')
+      .trim();
+    if (rawTitle.length >= 5 && !/^shopee việt nam$/i.test(rawTitle) && !/đăng nhập/i.test(rawTitle)) {
+      const priceFromMeta = pdp.metaPrice ? parseVndPrice(pdp.metaPrice) : 0;
+      const price = priceFromMeta >= 1000 ? priceFromMeta : extractCardPrices(evalData.mainText || '').price;
+      if (price >= 1000) {
+        const [imageId, cdnUrl] = extractImageRef(pdp.ogImg || '');
+        results.push({
+          shopee_id: String(pdp.itemId),
+          shop_id: String(pdp.shopId || ''),
+          name: rawTitle.slice(0, 150),
+          price,
+          orig: null,
+          rating: 4.9,
+          reviews: 20,
+          sold: 0,
+          stock: 0,
+          stock_needs_review: true,
+          images: cdnUrl ? [cdnUrl] : [],
+          image_id: imageId,
+          image_url: cdnUrl,
+          all_image_ids: imageId ? [imageId] : [],
+          category: guessCategory(kw, rawTitle),
+          keyword: kw,
+          source: 'shopee',
+          source_url: pdp.shopId ? `https://shopee.vn/product/${pdp.shopId}/${pdp.itemId}` : kw,
+          crawled_at: new Date().toISOString(),
+          status: 'draft',
+          is_verified: true
+        });
+      }
+    }
+  }
+
+  return results;
+}
+
+function extractFirstSqeCardSample(html) {
+  const s = String(html || '');
+  const sqeMatch = s.match(/data-sqe=["']item["']/i);
+  if (!sqeMatch) return '';
+  const idx = sqeMatch.index;
+  const openStart = Math.max(0, s.lastIndexOf('<', idx));
+  const rawSlice = s.slice(openStart, openStart + 2800);
+  const compact = sanitizeErrorText(rawSlice.replace(/<script[\s\S]*?<\/script>/gi, '').replace(/\s+/g, ' ').trim());
+  return compact.slice(0, 360);
 }
 
 function findCardFragmentAroundAnchor(html, anchorStart, anchorEnd) {
@@ -917,24 +1132,37 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
   }
 
   const directProduct = parseShopeeProductUrl(kw);
+  const evalData = extractEvalPayloadFromHtml(html);
+  const resolvedFinalUrl = finalUrl || String(evalData?.url || '');
   const domStats = inspectHtmlDomStats(html);
+  if (evalData && typeof evalData.sqeCount === 'number' && evalData.sqeCount > domStats.sqeItems) {
+    domStats.sqeItems = evalData.sqeCount;
+  }
+
+  if (evalData) {
+    const evalItems = parseEvalPayloadToItems(evalData, kw, maxItems);
+    if (evalItems.length > 0) {
+      return { items: evalItems, blocked: false, loginRequired: false, domStats, evalData, itemSources: ['DOM_EVAL'] };
+    }
+  }
+
   const embedded = extractEmbeddedJsonItems(html, kw, maxItems);
   if (embedded.length > 0) {
-    return { items: embedded, blocked: false, loginRequired: false, domStats, itemSources: ['EMBEDDED_JSON'] };
+    return { items: embedded, blocked: false, loginRequired: false, domStats, evalData, itemSources: ['EMBEDDED_JSON'] };
   }
 
   const jsonLdItems = extractJsonLdProducts(html, kw, directProduct);
   if (jsonLdItems.length > 0) {
-    return { items: jsonLdItems.slice(0, maxItems), blocked: false, loginRequired: false, domStats, itemSources: ['JSON_LD'] };
+    return { items: jsonLdItems.slice(0, maxItems), blocked: false, loginRequired: false, domStats, evalData, itemSources: ['JSON_LD'] };
   }
 
   if (directProduct) {
-    const blockedPdp = isAntibotChallengeHtml(html, finalUrl);
-    const loginPdp = isLoginRedirectHtml(html, finalUrl);
+    const blockedPdp = isAntibotChallengeHtml(html, resolvedFinalUrl);
+    const loginPdp = isLoginRedirectHtml(html, resolvedFinalUrl);
     if (!blockedPdp && !loginPdp) {
       const pdpFallback = extractPdpMetaFallback(html, directProduct, kw);
       if (pdpFallback.length > 0) {
-        return { items: pdpFallback, blocked: false, loginRequired: false, domStats, itemSources: ['PDP_META'] };
+        return { items: pdpFallback, blocked: false, loginRequired: false, domStats, evalData, itemSources: ['PDP_META'] };
       }
     }
   }
@@ -950,7 +1178,7 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
   while ((match = anchorOpenRe.exec(mainHtml)) !== null && parsed.length < maxItems) {
     const hrefAttrMatch = match[1].match(/\bhref=(["'])([^"']+)\1/i);
     if (!hrefAttrMatch) continue;
-    const href = decodeHtmlEntities(hrefAttrMatch[2]);
+    const href = safeDecodeHref(decodeHtmlEntities(hrefAttrMatch[2]));
     const hrefM = href.match(SHOPEE_HREF_RE);
     if (!hrefM) continue;
 
@@ -1015,12 +1243,20 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
   }
 
   if (parsed.length === 0) {
-    const blocked = isAntibotChallengeHtml(html, finalUrl);
-    const loginRequired = isLoginRedirectHtml(html, finalUrl);
-    return { items: [], blocked, loginRequired, domStats, itemSources: [] };
+    const blocked = isAntibotChallengeHtml(html, resolvedFinalUrl);
+    const loginRequired = isLoginRedirectHtml(html, resolvedFinalUrl);
+    return {
+      items: [],
+      blocked,
+      loginRequired,
+      domStats,
+      evalData,
+      sampleCard: evalData?.sampleCard || (domStats.sqeItems > 0 ? extractFirstSqeCardSample(mainHtml || html) : ''),
+      itemSources: []
+    };
   }
 
-  return { items: parsed, blocked: false, loginRequired: false, domStats, itemSources: ['DOM'] };
+  return { items: parsed, blocked: false, loginRequired: false, domStats, evalData, itemSources: ['DOM'] };
 }
 
 export function extractHtmlTitle(html) {
@@ -1030,9 +1266,11 @@ export function extractHtmlTitle(html) {
 
 const EXCLUDED_NON_CATALOG_XHR_RE =
   /(\/subcart|\/cart\/|\/cart\b|checkout|\/account\/|\/user\/|\/buyer\/|\/login|notification|\/chat\/|voucher|wallet|\/coin|\/order|event_batch|\/metrics|stm-sg-live|\/vi\.col\d+|\/tracking|\/log\b|recently_viewed|get_payment_info|mini_cart)/i;
+const NOISY_LOG_XHR_RE =
+  /(\/account\/subaccount|get_payment_info|web_experiments|track_config|experiment\/config|event_batch|\/metrics|\/webchat\/|app-auth|\/subcart|\/cart\/mini)/i;
 const PRIMARY_PDP_XHR_RE = /(\/pdp\/get_pc|\/pdp\/get_rw|\/item\/get|\/pdp\/)/i;
 const PRIMARY_SEARCH_XHR_RE =
-  /(search_items|global_search|search_page|recommend_search|\/search\/|search\?|get_category_tree|\/pdp\/get_pc|\/pdp\/get_rw|\/item\/get)/i;
+  /(search_items|global_search|search_page|recommend_search|recommend_v2|\/search\/|search\?|get_category_tree|\/pdp\/get_pc|\/pdp\/get_rw|\/item\/get|\/_t_|\/json\b)/i;
 
 export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
   if (!payload || typeof payload !== 'object') {
@@ -1044,6 +1282,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       itemSources: [],
       finalUrl: '',
       bodySnippet: '',
+      sampleCard: '',
       domStats: { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 }
     };
   }
@@ -1062,9 +1301,10 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
   let xhrBlocked = false;
   let xhrLoginRequired = false;
   const catalogXhrSummary = [];
-  const otherXhrSummary = [];
+  const interestingXhrSummary = [];
   const fallbackXhrSummary = [];
-  const finalUrl = String(payload.url || payload.final_url || '');
+  const seenSummaryLabels = new Set();
+  let finalUrl = String(payload.url || payload.final_url || '');
 
   const xhrEntries = Array.isArray(payload.xhr) ? payload.xhr : [];
   for (const entry of xhrEntries) {
@@ -1105,12 +1345,15 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
             ? ` ${method} [obj]`
             : ` ${method} ${bodyLen}B`;
       const summaryLabel = `${redactUrlForLogs(rawUrl)}(${status ?? '?'}${errTag}${keysTag})`;
-      if (PRIMARY_SEARCH_XHR_RE.test(lowUrl) && catalogXhrSummary.length < 8) {
-        catalogXhrSummary.push(summaryLabel);
-      } else if ((lowUrl.includes('shopee') || lowUrl.includes('/api/')) && otherXhrSummary.length < 8) {
-        otherXhrSummary.push(summaryLabel);
-      } else if (fallbackXhrSummary.length < 6) {
-        fallbackXhrSummary.push(summaryLabel);
+      if (!seenSummaryLabels.has(summaryLabel)) {
+        seenSummaryLabels.add(summaryLabel);
+        if (PRIMARY_SEARCH_XHR_RE.test(lowUrl) && catalogXhrSummary.length < 12) {
+          catalogXhrSummary.push(summaryLabel);
+        } else if (!NOISY_LOG_XHR_RE.test(lowUrl) && interestingXhrSummary.length < 10) {
+          interestingXhrSummary.push(summaryLabel);
+        } else if (fallbackXhrSummary.length < 6) {
+          fallbackXhrSummary.push(summaryLabel);
+        }
       }
     }
 
@@ -1153,11 +1396,12 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
     }
   }
 
-  const xhrSummary = [...catalogXhrSummary, ...otherXhrSummary];
+  const xhrSummary = [...catalogXhrSummary, ...interestingXhrSummary];
   if (xhrSummary.length === 0 && fallbackXhrSummary.length > 0) {
     xhrSummary.push(...fallbackXhrSummary);
   }
 
+  const rawHtml = String(payload.html || '');
   if (directProduct) {
     const exactPool = [...pdpXhrItems, ...primarySearchItems, ...secondaryXhrItems].filter(
       (it) => scoreProductMatch(it, kw) > 0
@@ -1172,7 +1416,8 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
         itemSources: mergedSrc,
         finalUrl,
         bodySnippet: '',
-        domStats: inspectHtmlDomStats(String(payload.html || ''))
+        sampleCard: '',
+        domStats: inspectHtmlDomStats(rawHtml)
       };
     }
   }
@@ -1187,12 +1432,15 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       itemSources: [...new Set([...pdpSources, ...primarySources])],
       finalUrl,
       bodySnippet: '',
-      domStats: inspectHtmlDomStats(String(payload.html || ''))
+      sampleCard: '',
+      domStats: inspectHtmlDomStats(rawHtml)
     };
   }
 
-  const rawHtml = String(payload.html || '');
   const htmlRes = parseShopeeHtml(rawHtml, kw, internalCap, finalUrl);
+  if (!finalUrl && htmlRes.evalData?.url) {
+    finalUrl = String(htmlRes.evalData.url);
+  }
   if (htmlRes.items.length > 0) {
     return {
       items: htmlRes.items,
@@ -1202,9 +1450,13 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       itemSources: htmlRes.itemSources || ['DOM'],
       finalUrl,
       bodySnippet: '',
+      sampleCard: '',
       domStats: htmlRes.domStats
     };
   }
+
+  const bodyDiagText =
+    sanitizeErrorText(String(htmlRes.evalData?.mainText || '')) || extractVisibleBodySnippet(rawHtml, 260);
 
   if (secondaryXhrItems.length > 0) {
     return {
@@ -1214,7 +1466,8 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       xhrSummary,
       itemSources: secondarySources,
       finalUrl,
-      bodySnippet: extractVisibleBodySnippet(rawHtml, 200),
+      bodySnippet: bodyDiagText.slice(0, 260),
+      sampleCard: htmlRes.sampleCard || '',
       domStats: htmlRes.domStats
     };
   }
@@ -1226,7 +1479,8 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
     xhrSummary,
     itemSources: [],
     finalUrl,
-    bodySnippet: extractVisibleBodySnippet(rawHtml, 200),
+    bodySnippet: bodyDiagText.slice(0, 260),
+    sampleCard: htmlRes.sampleCard || '',
     domStats: htmlRes.domStats
   };
 }
@@ -1438,22 +1692,54 @@ function handleZenrowsFatalStatus(status, jsonBody, rawText = '', { allowTarget4
   return { target403: false };
 }
 
-function buildShopeeDirectApiUrl(targetInfo, kw, maxItems = 20) {
-  const apiCap = Math.min(60, Math.max(20, Number(maxItems) || 20));
-  if (targetInfo.kind === 'product' && targetInfo.shopId && targetInfo.itemId) {
-    return `https://shopee.vn/api/v4/pdp/get_pc?item_id=${encodeURIComponent(targetInfo.itemId)}&shop_id=${encodeURIComponent(targetInfo.shopId)}`;
-  }
-  if (targetInfo.kind === 'category' && targetInfo.categoryId) {
-    const leafCatId = String(targetInfo.categoryId).split('.').filter(Boolean).pop();
-    if (leafCatId) {
-      return `https://shopee.vn/api/v4/search/search_items?by=pop&limit=${apiCap}&match_id=${encodeURIComponent(leafCatId)}&newest=0&order=desc&page_type=search&scenario=PAGE_OTHERS&version=2`;
-    }
-  }
-  const searchTerm = targetInfo.kind === 'search' ? targetInfo.keywordText : kw;
-  if (searchTerm && !/^https?:\/\//i.test(searchTerm)) {
-    return `https://shopee.vn/api/v4/search/search_items?by=relevancy&keyword=${encodeURIComponent(searchTerm)}&limit=${apiCap}&newest=0&order=desc&page_type=search&scenario=PAGE_GLOBAL_SEARCH&version=2`;
-  }
-  return '';
+function buildZenrowsDomEvalScript() {
+  return (
+    "(()=>{try{const D=document,Q=(e,s)=>e.querySelector(s),A=(e,k)=>e.getAttribute(k)||'',G=v=>/^\\d{4,20}$/.test(v||'')?''+v:''," +
+    "R=/(?:-i\\.(\\d+)\\.(\\d+)|\\/product\\/(\\d+)\\/(\\d+))/i,K=['item','item_basic','item_card','item_data','data','product'];" +
+    "const S=(o,d,s)=>{if(!o||typeof o!=='object'||d>3||s.has(o))return;s.add(o);" +
+    "const i=G(o.itemid??o.item_id??o.itemId??o.id),p=G(o.shopid??o.shop_id??o.shopId),h=o.href||o.to||o.url||'';" +
+    "if(i&&(p||R.test(h)))return{i,p,h,n:o.name||o.title||''};if(R.test(h))return{i:'',p:'',h,n:o.name||o.title||''};" +
+    "for(const k of K){const r=S(o[k],d+1,s);if(r)return r;}" +
+    "for(const k of Object.keys(o).slice(0,12)){if(!/^(_owner|return|child|sibling|stateNode)$/.test(k)){const r=S(o[k],d+1,s);if(r)return r;}}};" +
+    "const F=e=>{for(const n of[e,e.closest('a'),Q(e,'a'),e.firstElementChild,e.parentElement].filter(Boolean)){const ks=Object.keys(n);" +
+    "for(const k of ks)if(k.startsWith('__reactProps')){const r=S(n[k],0,new Set());if(r)return r;}" +
+    "const fk=ks.find(k=>k.startsWith('__reactFiber')||k.startsWith('__reactInternal'));" +
+    "if(fk)for(let c=n[fk],t=0;c&&t<10;t++,c=c.return){const r=S(c.memoizedProps,0,new Set());if(r)return r;}}};" +
+    "const P=e=>{const a=e.matches('a[href]')?e:Q(e,'a[href]')||e.closest('a[href]'),h=a?A(a,'href')||a.href:'',m=h.match(R);" +
+    "if(m)return{i:m[2]||m[4]||'',p:m[1]||m[3]||'',h};" +
+    "const u=Q(e,'[data-itemid],[data-item-id],[href*=\"-i.\"],[href*=\"/product/\"]'),x=u||e;" +
+    "const sh=A(x,'href'),sm=sh.match(R);if(sm)return{i:sm[2]||sm[4]||'',p:sm[1]||sm[3]||'',h:sh};" +
+    "const di=G(A(x,'data-itemid')||A(x,'data-item-id'));if(di)return{i:di,p:G(A(x,'data-shopid')||A(x,'data-shop-id')),h};" +
+    "const f=F(e);return f?{i:f.i||'',p:f.p||'',h:f.h||h,fn:f.n||''}:{i:'',p:'',h};};" +
+    "let cs=[...D.querySelectorAll('[data-sqe=\"item\"],.shopee-search-item-result__item')];" +
+    "if(!cs.length){const se=new Set();D.querySelectorAll('a[href*=\"-i.\"],a[href*=\"/product/\"]').forEach(a=>{const b=a.closest('li')||a;if(!se.has(b)){se.add(b);cs.push(b);}});}" +
+    "const its=[];let sc='';cs.slice(0,45).forEach((e,idx)=>{const d=P(e),ims=[...e.querySelectorAll('img')]," +
+    "im=ims.find(x=>/susercontent\\.com\\/file\\/|cf\\.shopee/i.test(x.currentSrc||x.src||A(x,'data-src')))||ims.find(x=>/^https?:/i.test(x.currentSrc||x.src||''))," +
+    "ne=Q(e,'[data-sqe=\"name\"],[class*=\"line-clamp\"]'),de=Q(e,'del,[class*=\"line-through\"]'),pe=Q(e,'[data-sqe=\"price\"]')," +
+    "txt=(e.innerText||'').replace(/\\s+/g,' ').trim().slice(0,320);" +
+    "if(!idx){const fk=Object.keys(e).filter(k=>k.startsWith('__react')),pk=fk.find(k=>k.startsWith('__reactProps'));" +
+    "sc=('p=['+(pk&&e[pk]?Object.keys(e[pk]).slice(0,6).join(','):fk.join(','))+'] id='+(d.i||'-')+' '+e.outerHTML.replace(/\\s+/g,' ').slice(0,220)).slice(0,340);}" +
+    "its.push({href:d.h,itemId:d.i,shopId:d.p,name:(d.fn||ne?.innerText||im?.alt||'').replace(/\\s+/g,' ').trim(),txt,del:de?de.innerText.trim():'',priceTxt:pe?pe.innerText.trim():'',img:im?(im.currentSrc||im.src||A(im,'data-src')):''});});" +
+    "const pm=location.pathname.match(R),M=p=>Q(D,'meta[property=\"'+p+'\"]')?.content||'',mn=Q(D,'main,[role=\"main\"],#main');" +
+    "D.getElementById('__sr_eval')?.remove();const s=D.createElement('script');s.id='__sr_eval';s.type='application/json';" +
+    "s.textContent=JSON.stringify({url:location.href,title:D.title||'',sqeCount:cs.length,sampleCard:sc,items:its," +
+    "pdp:pm?{shopId:pm[1]||pm[3]||'',itemId:pm[2]||pm[4]||'',h1:Q(D,'main h1,h1')?.innerText?.trim()||'',metaPrice:M('product:price:amount'),ogImg:M('og:image'),ogTitle:M('og:title')}:null," +
+    "mainText:(mn?mn.innerText:D.body?.innerText||'').replace(/\\s+/g,' ').trim().slice(0,450)});" +
+    "(D.body||D.documentElement).appendChild(s);}catch(e){}})()"
+  );
+}
+
+function buildZenrowsSearchSubmitScript(searchKw) {
+  const kwJson = JSON.stringify(String(searchKw || ''));
+  return (
+    `(()=>{try{const D=document,kw=${kwJson},i=D.querySelector('input.shopee-searchbar-input__input,input[role="combobox"],header input[type="text"],input[placeholder*="Tìm"]');` +
+    `if(i){i.focus();const d=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');d?.set?d.set.call(i,kw):(i.value=kw);` +
+    `i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));` +
+    `const b=D.querySelector('button.shopee-searchbar__search-button,.shopee-searchbar button');if(b){b.click();return;}` +
+    `const f=i.closest('form');if(f){f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));if(f.requestSubmit){f.requestSubmit();return;}}` +
+    `i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter',keyCode:13,which:13,bubbles:true}));}` +
+    `else{location.href='https://shopee.vn/search?keyword='+encodeURIComponent(kw);}}catch(e){}})()`
+  );
 }
 
 export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
@@ -1466,11 +1752,14 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const targetInfo = resolveTargetForInput(kw);
   const isDirectProduct = targetInfo.kind === 'product';
+  const searchKwText = targetInfo.keywordText || kw;
   const coreCookie = cookieHeader ? extractCoreAuthCookieHeader(cookieHeader) : '';
+  const stickySessionId = String(Math.floor(100000 + Math.random() * 899999));
+  const domEvalScript = buildZenrowsDomEvalScript();
   const jsInstructionsPrimary = JSON.stringify(
     isDirectProduct
-      ? [{ wait: 4500 }, { scroll_y: 650 }, { wait: 2500 }]
-      : [{ wait: 5000 }, { scroll_y: 950 }, { wait: 3000 }, { scroll_y: 1700 }, { wait: 2500 }]
+      ? [{ wait: 4500 }, { scroll_y: 650 }, { wait: 2500 }, { evaluate: domEvalScript }]
+      : [{ wait: 5500 }, { scroll_y: 950 }, { wait: 3000 }, { scroll_y: 1700 }, { wait: 2500 }, { evaluate: domEvalScript }]
   );
   const waitSelector = isDirectProduct
     ? 'meta[property="product:price:amount"], script[type="application/ld+json"], .product-briefing, [data-sqe="price"]'
@@ -1543,7 +1832,8 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         log(
           `    [i] [${attemptLabel}] HTTP 200 · url=${parsed.finalUrl ? redactUrlForLogs(parsed.finalUrl) : '?'} · HTML=${htmlLen}B · title="${title || 'n/a'}"` +
             ` · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs}) · xhr=${xhrLen}` +
-            `${parsed.xhrSummary.length ? ` [${parsed.xhrSummary.slice(0, 10).join(', ')}]` : ''}` +
+            `${parsed.xhrSummary.length ? ` [${parsed.xhrSummary.slice(0, 18).join(', ')}]` : ''}` +
+            `${parsed.sampleCard ? ` · card="${parsed.sampleCard}"` : ''}` +
             `${parsed.bodySnippet ? ` · body="${parsed.bodySnippet}"` : ''}` +
             `${parsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL (/buyer/login)' : ''}` +
             `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
@@ -1589,6 +1879,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       const snippet = extractVisibleBodySnippet(resp.text, 160);
       log(
         `    [i] [${attemptLabel}] HTTP 200 HTML=${resp.text.length}B · title="${title || 'n/a'}"` +
+          `${htmlRes.sampleCard ? ` · card="${htmlRes.sampleCard}"` : ''}` +
           `${snippet ? ` · body="${snippet}"` : ''}` +
           `${htmlRes.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
           `${htmlRes.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
@@ -1597,42 +1888,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { ...htmlRes, items: matched, timedOut: false, code: '200', httpStatus: 200, xhrCount: 0, htmlLen: resp.text.length };
   };
 
-  // Attempt 0 (Fast Direct Internal API): js_render=false + VN residential proxy + custom_headers (2–4s)
-  const directApiUrl = buildShopeeDirectApiUrl(targetInfo, kw, maxItems);
-  if (directApiUrl) {
-    const directCookie = coreCookie || cookieHeader;
-    log(
-      `    [*] Thu ZenRows DirectAPI (js_render=false + API noi bo${directCookie ? ' + CoreCookie' : ''}) cho '${kw}'...`
-    );
-    const r0 = await callZenrowsOnce({
-      apiKey,
-      paramsObj: {
-        url: directApiUrl,
-        js_render: 'false',
-        premium_proxy: 'true',
-        proxy_country: 'vn',
-        custom_headers: 'true'
-      },
-      extraHeaders: {
-        Accept: 'application/json, text/plain, */*',
-        'Accept-Language': 'vi-VN,vi;q=0.9,en-US;q=0.8',
-        Referer: targetInfo.targetUrl,
-        'X-Shopee-Language': 'vi',
-        'X-Api-Source': 'pc',
-        'X-Requested-With': 'XMLHttpRequest',
-        ...(directCookie ? { Cookie: directCookie } : {})
-      },
-      timeoutMs: 30000,
-      fetchImpl
-    });
-    const p0 = inspectAndParse('ZenRows DirectAPI', r0, { allowTarget403: true });
-    if (p0.items.length > 0) {
-      return { items: p0.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
-    }
-    log(`    [*] DirectAPI chua lay duoc san pham — leo thang ZenRows #1 Antibot (js_render=true)...`);
-  }
-
-  // Attempt 1 (Direct Stealth Browser): antibot=true + VN residential proxy + full assets + Cookie
+  // Attempt 1 (Direct Stealth Browser): antibot=true + VN residential proxy + sticky session_id + DOM/React Fiber extractor
   const r1 = await callZenrowsOnce({
     apiKey,
     paramsObj: {
@@ -1642,6 +1898,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       proxy_country: 'vn',
       antibot: 'true',
       json_response: 'true',
+      session_id: stickySessionId,
       window_width: '1366',
       window_height: '900',
       ...(cookieHeader ? { custom_headers: 'true' } : {}),
@@ -1656,7 +1913,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { items: p1.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
   }
 
-  // Attempt 2: Smart bounded recovery (CoreCookie when full Cookie blocked/login-gated; wait_for ONLY on 422 or incomplete shell)
+  // Attempt 2: Interactive Homepage Search for blank keyword shells OR smart bounded fallback with CoreCookie
   const useModeAutoOnAttempt2 = !cookieHeader && p1.loginRequired;
   const shouldUseCoreCookieOn2 =
     Boolean(cookieHeader) &&
@@ -1672,51 +1929,96 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     !p1.timedOut &&
     !p1.loginRequired &&
     p1.httpStatus !== 400 &&
-    (p1.httpStatus === 422 || (!p1.blocked && ((p1.xhrCount || 0) === 0 || (p1.htmlLen || 0) < 50000)));
+    (p1.httpStatus === 422 || (!p1.blocked && (p1.htmlLen || 0) < 50000));
+  const shouldUseHomeSearchOn2 =
+    !useModeAutoOnAttempt2 &&
+    !p1.timedOut &&
+    !isDirectProduct &&
+    targetInfo.kind !== 'category' &&
+    !p1.loginRequired &&
+    (p1.domStats?.sqeItems || 0) === 0 &&
+    (p1.items?.length || 0) === 0;
 
-  log(
-    useModeAutoOnAttempt2
-      ? `    [*] Thu ZenRows #2 (mode=auto · phien sach) cho '${kw}'...`
-      : `    [*] Leo thang ZenRows #2 (antibot=true + block_resources=none + ${shouldUseWaitForOn2 ? 'wait_for' : 'wait=9s'}` +
-          `${shouldUseCoreCookieOn2 ? ' + CoreCookie' : attempt2Cookie ? ' + Cookie Shopee' : ''}) cho '${kw}'...`
-  );
-  const attempt2Params = useModeAutoOnAttempt2
-    ? {
-        url: targetInfo.fallbackUrl,
-        mode: 'auto',
-        proxy_country: 'vn',
-        json_response: 'true',
-        wait: '8000'
-      }
-    : {
-        url: targetInfo.fallbackUrl,
-        js_render: 'true',
-        premium_proxy: 'true',
-        proxy_country: 'vn',
-        antibot: 'true',
-        json_response: 'true',
-        block_resources: 'none',
-        window_width: '1366',
-        window_height: '900',
-        ...(shouldUseWaitForOn2 ? { wait_for: waitSelector } : { wait: '9000' }),
-        ...(attempt2Cookie ? { custom_headers: 'true' } : {})
-      };
+  let attempt2Label = 'ZenRows #2 FullWait';
+  let attempt2Params;
+  if (useModeAutoOnAttempt2) {
+    attempt2Label = 'ZenRows #2 Auto';
+    attempt2Params = {
+      url: targetInfo.fallbackUrl,
+      mode: 'auto',
+      proxy_country: 'vn',
+      json_response: 'true',
+      wait: '8000'
+    };
+    log(`    [*] Thu ZenRows #2 (mode=auto · phien sach) cho '${kw}'...`);
+  } else if (shouldUseHomeSearchOn2) {
+    attempt2Label = 'ZenRows #2 HomeSearch';
+    const homeSearchInstructions = JSON.stringify([
+      { wait: 4000 },
+      { evaluate: buildZenrowsSearchSubmitScript(searchKwText) },
+      { wait: 7000 },
+      { scroll_y: 950 },
+      { wait: 2500 },
+      { evaluate: domEvalScript }
+    ]);
+    log(
+      `    [*] Leo thang ZenRows #2 HomeSearch (trang chu -> tim '${searchKwText}'` +
+        `${shouldUseCoreCookieOn2 ? ' + CoreCookie' : attempt2Cookie ? ' + Cookie Shopee' : ''})...`
+    );
+    attempt2Params = {
+      url: 'https://shopee.vn/',
+      js_render: 'true',
+      premium_proxy: 'true',
+      proxy_country: 'vn',
+      antibot: 'true',
+      json_response: 'true',
+      session_id: stickySessionId,
+      window_width: '1366',
+      window_height: '900',
+      ...(attempt2Cookie ? { custom_headers: 'true' } : {}),
+      js_instructions: homeSearchInstructions
+    };
+  } else {
+    attempt2Label = shouldUseCoreCookieOn2 ? 'ZenRows #2 CoreWait' : 'ZenRows #2 FullWait';
+    const boundedInstructions = JSON.stringify([
+      { wait: 6500 },
+      { scroll_y: 850 },
+      { wait: 2500 },
+      { evaluate: domEvalScript }
+    ]);
+    log(
+      `    [*] Leo thang ZenRows #2 (antibot=true + block_resources=none + ${shouldUseWaitForOn2 ? 'wait_for' : 'scroll+eval'}` +
+        `${shouldUseCoreCookieOn2 ? ' + CoreCookie' : attempt2Cookie ? ' + Cookie Shopee' : ''}) cho '${kw}'...`
+    );
+    attempt2Params = {
+      url: targetInfo.fallbackUrl,
+      js_render: 'true',
+      premium_proxy: 'true',
+      proxy_country: 'vn',
+      antibot: 'true',
+      json_response: 'true',
+      session_id: stickySessionId,
+      block_resources: 'none',
+      window_width: '1366',
+      window_height: '900',
+      ...(shouldUseWaitForOn2 ? { wait_for: waitSelector } : { js_instructions: boundedInstructions }),
+      ...(attempt2Cookie ? { custom_headers: 'true' } : {})
+    };
+  }
+
   const r2 = await callZenrowsOnce({
     apiKey,
     paramsObj: attempt2Params,
-    extraHeaders: attempt2Cookie ? { Cookie: attempt2Cookie } : {},
+    extraHeaders: !useModeAutoOnAttempt2 && attempt2Cookie ? { Cookie: attempt2Cookie } : {},
     timeoutMs: 95000,
     fetchImpl
   });
-  const p2 = inspectAndParse(
-    useModeAutoOnAttempt2 ? 'ZenRows #2 Auto' : shouldUseCoreCookieOn2 ? 'ZenRows #2 CoreWait' : 'ZenRows #2 FullWait',
-    r2
-  );
+  const p2 = inspectAndParse(attempt2Label, r2);
   if (p2.items.length > 0) {
     return { items: p2.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
   }
 
-  // Attempt 3: Clean-session Adaptive mode=auto rescue (omits stale Cookie & skips json_response for light PDP HTML)
+  // Attempt 3: Clean-session Adaptive mode=auto rescue (omits stale Cookie & js_instructions; skips json_response for light PDP HTML)
   const skipAttempt3 = !cookieHeader && p2.loginRequired;
   if (!skipAttempt3 && !(p1.timedOut && p2.timedOut)) {
     const attempt3Label = isDirectProduct ? 'ZenRows #3 CleanHTML' : 'ZenRows #3 AutoClean';
@@ -1899,75 +2201,159 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
   const coreCookie = cookieHeader ? extractCoreAuthCookieHeader(cookieHeader) : '';
   const activeCookie = coreCookie || cookieHeader;
 
-  const qs = new URLSearchParams({
-    token,
-    url: targetInfo.targetUrl,
-    country: 'VN',
-    format: 'json',
-    page_wait: '4000',
-    ajax_wait: 'true',
-    scroll: 'true',
-    ...(activeCookie ? { cookies: activeCookie } : {})
-  });
+  const crawlTiers = [
+    ...(activeCookie
+      ? [
+          {
+            label: 'Crawlbase JS+Cookie',
+            isJsTier: true,
+            params: {
+              url: targetInfo.targetUrl,
+              country: 'VN',
+              format: 'json',
+              page_wait: '4000',
+              ajax_wait: 'true',
+              scroll: 'true',
+              cookies: activeCookie
+            }
+          }
+        ]
+      : []),
+    {
+      label: 'Crawlbase JS Clean',
+      isJsTier: true,
+      params: {
+        url: targetInfo.targetUrl,
+        country: 'VN',
+        format: 'json',
+        page_wait: '4000',
+        ajax_wait: 'true',
+        scroll: 'true'
+      }
+    },
+    {
+      label: 'Crawlbase TCP VN',
+      isJsTier: false,
+      params: {
+        url: targetInfo.targetUrl,
+        country: 'VN',
+        format: 'json'
+      }
+    },
+    {
+      label: 'Crawlbase TCP Clean',
+      isJsTier: false,
+      params: {
+        url: targetInfo.targetUrl,
+        format: 'json'
+      }
+    }
+  ];
 
-  const out = await fetchWithExplicitTimeout(
-    `https://api.crawlbase.com/?${qs.toString()}`,
-    { method: 'GET' },
-    95000,
-    fetchImpl
-  );
-  if (out.timedOut || !out.res) {
-    log(`    [!] Crawlbase quá thời gian chờ (95s) cho '${kw}'.`);
-    return { items: [], blocked: false, loginRequired: false, timedOut: true };
-  }
+  let anyBlocked = false;
+  let anyLoginRequired = false;
+  let anyTimeout = false;
 
-  const { res, text } = out;
-  if (res.status === 401 || res.status === 403) {
-    throw new ProviderFatalError(
-      `Crawlbase từ chối Token (HTTP ${res.status}). Hãy dùng JavaScript Token trong CRAWLBASE_TOKEN.`
+  for (let idx = 0; idx < crawlTiers.length; idx++) {
+    const tier = crawlTiers[idx];
+    const qs = new URLSearchParams({ token, ...tier.params });
+    const out = await fetchWithExplicitTimeout(
+      `https://api.crawlbase.com/?${qs.toString()}`,
+      { method: 'GET' },
+      95000,
+      fetchImpl
     );
-  }
-  if (res.status === 402) {
-    throw new ProviderFatalError('Tài khoản Crawlbase đã hết credit (HTTP 402).');
-  }
-  if (res.status === 429) {
-    throw new ProviderFatalError('Crawlbase đang giới hạn tốc độ gọi API (HTTP 429).');
-  }
 
-  if (res.status !== 200) {
-    log(`    [!] Crawlbase HTTP ${res.status} cho '${kw}'.`);
-    return { items: [], blocked: false, loginRequired: false, timedOut: false };
-  }
+    if (out.timedOut || !out.res) {
+      anyTimeout = true;
+      log(`    [!] [${tier.label}] Quá thời gian chờ (95s) cho '${kw}'.`);
+      continue;
+    }
 
-  let data = null;
-  try {
-    data = JSON.parse(text);
-  } catch {
-    const htmlParsed = parseShopeeHtml(text, kw, maxItems, targetInfo.targetUrl);
-    return { ...htmlParsed, items: htmlParsed.items.filter((it) => scoreProductMatch(it, kw) > 0), timedOut: false };
-  }
+    const { res, text } = out;
+    if (res.status === 401 || res.status === 403) {
+      throw new ProviderFatalError(
+        `Crawlbase từ chối Token (HTTP ${res.status}). Hãy dùng JavaScript Token trong CRAWLBASE_TOKEN.`
+      );
+    }
+    if (res.status === 402) {
+      throw new ProviderFatalError('Tài khoản Crawlbase đã hết credit (HTTP 402).');
+    }
+    if (res.status === 429) {
+      throw new ProviderFatalError('Crawlbase đang giới hạn tốc độ gọi API (HTTP 429).');
+    }
 
-  const origStatus = Number(data?.original_status || 200);
-  if (origStatus === 403 || origStatus === 429) {
-    log(`    [!] Shopee qua Crawlbase trả về original_status=${origStatus} cho '${kw}'.`);
-    return { items: [], blocked: true, loginRequired: false, timedOut: false };
-  }
+    if (res.status === 400) {
+      const errSnippet = sanitizeErrorText(String(text || '').replace(/\s+/g, ' ').trim().slice(0, 180));
+      log(`    [!] [${tier.label}] Crawlbase HTTP 400${errSnippet ? ` (${errSnippet})` : ''} cho '${kw}'.`);
+      continue;
+    }
 
-  const bodyHtml = String(data?.body || '');
-  const bodyParsed = parseShopeeHtml(bodyHtml, kw, maxItems, targetInfo.targetUrl);
-  const matched = bodyParsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
-  if (matched.length === 0) {
+    if (res.status !== 200) {
+      log(`    [!] [${tier.label}] Crawlbase HTTP ${res.status} cho '${kw}'.`);
+      continue;
+    }
+
+    let data = null;
+    try {
+      data = JSON.parse(text);
+    } catch {
+      const htmlParsed = parseShopeeHtml(text, kw, maxItems, targetInfo.targetUrl);
+      if (htmlParsed.blocked) anyBlocked = true;
+      if (htmlParsed.loginRequired) anyLoginRequired = true;
+      const matchedHtml = htmlParsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
+      if (matchedHtml.length > 0) {
+        return { ...htmlParsed, items: matchedHtml, timedOut: false };
+      }
+      if (tier.label === 'Crawlbase JS+Cookie') continue;
+      break;
+    }
+
+    const origStatus = Number(data?.original_status || 200);
+    if (origStatus === 403 || origStatus === 429) {
+      anyBlocked = true;
+      log(`    [!] [${tier.label}] Shopee trả original_status=${origStatus} cho '${kw}'.`);
+      if (tier.label === 'Crawlbase JS+Cookie') continue;
+      break;
+    }
+
+    const bodyHtml = String(data?.body || '');
+    const bodyParsed = parseShopeeHtml(bodyHtml, kw, maxItems, data?.url || targetInfo.targetUrl);
+    if (bodyParsed.blocked) anyBlocked = true;
+    if (bodyParsed.loginRequired) anyLoginRequired = true;
+    const matched = bodyParsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
+    if (matched.length > 0) {
+      log(`    [i] [${tier.label}] Khớp ${matched.length}/${bodyParsed.items.length} item cho '${kw}'.`);
+      return {
+        ...bodyParsed,
+        items: matched,
+        timedOut: false
+      };
+    }
+
     const title = extractHtmlTitle(bodyHtml);
     const snippet = extractVisibleBodySnippet(bodyHtml, 160);
+    const ds = bodyParsed.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
     log(
-      `    [i] [Crawlbase] origStatus=${origStatus} HTML=${bodyHtml.length}B · title="${title || 'n/a'}"` +
-        `${snippet ? ` · body="${snippet}"` : ''}`
+      `    [i] [${tier.label}] origStatus=${origStatus} HTML=${bodyHtml.length}B · title="${title || 'n/a'}"` +
+        ` · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs})` +
+        `${bodyParsed.sampleCard ? ` · card="${bodyParsed.sampleCard}"` : ''}` +
+        `${snippet ? ` · body="${snippet}"` : ''}` +
+        `${bodyParsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
+        `${bodyParsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
     );
+
+    if (tier.label === 'Crawlbase JS+Cookie') {
+      continue;
+    }
+    break;
   }
+
   return {
-    ...bodyParsed,
-    items: matched,
-    timedOut: false
+    items: [],
+    blocked: anyBlocked,
+    loginRequired: anyLoginRequired,
+    timedOut: anyTimeout
   };
 }
 
@@ -2036,6 +2422,7 @@ export async function scrapeShopeeLive({
   let anyLoginRequired = false;
   let anyTimeout = false;
   let activeUsedProvider = primaryProvider;
+  const attemptedProviders = new Set();
   const disabledProviders = new Set();
   let lastFatalMsg = '';
 
@@ -2056,6 +2443,7 @@ export async function scrapeShopeeLive({
       const [provName, provKey] = configuredProviders[pIdx];
       if (disabledProviders.has(provName)) continue;
 
+      attemptedProviders.add(provName.toUpperCase());
       onProgress(`[*] [${provName.toUpperCase()}] Đang cào Shopee cho ${label}...\n`);
       let res = null;
       try {
@@ -2205,7 +2593,11 @@ export async function scrapeShopeeLive({
     perKeywordCounts[kwKey] = (perKeywordCounts[kwKey] || 0) + 1;
   }
 
-  const provLabel = activeUsedProvider.toUpperCase();
+  const attemptedList = [...attemptedProviders];
+  const provLabel =
+    selectedProducts.length > 0 || attemptedList.length <= 1
+      ? activeUsedProvider.toUpperCase()
+      : attemptedList.join(' / ');
   let status = 'empty';
   let message = `Không tìm thấy sản phẩm khớp với từ khóa đã yêu cầu qua ${provLabel}.`;
 
