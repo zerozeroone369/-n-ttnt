@@ -253,10 +253,17 @@ function stripTags(html) {
     .trim();
 }
 
-function pickNumericPriceCandidate(val) {
-  if (val === null || val === undefined) return 0;
-  if (typeof val === 'number') return Number.isFinite(val) && val > 0 ? val : 0;
-  if (typeof val === 'string') return parseVndPrice(val);
+function normalizeShopeeNumericVnd(rawVal, isAlreadyVnd = false) {
+  const n = Number(rawVal);
+  if (!Number.isFinite(n) || n <= 0) return 0;
+  const vnd = isAlreadyVnd ? Math.trunc(n) : Math.trunc(n / 100000);
+  return vnd >= 1000 && vnd <= 500_000_000 ? vnd : 0;
+}
+
+function pickPriceCandidateInfo(val) {
+  if (val === null || val === undefined) return { num: 0, isNumeric: false };
+  if (typeof val === 'number') return { num: Number.isFinite(val) && val > 0 ? val : 0, isNumeric: true };
+  if (typeof val === 'string') return { num: parseVndPrice(val), isNumeric: false };
   if (typeof val === 'object') {
     const keys = [
       'single_value',
@@ -278,12 +285,21 @@ function pickNumericPriceCandidate(val) {
     ];
     for (const k of keys) {
       const c = val[k];
-      if (typeof c === 'number' && Number.isFinite(c) && c > 0) return c;
+      if (typeof c === 'number' && Number.isFinite(c) && c > 0) return { num: c, isNumeric: true };
       if (typeof c === 'string') {
         const parsed = parseVndPrice(c);
-        if (parsed > 0) return parsed;
+        if (parsed > 0) return { num: parsed, isNumeric: false };
       }
     }
+  }
+  return { num: 0, isNumeric: false };
+}
+
+function pickFirstValidPriceVnd(candidates) {
+  for (const cand of candidates) {
+    const info = pickPriceCandidateInfo(cand);
+    const vnd = normalizeShopeeNumericVnd(info.num, !info.isNumeric);
+    if (vnd >= 1000) return vnd;
   }
   return 0;
 }
@@ -326,54 +342,60 @@ export function parseShopeeItem(rawItem, kw) {
   const name = String(rawName).trim();
   if (!name || name.length < 3) return null;
 
-  const firstIbModel = Array.isArray(ib.models) ? ib.models[0] : Array.isArray(rawItem.models) ? rawItem.models[0] : null;
-  const rawPriceCand =
-    pickNumericPriceCandidate(asset?.display_price?.price) ||
-    pickNumericPriceCandidate(asset?.display_price) ||
-    pickNumericPriceCandidate(ib?.item_card_display_price?.price) ||
-    pickNumericPriceCandidate(card?.item_card_display_price?.price) ||
-    pickNumericPriceCandidate(rawItem?.item_card_display_price?.price) ||
-    pickNumericPriceCandidate(ib?.display_price?.price) ||
-    pickNumericPriceCandidate(ib?.price_info) ||
-    pickNumericPriceCandidate(rawItem?.price_info) ||
-    pickNumericPriceCandidate(ib.price) ||
-    pickNumericPriceCandidate(ib.price_min) ||
-    pickNumericPriceCandidate(ib.priceMin) ||
-    pickNumericPriceCandidate(ib.min_price) ||
-    pickNumericPriceCandidate(ib.minPrice) ||
-    pickNumericPriceCandidate(ib.current_price) ||
-    pickNumericPriceCandidate(ib.currentPrice) ||
-    pickNumericPriceCandidate(card.price) ||
-    pickNumericPriceCandidate(card.price_min) ||
-    pickNumericPriceCandidate(card.priceMin) ||
-    pickNumericPriceCandidate(rawItem.price) ||
-    pickNumericPriceCandidate(rawItem.price_min) ||
-    pickNumericPriceCandidate(rawItem.priceMin) ||
-    pickNumericPriceCandidate(firstIbModel?.price) ||
-    0;
-  let priceRaw = Number(rawPriceCand);
-  if (!Number.isFinite(priceRaw) || priceRaw <= 0) return null;
-  const price = priceRaw >= 100_000_000 ? Math.trunc(priceRaw / 100000) : Math.trunc(priceRaw);
-  if (price <= 0) return null;
+  const modelsArr = Array.isArray(ib.models)
+    ? ib.models
+    : Array.isArray(rawItem.models)
+      ? rawItem.models
+      : Array.isArray(card.models)
+        ? card.models
+        : [];
+  const price =
+    rawItem.__directVndPrice >= 1000
+      ? rawItem.__directVndPrice
+      : pickFirstValidPriceVnd([
+          asset?.display_price?.price,
+          asset?.display_price,
+          ib?.item_card_display_price?.price,
+          card?.item_card_display_price?.price,
+          rawItem?.item_card_display_price?.price,
+          ib?.display_price?.price,
+          ib?.price_info,
+          rawItem?.price_info,
+          ib.price,
+          ib.price_min,
+          ib.priceMin,
+          ib.min_price,
+          ib.minPrice,
+          ib.current_price,
+          ib.currentPrice,
+          card.price,
+          card.price_min,
+          card.priceMin,
+          rawItem.price,
+          rawItem.price_min,
+          rawItem.priceMin,
+          ...modelsArr.flatMap((m) => [m?.price, m?.price_info, m?.priceInfo, m?.extinfo?.price, m])
+        ]);
+  if (!price || price < 1000) return null;
 
-  const origCand =
-    pickNumericPriceCandidate(asset?.display_price?.strikethrough_price) ||
-    pickNumericPriceCandidate(ib?.item_card_display_price?.strikethrough_price) ||
-    pickNumericPriceCandidate(card?.item_card_display_price?.strikethrough_price) ||
-    pickNumericPriceCandidate(ib?.display_price?.strikethrough_price) ||
-    pickNumericPriceCandidate(ib.price_before_discount) ||
-    pickNumericPriceCandidate(ib.priceBeforeDiscount) ||
-    pickNumericPriceCandidate(ib.price_max_before_discount) ||
-    pickNumericPriceCandidate(card.price_before_discount) ||
-    pickNumericPriceCandidate(card.priceBeforeDiscount) ||
-    pickNumericPriceCandidate(rawItem.price_before_discount) ||
-    pickNumericPriceCandidate(rawItem.priceBeforeDiscount) ||
-    pickNumericPriceCandidate(firstIbModel?.price_before_discount) ||
-    pickNumericPriceCandidate(firstIbModel?.priceBeforeDiscount) ||
-    0;
-  let origRaw = Number(origCand);
-  let orig = origRaw >= 100_000_000 ? Math.trunc(origRaw / 100000) : Math.trunc(origRaw);
-  if (!Number.isFinite(orig) || orig <= price) orig = null;
+  let orig =
+    (rawItem.__directVndOrig >= 1000 ? rawItem.__directVndOrig : 0) ||
+    pickFirstValidPriceVnd([
+      asset?.display_price?.strikethrough_price,
+      ib?.item_card_display_price?.strikethrough_price,
+      card?.item_card_display_price?.strikethrough_price,
+      ib?.display_price?.strikethrough_price,
+      ib.price_before_discount,
+      ib.priceBeforeDiscount,
+      ib.price_max_before_discount,
+      card.price_before_discount,
+      card.priceBeforeDiscount,
+      rawItem.price_before_discount,
+      rawItem.priceBeforeDiscount,
+      ...modelsArr.flatMap((m) => [m?.price_before_discount, m?.priceBeforeDiscount])
+    ]) ||
+    null;
+  if (!orig || orig <= price) orig = null;
 
   let rating = null;
   if (asset?.rating && asset.rating.rating_text) {
@@ -669,37 +691,60 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
     const pImages = dp.product_images || dp.productImages || root.product_images || root.productImages || {};
     const pReview = dp.product_review || dp.productReview || root.product_review || root.productReview || {};
     const modelsList = Array.isArray(it.models) ? it.models : Array.isArray(dp.models) ? dp.models : [];
-    const modelWithPrice =
-      modelsList.find((m) => pickNumericPriceCandidate(m?.price || m?.price_info || m?.priceInfo || m) > 0) || modelsList[0] || null;
-    const priceVal =
-      pickNumericPriceCandidate(it.price) ||
-      pickNumericPriceCandidate(it.price_min) ||
-      pickNumericPriceCandidate(it.priceMin) ||
-      pickNumericPriceCandidate(it.min_price) ||
-      pickNumericPriceCandidate(it.minPrice) ||
-      pickNumericPriceCandidate(it.current_price) ||
-      pickNumericPriceCandidate(it.currentPrice) ||
-      pickNumericPriceCandidate(it.price_info) ||
-      pickNumericPriceCandidate(it.priceInfo) ||
-      pickNumericPriceCandidate(it.price_range) ||
-      pickNumericPriceCandidate(pPrice?.price) ||
-      pickNumericPriceCandidate(pPrice?.price_range) ||
-      pickNumericPriceCandidate(pPrice?.discount_price) ||
-      pickNumericPriceCandidate(pPrice) ||
-      pickNumericPriceCandidate(dp.price_info) ||
-      pickNumericPriceCandidate(dp.price) ||
-      pickNumericPriceCandidate(modelWithPrice?.price || modelWithPrice?.price_info || modelWithPrice?.priceInfo || modelWithPrice) ||
-      0;
-    const origVal =
-      pickNumericPriceCandidate(it.price_before_discount) ||
-      pickNumericPriceCandidate(it.priceBeforeDiscount) ||
-      pickNumericPriceCandidate(it.price_max_before_discount) ||
-      pickNumericPriceCandidate(pPrice?.price_before_discount) ||
-      pickNumericPriceCandidate(pPrice?.priceBeforeDiscount) ||
-      pickNumericPriceCandidate(pPrice?.origin_price) ||
-      pickNumericPriceCandidate(modelWithPrice?.price_before_discount) ||
-      pickNumericPriceCandidate(modelWithPrice?.priceBeforeDiscount) ||
-      0;
+    const priceBreakdown = dp.price_breakdown || dp.priceBreakdown || {};
+    const exclusivePrice = dp.exclusive_price || dp.exclusivePrice || {};
+    const flashSale = dp.flash_sale || dp.flashSale || {};
+    const deepDiscount = dp.deep_discount || dp.deepDiscount || {};
+    const flashPreview = dp.flash_sale_preview || dp.flashSalePreview || {};
+    const priceVal = pickFirstValidPriceVnd([
+      it.price,
+      it.price_min,
+      it.priceMin,
+      it.min_price,
+      it.minPrice,
+      it.current_price,
+      it.currentPrice,
+      it.price_info,
+      it.priceInfo,
+      it.price_range,
+      pPrice?.price,
+      pPrice?.final_price,
+      pPrice?.finalPrice,
+      pPrice?.price_range,
+      pPrice?.discount_price,
+      pPrice,
+      dp.price_info,
+      dp.price,
+      priceBreakdown?.final_price,
+      priceBreakdown?.finalPrice,
+      priceBreakdown?.price,
+      priceBreakdown?.current_price,
+      priceBreakdown,
+      exclusivePrice?.price,
+      exclusivePrice,
+      flashSale?.price,
+      flashSale?.price_min,
+      flashSale,
+      deepDiscount?.promotion?.price,
+      deepDiscount?.price,
+      deepDiscount,
+      flashPreview?.price,
+      flashPreview,
+      ...modelsList.flatMap((m) => [m?.price, m?.price_info, m?.priceInfo, m?.extinfo?.price, m])
+    ]);
+    const origVal = pickFirstValidPriceVnd([
+      it.price_before_discount,
+      it.priceBeforeDiscount,
+      it.price_max_before_discount,
+      pPrice?.price_before_discount,
+      pPrice?.priceBeforeDiscount,
+      pPrice?.origin_price,
+      priceBreakdown?.original_price,
+      priceBreakdown?.price_before_discount,
+      flashSale?.price_before_discount,
+      deepDiscount?.promotion?.price_before_discount,
+      ...modelsList.flatMap((m) => [m?.price_before_discount, m?.priceBeforeDiscount])
+    ]);
     const tierImgs = Array.isArray(it.tier_variations?.[0]?.images)
       ? it.tier_variations[0].images
       : Array.isArray(it.tierVariations?.[0]?.images)
@@ -741,8 +786,8 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
       ...it,
       shopid: shopFallback,
       name: pdpTitle,
-      price: priceVal,
-      price_before_discount: origVal,
+      __directVndPrice: priceVal,
+      __directVndOrig: origVal,
       images: imgList,
       image: pickImageStringFromEntry(it.image) || imgList[0] || '',
       historical_sold:
@@ -1087,16 +1132,16 @@ function normalizeEvalPayload(raw) {
 
 export function extractEvalPayloadFromHtml(html) {
   if (!html || typeof html !== 'string') return null;
-  const headSlice = html.slice(0, Math.min(html.length, 400_000));
+  const headProbe = html.slice(0, Math.min(html.length, 4096));
   for (const quote of ['"', "'"]) {
     const marker = `data-sr-eval=${quote}`;
-    const attrIdx = headSlice.indexOf(marker);
+    const attrIdx = headProbe.indexOf(marker);
     if (attrIdx !== -1) {
       const valStart = attrIdx + marker.length;
-      const valEnd = headSlice.indexOf(quote, valStart);
-      if (valEnd !== -1) {
+      const valEnd = html.indexOf(quote, valStart);
+      if (valEnd !== -1 && valEnd - valStart <= 2_500_000) {
         try {
-          return normalizeEvalPayload(JSON.parse(decodeHtmlEntities(headSlice.slice(valStart, valEnd).trim())));
+          return normalizeEvalPayload(JSON.parse(decodeHtmlEntities(html.slice(valStart, valEnd).trim())));
         } catch {
           // Fall through to legacy <script id="__sr_eval"> fallback
         }
@@ -1512,6 +1557,41 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
   return results;
 }
 
+export function inspectMfeInitialDataPdp(html) {
+  if (!html || typeof html !== 'string' || !html.includes('mfe-initial-data')) {
+    return null;
+  }
+  const mfeMatch = html.match(/<script\b[^>]*type=["']text\/mfe-initial-data["'][^>]*>([\s\S]*?)<\/script>/i);
+  if (!mfeMatch) return null;
+  const mfeObj = tryJsonParseSafe(mfeMatch[1].trim());
+  const initState = mfeObj?.initialState || mfeObj;
+  if (!initState || typeof initState !== 'object') return null;
+
+  const dp = initState.DOMAIN_PDP;
+  const cMap = dp?.data?.PDP_BFF_DATA?.cachedMap || dp?.data?.cachedMap;
+  const firstEntry = cMap && typeof cMap === 'object' ? Object.values(cMap)[0] : null;
+  const itemSlice = initState.item && typeof initState.item === 'object' ? initState.item : null;
+
+  let priceRedacted = false;
+  if (firstEntry && typeof firstEntry === 'object' && firstEntry.item && typeof firstEntry.item === 'object') {
+    const it = firstEntry.item;
+    const remFields = firstEntry.removed_fields ?? firstEntry.removedFields;
+    const noMainPrice =
+      (it.price === null || it.price === undefined) &&
+      (it.price_min === null || it.price_min === undefined) &&
+      (firstEntry.product_price === null || firstEntry.product_price === undefined) &&
+      (firstEntry.productPrice === null || firstEntry.productPrice === undefined);
+    const hasRemovedMarker =
+      Array.isArray(remFields) &&
+      (remFields.length === 0 || remFields.some((f) => /price|flash_sale|deep_discount|exclusive_price/i.test(String(f || ''))));
+    if (noMainPrice && (hasRemovedMarker || firstEntry.detail_level !== undefined || firstEntry.detailLevel !== undefined)) {
+      priceRedacted = true;
+    }
+  }
+
+  return { initState, dp, firstEntry, itemSlice, priceRedacted };
+}
+
 function extractPdpHtmlDiag(html, directProduct = null) {
   if (!html || typeof html !== 'string') return '';
   const ldMatches = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
@@ -1554,32 +1634,30 @@ function extractPdpHtmlDiag(html, directProduct = null) {
     const mainClean = stripTags(stripTagBlocks(html, ['header', 'nav', 'footer', 'script', 'style', 'svg', 'noscript']));
     const domPriceHits = (mainClean.match(/(?:₫\s*[\d.,]+|[\d.,]+\s*[₫đ]|\b\d{1,3}(?:\.\d{3}){1,2}\b)/g) || []).slice(0, 4);
     extra += `,tId=${totalCnt}(wP=${pricedCnt}),domP=[${domPriceHits.join('|')}]`;
-    const mfeMatch = html.match(/<script\b[^>]*type=["']text\/mfe-initial-data["'][^>]*>([\s\S]*?)<\/script>/i);
-    if (mfeMatch) {
-      const mfeObj = tryJsonParseSafe(mfeMatch[1].trim());
-      const initState = mfeObj?.initialState || mfeObj;
-      if (initState && typeof initState === 'object') {
-        extra += `,mfeKeys=[${Object.keys(initState).slice(0, 10).join('|')}]`;
-        const dp = initState.DOMAIN_PDP;
-        const cMap = dp?.data?.PDP_BFF_DATA?.cachedMap || dp?.data?.cachedMap;
-        const firstEntry = cMap && typeof cMap === 'object' ? Object.values(cMap)[0] : null;
-        if (firstEntry && typeof firstEntry === 'object') {
-          extra += `,ceKeys=[${Object.keys(firstEntry).join('|')}]`;
-          const ceItem = firstEntry.item && typeof firstEntry.item === 'object' ? firstEntry.item : {};
-          const ceItemPriceKeys = Object.entries(ceItem)
-            .filter(([k]) => /(?:price|model|tier|img|sold|rating|hidden)/i.test(k))
-            .slice(0, 12)
-            .map(([k, v]) => `${k}:${Array.isArray(v) ? `arr[${v.length}]` : typeof v === 'object' && v !== null ? `{${Object.keys(v).slice(0, 4).join(',')}}` : v}`);
-          extra += `,ceIt=[${ceItemPriceKeys.join(',')}]`;
-          extra += `,ceP=${sanitizeErrorText(JSON.stringify(firstEntry.product_price ?? firstEntry.productPrice ?? null)).slice(0, 200)}`;
-        } else {
-          const dpStr = dp ? sanitizeErrorText(JSON.stringify(dp)).slice(0, 260) : '';
-          if (dpStr) extra += `,dp=${dpStr}`;
-        }
-        const itemSlice = initState.item;
-        if (itemSlice && typeof itemSlice === 'object') {
-          extra += `,itSliceKeys=[${Object.keys(itemSlice).slice(0, 8).join('|')}]`;
-        }
+    const mfeInfo = inspectMfeInitialDataPdp(html);
+    if (mfeInfo) {
+      const { initState, dp, firstEntry, itemSlice } = mfeInfo;
+      extra += `,mfeKeys=[${Object.keys(initState).slice(0, 10).join('|')}]`;
+      if (firstEntry && typeof firstEntry === 'object') {
+        extra += `,ceKeys=[${Object.keys(firstEntry).join('|')}]`;
+        const ceItem = firstEntry.item && typeof firstEntry.item === 'object' ? firstEntry.item : {};
+        const ceItemPriceKeys = Object.entries(ceItem)
+          .filter(([k]) => /(?:price|model|tier|img|sold|rating|hidden)/i.test(k))
+          .slice(0, 12)
+          .map(([k, v]) => `${k}:${Array.isArray(v) ? `arr[${v.length}]` : typeof v === 'object' && v !== null ? `{${Object.keys(v).slice(0, 4).join(',')}}` : v}`);
+        extra += `,ceIt=[${ceItemPriceKeys.join(',')}]`;
+        extra += `,ceP=${sanitizeErrorText(JSON.stringify(firstEntry.product_price ?? firstEntry.productPrice ?? null)).slice(0, 200)}`;
+        extra += `,dl=${firstEntry.detail_level ?? firstEntry.detailLevel ?? '-'}`;
+        extra += `,rem=${sanitizeErrorText(JSON.stringify(firstEntry.removed_fields ?? firstEntry.removedFields ?? null)).slice(0, 180)}`;
+        extra += `,m0=${sanitizeErrorText(JSON.stringify(ceItem.models?.[0] ?? null)).slice(0, 180)}`;
+        extra += `,pSub=${sanitizeErrorText(JSON.stringify({ fs: firstEntry.flash_sale ?? null, fsp: firstEntry.flash_sale_preview ?? null, dd: firstEntry.deep_discount ?? null, ep: firstEntry.exclusive_price ?? null, pb: firstEntry.price_breakdown ?? null })).slice(0, 220)}`;
+      } else {
+        const dpStr = dp ? sanitizeErrorText(JSON.stringify(dp)).slice(0, 260) : '';
+        if (dpStr) extra += `,dp=${dpStr}`;
+      }
+      if (itemSlice && typeof itemSlice === 'object') {
+        extra += `,itSliceKeys=[${Object.keys(itemSlice).slice(0, 8).join('|')}]`;
+        extra += `,itIt=${sanitizeErrorText(JSON.stringify(itemSlice?.items ?? null)).slice(0, 200)}`;
       }
     } else if (bestCtx) {
       extra += `,ctx="${bestCtx.slice(0, 160)}"`;
@@ -1777,11 +1855,14 @@ export function parseShopeeHtml(html, kw, maxItems = 40, finalUrl = '') {
     const blocked = isAntibotChallengeHtml(html, resolvedFinalUrl);
     const loginRequired = isLoginRedirectHtml(html, resolvedFinalUrl);
     const notFound = !blocked && !loginRequired && isProductNotFoundHtml(html, resolvedFinalUrl);
+    const mfeInfo = directProduct ? inspectMfeInitialDataPdp(html) : null;
+    const priceRedactedNoAuth = Boolean(directProduct && !blocked && !loginRequired && !notFound && mfeInfo?.priceRedacted);
     return {
       items: [],
       blocked,
       loginRequired,
       notFound,
+      priceRedactedNoAuth,
       domStats,
       evalData,
       sampleCard: evalData?.sampleCard || (domStats.sqeItems > 0 ? extractFirstSqeCardSample(mainHtml || html) : ''),
@@ -2022,6 +2103,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
     blocked: Boolean(xhrBlocked || htmlRes.blocked),
     loginRequired: Boolean(xhrLoginRequired || htmlRes.loginRequired),
     notFound: Boolean(htmlRes.notFound),
+    priceRedactedNoAuth: Boolean(htmlRes.priceRedactedNoAuth),
     xhrSummary,
     itemSources: [],
     finalUrl,
@@ -2241,11 +2323,11 @@ function handleZenrowsFatalStatus(status, jsonBody, rawText = '', { allowTarget4
 
 function buildZenrowsNetworkSpyBody() {
   return (
-    "try{if(!window.__s){window.__s=1;const C=window.__c=[]," +
-    "M=/search_items|recommend|\\/pdp\\/|\\/item\\/get/i," +
-    "P=t=>{try{C.length<3&&t?.length>40&&t.length<3e5&&C.push(JSON.parse(t));}catch{}}," +
-    "F=window.fetch;if(F)window.fetch=function(...a){const u=a[0]?.url||a[0]+'';" +
-    "return F.apply(this,a).then(r=>{try{M.test(u)&&r.clone().text().then(P).catch(()=>{});}catch{}return r;});};" +
+    "try{const W=window;if(!W.__s){W.__s=1;const C=W.__c=[]," +
+    "M=/search_i|global_s|recommend|pdp\\/|item\\/get/i," +
+    "P=t=>{try{let d,a;if(C.length<3&&t.length>40&&t.length<12e5)d=JSON.parse(t),a=d.data?.items||d.items,C.push(a&&t.length>18e4?{data:{items:a.slice(0,35)}}:d);}catch{}}," +
+    "F=W.fetch;if(F)W.fetch=function(...a){const u=a[0]?.url||a[0]+'';" +
+    "return F.apply(this,a).then(r=>{try{M.test(u)&&r.clone().text().then(P,()=>{});}catch{}return r;});};" +
     "const X=XMLHttpRequest.prototype,O=X.open,S=X.send;" +
     "X.open=function(m,u){this.__u=u;return O.apply(this,arguments);};" +
     "X.send=function(){try{M.test(this.__u||'')&&this.addEventListener('load',()=>P(this.responseText));}catch{}return S.apply(this,arguments);};}}catch{}"
@@ -2259,65 +2341,64 @@ function buildZenrowsNetworkSpyScript() {
 function buildZenrowsDomEvalScript({ includePdp = false } = {}) {
   if (includePdp) {
     return (
-      "(()=>{const D=document,L=location,E='data-sr-eval',T=s=>(''+(s||'')).replace(/\\s+/g,' ').trim();try{" +
+      "(()=>{const D=document,L=location,SA=v=>D.documentElement.setAttribute('data-sr-eval',JSON.stringify(v)),T=s=>(''+(s||'')).replace(/\\s+/g,' ').trim();try{" +
       "const Q=(e,s)=>e?.querySelector(s),QA=s=>[...D.querySelectorAll(s)],A=(e,k)=>e?.getAttribute(k)||''," +
       "R=/(?:-i\\.(\\d+)\\.(\\d+)|\\/product\\/(\\d+)\\/(\\d+))/i,M=p=>Q(D,`meta[property='${p}']`)?.content||''," +
-      "IU=x=>x.currentSrc||x.src||A(x,'data-src')||A(x,'data-lazy-src')||A(x,'srcset').split(/[\\s,]/)[0]||''," +
-      "C=window.__c||window.__sr_cap,cp=Array.isArray(C)?C.slice(0,3):[]," +
-      "pm=L.pathname.match(R),mt=T(Q(D,'main,[role=main]')?.innerText||D.body?.innerText)," +
+      "IU=x=>x.currentSrc||x.src||A(x,'data-src')||A(x,'data-lazy-src')||A(x,'srcset').split(/[\\s,]/)[0]," +
+      "C=window.__c||[],cp=C.slice(0,3)," +
+      "pm=L.pathname.match(R),mt=T((Q(D,'main,[role=main]')||D.body)?.innerText)," +
       "mp=M('product:price:amount')||M('og:price:amount')||A(Q(D,'meta[itemprop=price]'),'content')," +
       "pp=mt.match(/(?:₫\\s*[\\d.,]+|[\\d.,]+\\s*[₫đ])/)?.[0]||mt.match(/\\b\\d{1,3}(?:\\.\\d{3}){1,2}\\b/)?.[0]||'';" +
-      "D.documentElement.setAttribute(E,JSON.stringify({u:L.href,tt:D.title||'',rd:D.readyState||'',sq:0,cc:Array.isArray(C)?C.length:0,cp,its:[]," +
-      "pdp:pm?{shopId:pm[1]||pm[3]||'',itemId:pm[2]||pm[4]||'',h1:Q(D,'main h1,h1')?.innerText?.trim()||'',metaPrice:mp,pdpPrice:pp,pdpOrig:Q(D,'main del,[class*=line-through]')?.innerText?.trim()||'',pdpImg:QA('main img,picture img').map(IU).find(u=>/susercontent\\.com\\/file\\//i.test(u))||M('og:image'),ogImg:M('og:image'),ogTitle:M('og:title'),sold:mt.match(/[\\d.,]+k?\\+?\\s*đã bán|đã bán\\s*[\\d.,]+k?\\+?/i)?.[0]||''}:null," +
-      "mt:mt.slice(0,750)}));}catch(e){try{D.documentElement.setAttribute(E,JSON.stringify({u:L.href,rd:D.readyState||'',err:(''+e).slice(0,120)}));}catch{}}})()"
+      "SA({u:L.href,tt:D.title,rd:D.readyState,sq:0,cc:C.length,cp,its:[]," +
+      "pdp:pm?{shopId:pm[1]||pm[3]||'',itemId:pm[2]||pm[4]||'',h1:Q(D,'main h1,h1')?.innerText?.trim()||'',metaPrice:mp,pdpPrice:pp,pdpOrig:Q(D,'main del,[class*=line-]')?.innerText?.trim()||'',pdpImg:QA('main img,picture img').map(IU).find(u=>/susercontent\\.com\\/file\\//i.test(u))||M('og:image'),ogImg:M('og:image'),ogTitle:M('og:title'),sold:mt.match(/[\\d.,]+k?\\+?\\s*đã bán|đã bán\\s*[\\d.,]+k?\\+?/i)?.[0]||''}:null," +
+      "mt:mt.slice(0,750)});}catch(e){try{SA({u:L.href,rd:D.readyState,err:(''+e).slice(0,120)});}catch{}}})()"
     );
   }
   return (
-    "(()=>{const D=document,L=location,E='data-sr-eval',T=s=>(''+(s||'')).replace(/\\s+/g,' ').trim();try{" +
-    "const Q=(e,s)=>e.querySelector(s),QA=(s,e=D)=>[...e.querySelectorAll(s)],A=(e,k)=>e.getAttribute(k)||'',G=v=>/^\\d{4,20}$/.test(v||'')?''+v:''," +
-    "R=/(?:-i\\.(\\d+)\\.(\\d+)|\\/product\\/(\\d+)\\/(\\d+))/i,K=['item','item_basic','item_card','item_data','item_card_displayed_asset','data','product']," +
+    "(()=>{const D=document,L=location,SA=v=>D.documentElement.setAttribute('data-sr-eval',JSON.stringify(v)),T=s=>(''+(s||'')).replace(/\\s+/g,' ').trim();try{" +
+    "const Q=(e,s)=>e?.querySelector(s),QA=(s,e=D)=>[...e.querySelectorAll(s)],A=(e,k)=>e?.getAttribute(k)||'',IT=(e,s)=>T(Q(e,s)?.innerText),G=v=>/^\\d{4,20}$/.test(v)?''+v:''," +
+    "U=a=>[...new Set(a.filter(Boolean))],R=/(?:-i\\.(\\d+)\\.(\\d+)|\\/product\\/(\\d+)\\/(\\d+))/i,M=/susercontent|shopee/i,Z='__react'," +
+    "K='item,item_basic,item_data,data'.split(',')," +
     "S=(o,d,s)=>{if(!o||typeof o!='object'||d>3||s.has(o))return;s.add(o);" +
     "const i=G(o.itemid||o.item_id||o.itemId||o.id),p=G(o.shopid||o.shop_id||o.shopId),h=o.href||o.to||o.url||'',H=R.test(h);" +
     "if((i&&(p||H))||H){const a=o.item_card_displayed_asset||o.item_data||o.item_basic||o,dp=a.display_price||a.item_card_display_price||a;" +
-    "return{i,p,h,n:o.name||a.name||o.title||'',im:a.image||a.images?.[0]||o.image||o.images?.[0]||''," +
-    "pr:dp.price||o.price||o.price_min||0,or:dp.strikethrough_price||a.price_before_discount||o.price_before_discount||0," +
-    "sd:a.historical_sold||a.sold||a.sold_count?.text||o.historical_sold||o.sold||0};}" +
-    "for(const k of[...K,...Object.keys(o).slice(0,8)])if(o[k]&&!/^(_owner|return|child|sibling|stateNode)$/.test(k)){const r=S(o[k],d+1,s);if(r)return r;}}," +
+    "return{i,p,h,n:o.name||a.name||o.title,im:a.image||a.images?.[0]||o.image||o.images?.[0]," +
+    "pr:dp.price||o.price||o.price_min,or:dp.strikethrough_price||a.price_before_discount||o.price_before_discount," +
+    "sd:a.historical_sold||a.sold||a.sold_count?.text};}" +
+    "for(const k of[...K,...Object.keys(o).slice(0,10)])if(o[k]&&!/^(_|return|child|sib|state)/.test(k)){const r=S(o[k],d+1,s);if(r)return r;}}," +
     "F=e=>{for(const n of[e,e.closest('a'),Q(e,'a'),e.firstElementChild,e.parentElement])if(n){const ks=Object.keys(n);" +
-    "for(const k of ks)if(k.startsWith('__reactProps')){const r=S(n[k],0,new Set());if(r)return r;}" +
-    "const fk=ks.find(k=>k.startsWith('__reactFiber')||k.startsWith('__reactInternal'));" +
+    "for(const k of ks)if(k.startsWith(Z+'P')){const r=S(n[k],0,new Set());if(r)return r;}" +
+    "const fk=ks.find(k=>k.startsWith(Z+'F')||k.startsWith(Z+'I'));" +
     "if(fk)for(let c=n[fk],t=0;c&&t<9;t++,c=c.return){const r=S(c.memoizedProps,0,new Set());if(r)return r;}}}," +
-    "IU=x=>x.currentSrc||x.src||A(x,'data-src')||A(x,'data-lazy-src')||A(x,'srcset').split(/[\\s,]/)[0]||''," +
-    "BG=e=>(A(e,'style')+A(Q(e,'[style*=susercontent]')||e,'style')).match(/url\\(['\"]?(https?:\\/\\/[^'\")\\s]+susercontent[^'\")\\s]+)/i)?.[1]||''," +
+    "IU=x=>x.currentSrc||x.src||A(x,'data-src')||A(x,'data-lazy-src')||A(x,'srcset').split(/[\\s,]/)[0]," +
+    "BG=e=>(A(e,'style')+A(Q(e,'[style*=susercontent]'),'style')).match(/https?:\\/\\/[\\w.-]*susercontent[\\w./?=&@-]+/i)?.[0]||''," +
     "P=e=>{const a=e.closest('a[href]')||Q(e,'a[href]'),h=a?A(a,'href')||a.href:'',m=h.match(R);" +
     "return m?{i:m[2]||m[4]||'',p:m[1]||m[3]||'',h}:{i:G(A(e,'data-itemid')||A(e,'data-item-id')),p:G(A(e,'data-shopid')||A(e,'data-shop-id')),h};};" +
-    "let cs=QA('[data-sqe=item],.shopee-search-item-result__item');if(!cs.length)cs=[...new Set(QA(\"a[href*='-i.'],a[href*='/product/']\").map(a=>a.closest('li')||a))];" +
-    "const its=[];let sc='';cs.slice(0,35).forEach((e,x)=>{const d=P(e),ims=QA('img',e),im=ims.find(y=>/susercontent|cf\\.shopee/i.test(IU(y)))||ims.find(y=>/^https?:/i.test(IU(y))),iu=(im&&IU(im))||BG(e)," +
-    "f=(!d.i||!iu)?F(e):null,fi=d.i||f?.i||'',t=T(e.innerText).slice(0,220);" +
+    "let cs=QA('[data-sqe=item],.shopee-search-item-result__item');if(!cs.length)cs=U(QA(`a[href*='-i.'],a[href*='/product/']`).map(a=>a.closest('li')||a));" +
+    "if(!cs.length)cs=U(QA('main img').map(y=>M.test(IU(y))&&(y.closest('li,a')||y.parentElement)));" +
+    "const its=[];let sc='';cs.slice(0,35).forEach((e,x)=>{const d=P(e),ims=QA('img',e),im=ims.find(y=>M.test(IU(y)))||ims.find(y=>/^https?:/i.test(IU(y))),iu=(im&&IU(im))||BG(e)," +
+    "f=((!d.i||!iu)&&F(e))||{},fi=d.i||f.i||'',t=T(e.innerText).slice(0,220);" +
     "if(!x)sc='id='+(fi||'-')+' '+e.tagName;" +
-    "its.push({h:d.h||f?.h||'',i:fi,p:d.p||f?.p||'',n:T(f?.n||Q(e,'[data-sqe=name],[class*=line-clamp]')?.innerText||im?.alt),t,d:T(Q(e,'del,[class*=line-through]')?.innerText),pt:T(Q(e,'[data-sqe=price]')?.innerText),g:iu,fi:f?.im||'',fp:f?.pr||0,fo:f?.or||0,fs:f?.sd||0});});" +
-    "const C=window.__c||window.__sr_cap,cp=Array.isArray(C)?C.slice(0,3):[],mt=T(Q(D,'main,[role=main]')?.innerText);" +
-    "D.documentElement.setAttribute(E,JSON.stringify({u:L.href,tt:D.title||'',rd:D.readyState||'',sq:cs.length,cc:Array.isArray(C)?C.length:0,cp,sc,its,pdp:null,mt:mt.slice(0,320)}));" +
-    "}catch(e){try{D.documentElement.setAttribute(E,JSON.stringify({u:L.href,rd:D.readyState||'',err:(''+e).slice(0,120)}));}catch{}}})()"
+    "its.push({h:d.h||f.h,i:fi,p:d.p||f.p,n:T(f.n||IT(e,'[data-sqe=name],[class*=clamp]')||(im&&im.alt)),t,d:IT(e,'del,[class*=line-]'),pt:IT(e,'[data-sqe=price]'),g:iu,fi:f.im,fp:f.pr,fo:f.or,fs:f.sd});});" +
+    "const C=window.__c||[],cp=C.slice(0,3),mt=IT(D,'main')||T(D.body?.innerText);" +
+    "SA({u:L.href,tt:D.title,rd:D.readyState,sq:cs.length,cc:C.length,cp,sc,its,mt:mt.slice(0,320)});" +
+    "}catch(e){try{SA({u:L.href,rd:D.readyState,err:(''+e).slice(0,120)});}catch{}}})()"
   );
 }
 
-function buildZenrowsSearchSubmitScript(searchKw, fallbackUrl) {
+function buildZenrowsSearchSubmitScript(searchKw) {
   const kwJson = JSON.stringify(String(searchKw || ''));
-  const urlJson = JSON.stringify(String(fallbackUrl || `https://shopee.vn/search?keyword=${encodeURIComponent(String(searchKw || ''))}`));
   return (
-    "(()=>{const D=document,L=location,kw=" +
+    "(()=>{const D=document,L=location,Q=s=>D.querySelector(s),kw=" +
     kwJson +
-    ",U=" +
-    urlJson +
-    ";try{" +
+    ",U='/search?keyword='+encodeURIComponent(kw);try{" +
     buildZenrowsNetworkSpyBody() +
-    "D.querySelector('.shopee-popup__close-btn')?.click();" +
-    "const inp=D.querySelector('input.shopee-searchbar-input__input,form[role=search] input,input[type=search]');" +
-    "if(inp){const sv=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set," +
-    "E=(n,o)=>inp.dispatchEvent(new(o?KeyboardEvent:Event)(n,{bubbles:true,...o}));" +
-    "inp.focus();sv?sv.call(inp,kw):inp.value=kw;E('input');E('change');" +
-    "const b=D.querySelector('button.shopee-searchbar__search-button,form[role=search] button');" +
+    "Q('.shopee-popup__close-btn')?.click();" +
+    "const i=Q('.shopee-searchbar-input__input,form input,input[type=search]');" +
+    "if(i){const sv=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value')?.set," +
+    "E=(n,o)=>i.dispatchEvent(new(o?KeyboardEvent:Event)(n,{bubbles:!0,...o}));" +
+    "i.focus();sv?sv.call(i,kw):i.value=kw;E('input');E('change');" +
+    "const b=Q('.shopee-searchbar__search-button,form button');" +
     "setTimeout(()=>{b?b.click():E('keydown',{key:'Enter',keyCode:13});},150);" +
     "setTimeout(()=>L.pathname=='/'&&L.assign(U),1200);}" +
     "else L.assign(U);}catch{L.assign(U);}})()"
@@ -2351,39 +2432,40 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   let anyLoginRequired = false;
   let anyNotFound = false;
   let anyTimeout = false;
+  let anyPriceRedacted = false;
 
   const inspectAndParse = (attemptLabel, resp, { allowTarget403 = false } = {}) => {
     if (resp.timedOut) {
       anyTimeout = true;
       const secs = Math.round((resp.timeoutMs || 90000) / 1000);
       log(`    [!] [${attemptLabel}] Quá thời gian chờ (${secs}s) — đang chuyển phương án dự phòng...`);
-      return { items: [], blocked: false, loginRequired: false, notFound: false, timedOut: true, code: 'TIMEOUT', httpStatus: 0, xhrCount: 0, htmlLen: 0 };
+      return { items: [], blocked: false, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: true, code: 'TIMEOUT', httpStatus: 0, xhrCount: 0, htmlLen: 0 };
     }
 
     const fatalCheck = handleZenrowsFatalStatus(resp.status, resp.jsonBody, resp.text, { allowTarget403 });
     if (fatalCheck.target403) {
       anyBlocked = true;
       log(`    [!] [${attemptLabel}] Shopee trả HTTP 403 trên API trực tiếp — leo thang sang trình duyệt antibot...`);
-      return { items: [], blocked: true, loginRequired: false, notFound: false, timedOut: false, code: '403', httpStatus: 403, xhrCount: 0, htmlLen: 0 };
+      return { items: [], blocked: true, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: false, code: '403', httpStatus: 403, xhrCount: 0, htmlLen: 0 };
     }
 
     if (resp.status === 422) {
       anyBlocked = true;
       const errCode = resp.jsonBody?.code ? ` (${resp.jsonBody.code})` : '';
       log(`    [!] [${attemptLabel}] ZenRows trả HTTP 422${errCode}: mục tiêu tạm chặn hoặc chưa render xong.`);
-      return { items: [], blocked: true, loginRequired: false, notFound: false, timedOut: false, code: resp.jsonBody?.code || '422', httpStatus: 422, xhrCount: 0, htmlLen: 0 };
+      return { items: [], blocked: true, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: false, code: resp.jsonBody?.code || '422', httpStatus: 422, xhrCount: 0, htmlLen: 0 };
     }
 
     if (resp.status === 400) {
       const code = resp.jsonBody?.code || 'HTTP_400';
       const title = sanitizeErrorText(resp.jsonBody?.title || resp.jsonBody?.detail || resp.text.slice(0, 160));
       log(`    [!] [${attemptLabel}] ZenRows HTTP 400 (${code}): ${title}`);
-      return { items: [], blocked: code === 'REQS002', loginRequired: false, notFound: false, timedOut: false, code, httpStatus: 400, xhrCount: 0, htmlLen: 0 };
+      return { items: [], blocked: code === 'REQS002', loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: false, code, httpStatus: 400, xhrCount: 0, htmlLen: 0 };
     }
 
     if (resp.status !== 200) {
       log(`    [!] [${attemptLabel}] ZenRows HTTP ${resp.status} cho '${kw}'.`);
-      return { items: [], blocked: false, loginRequired: false, notFound: false, timedOut: false, code: String(resp.status), httpStatus: resp.status, xhrCount: 0, htmlLen: 0 };
+      return { items: [], blocked: false, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: false, code: String(resp.status), httpStatus: resp.status, xhrCount: 0, htmlLen: 0 };
     }
 
     const keepMatchingOnly = (itemsList, sourceList = []) => {
@@ -2413,6 +2495,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       if (parsed.blocked) anyBlocked = true;
       if (parsed.loginRequired) anyLoginRequired = true;
       if (parsed.notFound) anyNotFound = true;
+      if (parsed.priceRedactedNoAuth) anyPriceRedacted = true;
 
       const { matched } = keepMatchingOnly(parsed.items, parsed.itemSources || []);
       if (matched.length === 0) {
@@ -2432,6 +2515,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
             `${parsed.bodySnippet ? ` · body="${parsed.bodySnippet}"` : ''}` +
             `${parsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL (/buyer/login)' : ''}` +
             `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}` +
+            `${parsed.priceRedactedNoAuth ? ' · PHÁT HIỆN ẨN GIÁ KHI CHƯA COOKIE' : ''}` +
             `${parsed.notFound ? ' · PHÁT HIỆN SẢN PHẨM KHÔNG TỒN TẠI' : ''}`
         );
       }
@@ -2459,6 +2543,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         blocked: hasErr && !isLoginErr,
         loginRequired: isLoginErr,
         notFound: false,
+        priceRedactedNoAuth: false,
         timedOut: false,
         code: hasErr ? `ERR_${jsonErr}` : '200',
         httpStatus: 200,
@@ -2471,6 +2556,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     if (htmlRes.blocked) anyBlocked = true;
     if (htmlRes.loginRequired) anyLoginRequired = true;
     if (htmlRes.notFound) anyNotFound = true;
+    if (htmlRes.priceRedactedNoAuth) anyPriceRedacted = true;
     const { matched } = keepMatchingOnly(htmlRes.items, htmlRes.itemSources || ['HTML']);
     if (matched.length === 0) {
       const title = extractHtmlTitle(resp.text);
@@ -2485,6 +2571,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
           `${snippet ? ` · body="${snippet}"` : ''}` +
           `${htmlRes.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
           `${htmlRes.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}` +
+          `${htmlRes.priceRedactedNoAuth ? ' · PHÁT HIỆN ẨN GIÁ KHI CHƯA COOKIE' : ''}` +
           `${htmlRes.notFound ? ' · PHÁT HIỆN SẢN PHẨM KHÔNG TỒN TẠI' : ''}`
       );
     }
@@ -2522,7 +2609,6 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const useModeAutoOnAttempt2 = !cookieHeader && p1.loginRequired;
   const shouldUseCoreCookieOn2 =
     Boolean(cookieHeader) &&
-    (p1.blocked || p1.loginRequired || p1.timedOut) &&
     Boolean(coreCookie) &&
     coreCookie !== cookieHeader;
   const attempt2Cookie = shouldUseCoreCookieOn2
@@ -2560,7 +2646,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     attempt2Label = 'ZenRows #2 HomeSearch';
     const homeSearchInstructions = JSON.stringify([
       { wait: 3500 },
-      { evaluate: buildZenrowsSearchSubmitScript(searchKwText, targetInfo.targetUrl) },
+      { evaluate: buildZenrowsSearchSubmitScript(searchKwText) },
       { wait: 7500 },
       { scroll_y: 800 },
       { wait: 2000 },
@@ -2633,7 +2719,8 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const skipAttempt3 =
     useModeAutoOnAttempt2 ||
     (p1.timedOut && p2.timedOut) ||
-    (!cookieHeader && p1.loginRequired && p2.loginRequired);
+    (!cookieHeader && p1.loginRequired && p2.loginRequired) ||
+    (!cookieHeader && isDirectProduct && p1.priceRedactedNoAuth);
   if (!skipAttempt3) {
     const attempt3Label = isDirectProduct ? 'ZenRows #3 CleanHTML' : 'ZenRows #3 AutoClean';
     log(
@@ -2655,10 +2742,10 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     });
     const p3 = inspectAndParse(attempt3Label, r3);
     if (p3.items.length > 0) {
-      return { items: p3.items.slice(0, maxItems), blocked: false, loginRequired: false, notFound: false, timedOut: false };
+      return { items: p3.items.slice(0, maxItems), blocked: false, loginRequired: false, notFound: false, priceRedactedNoAuth: false, timedOut: false };
     }
     if (p3.notFound) {
-      return { items: [], blocked: anyBlocked, loginRequired: anyLoginRequired, notFound: !anyBlocked, timedOut: false };
+      return { items: [], blocked: anyBlocked, loginRequired: anyLoginRequired, notFound: !anyBlocked, priceRedactedNoAuth: anyPriceRedacted, timedOut: false };
     }
   }
 
@@ -2667,6 +2754,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     blocked: anyBlocked,
     loginRequired: anyLoginRequired,
     notFound: anyNotFound,
+    priceRedactedNoAuth: anyPriceRedacted,
     timedOut: anyTimeout
   };
 }
@@ -2709,6 +2797,7 @@ export async function fetchViaScraperApi(kw, apiKey, maxItems, options = {}) {
   let anyBlocked = false;
   let anyLoginRequired = false;
   let anyTimeout = false;
+  let anyPriceRedacted = false;
   let totalTiers = 0;
   let http403Count = 0;
   let last403Snippet = '';
@@ -2780,6 +2869,7 @@ export async function fetchViaScraperApi(kw, apiKey, maxItems, options = {}) {
     const parsed = parseShopeeHtml(text, kw, maxItems, targetInfo.targetUrl);
     if (parsed.blocked) anyBlocked = true;
     if (parsed.loginRequired) anyLoginRequired = true;
+    if (parsed.priceRedactedNoAuth) anyPriceRedacted = true;
     const matched = parsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
     if (matched.length > 0) {
       log(`    [i] [${tier.label}] Khớp ${matched.length}/${parsed.items.length} item cho '${kw}'.`);
@@ -2787,7 +2877,7 @@ export async function fetchViaScraperApi(kw, apiKey, maxItems, options = {}) {
     }
     if (parsed.notFound) {
       log(`    [!] [${tier.label}] Phát hiện sản phẩm Shopee không tồn tại hoặc đã bị xóa.`);
-      return { items: [], blocked: false, loginRequired: false, notFound: true, timedOut: false };
+      return { items: [], blocked: false, loginRequired: false, notFound: true, priceRedactedNoAuth: false, timedOut: false };
     }
 
     const title = extractHtmlTitle(text);
@@ -2798,7 +2888,8 @@ export async function fetchViaScraperApi(kw, apiKey, maxItems, options = {}) {
         `dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs})` +
         `${bodySnippet ? ` · body="${bodySnippet}"` : ''}` +
         `${parsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
-        `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
+        `${parsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}` +
+        `${parsed.priceRedactedNoAuth ? ' · PHÁT HIỆN ẨN GIÁ KHI CHƯA COOKIE' : ''}`
     );
 
     // If a tier with country_code=vn succeeded cleanly (HTTP 200) without cookie and hit login/block only, don't retry Global unnecessarily
@@ -2813,7 +2904,7 @@ export async function fetchViaScraperApi(kw, apiKey, maxItems, options = {}) {
     );
   }
 
-  return { items: [], blocked: anyBlocked, loginRequired: anyLoginRequired, notFound: false, timedOut: anyTimeout };
+  return { items: [], blocked: anyBlocked, loginRequired: anyLoginRequired, notFound: false, priceRedactedNoAuth: anyPriceRedacted, timedOut: anyTimeout };
 }
 
 export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
@@ -2866,6 +2957,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
   let anyBlocked = false;
   let anyLoginRequired = false;
   let anyTimeout = false;
+  let anyPriceRedacted = false;
 
   for (let idx = 0; idx < crawlTiers.length; idx++) {
     const tier = crawlTiers[idx];
@@ -2914,6 +3006,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
       const htmlParsed = parseShopeeHtml(text, kw, maxItems, targetInfo.targetUrl);
       if (htmlParsed.blocked) anyBlocked = true;
       if (htmlParsed.loginRequired) anyLoginRequired = true;
+      if (htmlParsed.priceRedactedNoAuth) anyPriceRedacted = true;
       const matchedHtml = htmlParsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
       if (matchedHtml.length > 0) {
         return { ...htmlParsed, items: matchedHtml, timedOut: false };
@@ -2934,6 +3027,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
     const bodyParsed = parseShopeeHtml(bodyHtml, kw, maxItems, data?.url || targetInfo.targetUrl);
     if (bodyParsed.blocked) anyBlocked = true;
     if (bodyParsed.loginRequired) anyLoginRequired = true;
+    if (bodyParsed.priceRedactedNoAuth) anyPriceRedacted = true;
     const matched = bodyParsed.items.filter((it) => scoreProductMatch(it, kw) > 0);
     if (matched.length > 0) {
       log(`    [i] [${tier.label}] Khớp ${matched.length}/${bodyParsed.items.length} item cho '${kw}'.`);
@@ -2945,7 +3039,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
     }
     if (bodyParsed.notFound) {
       log(`    [!] [${tier.label}] Phát hiện sản phẩm Shopee không tồn tại hoặc đã bị xóa.`);
-      return { items: [], blocked: false, loginRequired: false, notFound: true, timedOut: false };
+      return { items: [], blocked: false, loginRequired: false, notFound: true, priceRedactedNoAuth: false, timedOut: false };
     }
 
     const title = extractHtmlTitle(bodyHtml);
@@ -2957,7 +3051,8 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
         `${bodyParsed.sampleCard ? ` · card="${bodyParsed.sampleCard}"` : ''}` +
         `${snippet ? ` · body="${snippet}"` : ''}` +
         `${bodyParsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
-        `${bodyParsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}`
+        `${bodyParsed.blocked ? ' · PHÁT HIỆN ANTI-BOT' : ''}` +
+        `${bodyParsed.priceRedactedNoAuth ? ' · PHÁT HIỆN ẨN GIÁ KHI CHƯA COOKIE' : ''}`
     );
 
     if (tier.label === 'Crawlbase JS+Cookie') {
@@ -2971,6 +3066,7 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
     blocked: anyBlocked,
     loginRequired: anyLoginRequired,
     notFound: false,
+    priceRedactedNoAuth: anyPriceRedacted,
     timedOut: anyTimeout
   };
 }
@@ -3040,6 +3136,7 @@ export async function scrapeShopeeLive({
   let anyLoginRequired = false;
   let anyNotFound = false;
   let anyTimeout = false;
+  let anyPriceRedacted = false;
   let activeUsedProvider = primaryProvider;
   const attemptedProviders = new Set();
   const disabledProviders = new Set();
@@ -3059,6 +3156,7 @@ export async function scrapeShopeeLive({
     let kwLoginRequired = false;
     let kwNotFound = false;
     let kwTimeout = false;
+    let kwPriceRedacted = false;
     for (let pIdx = 0; pIdx < configuredProviders.length; pIdx++) {
       const [provName, provKey] = configuredProviders[pIdx];
       if (disabledProviders.has(provName)) continue;
@@ -3142,6 +3240,7 @@ export async function scrapeShopeeLive({
       if (res?.loginRequired) kwLoginRequired = true;
       if (res?.notFound) kwNotFound = true;
       if (res?.timedOut) kwTimeout = true;
+      if (res?.priceRedactedNoAuth) kwPriceRedacted = true;
       activeUsedProvider = provName;
 
       if (items.length > 0) {
@@ -3150,6 +3249,7 @@ export async function scrapeShopeeLive({
         kwLoginRequired = false;
         kwNotFound = false;
         kwTimeout = false;
+        kwPriceRedacted = false;
         onProgress(`    ✓ [${provName.toUpperCase()}] Bóc tách được ${kwItems.length} sản phẩm cho '${kw}'.\n`);
         break;
       }
@@ -3169,6 +3269,7 @@ export async function scrapeShopeeLive({
       if (kwLoginRequired) anyLoginRequired = true;
       if (kwNotFound) anyNotFound = true;
       if (kwTimeout) anyTimeout = true;
+      if (kwPriceRedacted) anyPriceRedacted = true;
     }
     capturedByKw[kw] = kwItems;
 
@@ -3234,15 +3335,22 @@ export async function scrapeShopeeLive({
   const noCookieNote = !cookieInfo.hasCookie
     ? ' (Hiện máy chủ có 0 Cookie Shopee — sau mỗi lần Render redeploy cookie cũ sẽ bị xóa, hãy dán lại Cookie Shopee từ trình duyệt hoặc gắn biến SHOPEE_COOKIE trên Render).'
     : '';
+  const redactedLoginRequired = !cookieInfo.hasCookie && anyPriceRedacted;
   let status = 'empty';
   let message = `Không tìm thấy sản phẩm khớp với yêu cầu qua ${provLabel}.`;
 
   if (selectedProducts.length > 0) {
     status = 'completed';
     message = `Đã cào thành công ${selectedProducts.length} sản phẩm thật từ Shopee qua ${provLabel}.`;
-  } else if (anyNotFound && !anyBlocked && !anyLoginRequired) {
+  } else if (anyNotFound && !anyBlocked && !anyLoginRequired && !anyPriceRedacted) {
     status = 'empty';
     message = `Sản phẩm Shopee này không tồn tại hoặc đã bị xóa bởi người bán (kiểm tra qua ${provLabel}).`;
+  } else if (redactedLoginRequired) {
+    status = 'login_required';
+    message =
+      `Shopee đang ẩn toàn bộ giá sản phẩm (trả price: null / removed_fields khi truy cập chưa đăng nhập) đối với ${targetDesc} qua ${provLabel}. ` +
+      'Vui lòng dán Cookie Shopee đã đăng nhập từ trình duyệt vào mục "Cookie Shopee" rồi bấm Bắt Đầu Cào lại.' +
+      noCookieNote;
   } else if (anyLoginRequired) {
     status = 'login_required';
     message =
@@ -3267,7 +3375,7 @@ export async function scrapeShopeeLive({
     status,
     message,
     anti_bot_blocked: anyBlocked,
-    login_required: anyLoginRequired,
+    login_required: Boolean(anyLoginRequired || redactedLoginRequired),
     config_required: false,
     provider: activeUsedProvider,
     per_keyword_counts: perKeywordCounts
