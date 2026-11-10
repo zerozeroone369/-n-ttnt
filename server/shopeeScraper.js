@@ -199,7 +199,7 @@ export function parseSoldCount(soldVal) {
 
 export function parseVndPrice(text) {
   if (typeof text === 'number' && Number.isFinite(text)) {
-    const val = text > 99999 ? Math.trunc(text / 100000) : Math.trunc(text);
+    const val = text >= 100_000_000 ? Math.trunc(text / 100000) : Math.trunc(text);
     return val >= 1000 && val <= 500_000_000 ? val : 0;
   }
   if (!text || typeof text !== 'string') return 0;
@@ -281,7 +281,7 @@ export function parseShopeeItem(rawItem, kw) {
     priceRaw = typeof rawPriceCand === 'string' ? parseVndPrice(rawPriceCand) : 0;
   }
   if (!Number.isFinite(priceRaw) || priceRaw <= 0) return null;
-  const price = priceRaw > 99999 ? Math.trunc(priceRaw / 100000) : Math.trunc(priceRaw);
+  const price = priceRaw >= 100_000_000 ? Math.trunc(priceRaw / 100000) : Math.trunc(priceRaw);
   if (price <= 0) return null;
 
   const origCand =
@@ -297,7 +297,7 @@ export function parseShopeeItem(rawItem, kw) {
   if (!Number.isFinite(origRaw) || origRaw <= 0) {
     origRaw = typeof origCand === 'string' ? parseVndPrice(origCand) : 0;
   }
-  let orig = origRaw > 99999 ? Math.trunc(origRaw / 100000) : Math.trunc(origRaw);
+  let orig = origRaw >= 100_000_000 ? Math.trunc(origRaw / 100000) : Math.trunc(origRaw);
   if (!Number.isFinite(orig) || orig <= price) orig = null;
 
   let rating = null;
@@ -1144,12 +1144,15 @@ export function inspectHtmlDomStats(html) {
 function extractJsonLdProducts(html, kw, fallbackIds = null) {
   const results = [];
   const seenIds = new Set();
-  const ldRe = /<script[^>]+type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
+  const ldRe = /<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi;
   let m;
   while ((m = ldRe.exec(String(html || ''))) !== null) {
     let parsed;
     try {
-      parsed = JSON.parse(decodeHtmlEntities(m[1].trim()));
+      const cleanedLd = decodeHtmlEntities(m[1].trim())
+        .replace(/^\s*(?:\/\*<!\[CDATA\[\*\/|\/\/<!\[CDATA\[|<!--)\s*/i, '')
+        .replace(/\s*(?:\/\*\]\]>\*\/|\/\/\]\]>|-->)\s*$/i, '');
+      parsed = JSON.parse(cleanedLd);
     } catch {
       continue;
     }
@@ -1160,6 +1163,9 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
       if (Array.isArray(node['@graph'])) {
         queue.push(...node['@graph']);
       }
+      if (node.mainEntity && typeof node.mainEntity === 'object') {
+        queue.push(node.mainEntity);
+      }
       const types = Array.isArray(node['@type']) ? node['@type'] : [node['@type']];
       if (!types.some((t) => String(t || '').toLowerCase() === 'product')) continue;
 
@@ -1167,7 +1173,8 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
       if (!name || name.length < 3) continue;
 
       const offer = Array.isArray(node.offers) ? node.offers[0] : node.offers;
-      const price = parseVndPrice(offer?.price ?? offer?.lowPrice ?? offer?.highPrice ?? 0);
+      const offerSpec = Array.isArray(offer?.priceSpecification) ? offer.priceSpecification[0] : offer?.priceSpecification;
+      const price = parseVndPrice(offer?.price ?? offer?.lowPrice ?? offer?.highPrice ?? offerSpec?.price ?? 0);
       if (!price || price < 1000) continue;
 
       const urlStr = String(node.url || offer?.url || '');
@@ -1212,6 +1219,28 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
   return results;
 }
 
+function extractPdpHtmlDiag(html) {
+  if (!html || typeof html !== 'string') return '';
+  const ldMatches = [...html.matchAll(/<script\b[^>]*type=["']application\/ld\+json["'][^>]*>([\s\S]*?)<\/script>/gi)];
+  const ldInfo = ldMatches.slice(0, 3).map((m) => {
+    try {
+      const obj = JSON.parse(decodeHtmlEntities(m[1].trim()));
+      const node = Array.isArray(obj) ? obj[0] : obj?.['@graph']?.[0] || obj;
+      const offer = Array.isArray(node?.offers) ? node.offers[0] : node?.offers;
+      return `${node?.['@type'] || '?'}(p=${offer?.price ?? offer?.lowPrice ?? '-'})`;
+    } catch {
+      return 'badjson';
+    }
+  });
+  const metaP =
+    extractMetaPropertyContent(html, 'product:price:amount') ||
+    extractMetaPropertyContent(html, 'og:price:amount') ||
+    (html.match(/<meta[^>]+itemprop=["']price["'][^>]+content=["']([^"']+)["']/i)?.[1] || '');
+  const ogImg = extractMetaPropertyContent(html, 'og:image') ? 'y' : 'n';
+  const embIds = (html.match(/"(?:itemid|item_id)"\s*:/gi) || []).length;
+  return `pdpDiag(ld=${ldMatches.length}${ldInfo.length ? `[${ldInfo.join(',')}]` : ''},mPrice=${metaP || '-'},ogImg=${ogImg},embIds=${embIds})`;
+}
+
 function extractPdpMetaFallback(html, directProduct, kw) {
   if (!directProduct || !html) return [];
   const mainHtml = stripTagBlocks(html, ['header', 'nav', 'footer', 'script', 'style', 'svg', 'noscript']);
@@ -1219,13 +1248,24 @@ function extractPdpMetaFallback(html, directProduct, kw) {
   const ogTitle = extractMetaPropertyContent(html, 'og:title');
   const docTitle = extractHtmlTitle(html);
 
-  let rawTitle = stripTags((h1Match && h1Match[1]) || ogTitle || docTitle || '');
-  rawTitle = rawTitle.replace(/\s*\|\s*Shopee.*$/i, '').replace(/^Mua ngay\s+/i, '').trim();
-  if (!rawTitle || rawTitle.length < 5 || /^shopee việt nam$/i.test(rawTitle) || /đăng nhập/i.test(rawTitle)) {
+  const cleanPdpTitle = (s) =>
+    stripTags(s || '')
+      .replace(/\s*\|\s*Shopee.*$/i, '')
+      .replace(/^Mua ngay\s+/i, '')
+      .trim();
+  const isValidPdpTitle = (t) => Boolean(t && t.length >= 5 && !/^shopee(?: việt nam)?$/i.test(t) && !/đăng nhập/i.test(t));
+
+  let rawTitle = cleanPdpTitle(h1Match && h1Match[1]);
+  if (!isValidPdpTitle(rawTitle)) rawTitle = cleanPdpTitle(ogTitle);
+  if (!isValidPdpTitle(rawTitle)) rawTitle = cleanPdpTitle(docTitle);
+  if (!isValidPdpTitle(rawTitle)) {
     return [];
   }
 
-  const metaPrice = extractMetaPropertyContent(html, 'product:price:amount');
+  const metaPrice =
+    extractMetaPropertyContent(html, 'product:price:amount') ||
+    extractMetaPropertyContent(html, 'og:price:amount') ||
+    (html.match(/<meta[^>]+itemprop=["']price["'][^>]+content=["']([^"']+)["']/i)?.[1] || '');
   let price = metaPrice ? parseVndPrice(metaPrice) : 0;
   if (!price) {
     price = extractCardPrices(mainHtml).price;
@@ -1929,7 +1969,8 @@ function buildZenrowsSearchSubmitScript(searchKw, fallbackUrl) {
     "E=(n,o)=>inp.dispatchEvent(new(o?KeyboardEvent:Event)(n,{bubbles:true,...o}));" +
     "inp.focus();sv?sv.call(inp,kw):inp.value=kw;E('input');E('change');" +
     "const b=D.querySelector('button.shopee-searchbar__search-button,form[role=search] button');" +
-    "setTimeout(()=>{b?b.click():E('keydown',{key:'Enter',keyCode:13});},150);}" +
+    "setTimeout(()=>{b?b.click():E('keydown',{key:'Enter',keyCode:13});},150);" +
+    "setTimeout(()=>L.pathname=='/'&&L.assign(U),1200);}" +
     "else L.assign(U);}catch{L.assign(U);}})()"
   );
 }
@@ -2031,10 +2072,12 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         const evalTag = ev
           ? ` · eval(${ev.ready || '?'},cap=${ev.capCount || 0}${ev.err ? `,err=${sanitizeErrorText(ev.err)}` : ''})`
           : '';
+        const pdpDiagTag = isDirectProduct && htmlLen > 50000 ? ` · ${extractPdpHtmlDiag(resp.jsonBody.html || '')}` : '';
         log(
           `    [i] [${attemptLabel}] HTTP 200 · url=${parsed.finalUrl ? redactUrlForLogs(parsed.finalUrl) : '?'} · HTML=${htmlLen}B · title="${title || 'n/a'}"` +
             `${instrTag}${evalTag} · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs}) · xhr=${xhrLen}` +
             `${parsed.xhrSummary.length ? ` [${parsed.xhrSummary.slice(0, 18).join(', ')}]` : ''}` +
+            `${pdpDiagTag}` +
             `${parsed.sampleCard ? ` · card="${parsed.sampleCard}"` : ''}` +
             `${parsed.bodySnippet ? ` · body="${parsed.bodySnippet}"` : ''}` +
             `${parsed.loginRequired ? ' · PHÁT HIỆN LOGIN WALL (/buyer/login)' : ''}` +
@@ -2082,8 +2125,11 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     if (matched.length === 0) {
       const title = extractHtmlTitle(resp.text);
       const snippet = extractVisibleBodySnippet(resp.text, 160);
+      const ds = htmlRes.domStats || { hrefMatches: 0, sqeItems: 0, cdnImgs: 0 };
+      const pdpDiagTag = isDirectProduct && resp.text.length > 50000 ? ` · ${extractPdpHtmlDiag(resp.text)}` : '';
       log(
-        `    [i] [${attemptLabel}] HTTP 200 HTML=${resp.text.length}B · title="${title || 'n/a'}"` +
+        `    [i] [${attemptLabel}] HTTP 200 HTML=${resp.text.length}B · title="${title || 'n/a'}" · dom(href=${ds.hrefMatches},sqe=${ds.sqeItems},img=${ds.cdnImgs})` +
+          `${pdpDiagTag}` +
           `${htmlRes.sampleCard ? ` · card="${htmlRes.sampleCard}"` : ''}` +
           `${snippet ? ` · body="${snippet}"` : ''}` +
           `${htmlRes.loginRequired ? ' · PHÁT HIỆN LOGIN WALL' : ''}` +
