@@ -494,6 +494,9 @@ export function isLoginRedirectHtml(html, finalUrl = '') {
     visibleLow.includes('đăng nhập bằng mã qr') ||
     visibleLow.includes('quét mã qr để đăng nhập') ||
     visibleLow.includes('có vẻ như bạn chưa đăng nhập') ||
+    visibleLow.includes('looks like you’re not logged in') ||
+    visibleLow.includes("looks like you're not logged in") ||
+    (visibleLow.includes('login required') && visibleLow.includes('log in to continue')) ||
     (visibleLow.includes('cần đăng nhập') && visibleLow.includes('đăng nhập để tiếp tục')) ||
     (visibleLow.includes('đăng nhập') &&
       (visibleLow.includes('mật khẩu') || visibleLow.includes('số điện thoại/email') || visibleLow.includes('tên đăng nhập')))
@@ -1720,26 +1723,18 @@ function buildZenrowsDomEvalScript() {
     "if(!idx){const fk=Object.keys(e).filter(k=>k.startsWith('__react')),pk=fk.find(k=>k.startsWith('__reactProps'));" +
     "sc=('p=['+(pk&&e[pk]?Object.keys(e[pk]).slice(0,6).join(','):fk.join(','))+'] id='+(d.i||'-')+' '+e.outerHTML.replace(/\\s+/g,' ').slice(0,220)).slice(0,340);}" +
     "its.push({href:d.h,itemId:d.i,shopId:d.p,name:(d.fn||ne?.innerText||im?.alt||'').replace(/\\s+/g,' ').trim(),txt,del:de?de.innerText.trim():'',priceTxt:pe?pe.innerText.trim():'',img:im?(im.currentSrc||im.src||A(im,'data-src')):''});});" +
-    "const pm=location.pathname.match(R),M=p=>Q(D,'meta[property=\"'+p+'\"]')?.content||'',mn=Q(D,'main,[role=\"main\"],#main');" +
+    "const pm=location.pathname.match(R),M=p=>Q(D,'meta[property=\"'+p+'\"]')?.content||'',mn=Q(D,'main,[role=\"main\"]');" +
     "D.getElementById('__sr_eval')?.remove();const s=D.createElement('script');s.id='__sr_eval';s.type='application/json';" +
     "s.textContent=JSON.stringify({url:location.href,title:D.title||'',sqeCount:cs.length,sampleCard:sc,items:its," +
     "pdp:pm?{shopId:pm[1]||pm[3]||'',itemId:pm[2]||pm[4]||'',h1:Q(D,'main h1,h1')?.innerText?.trim()||'',metaPrice:M('product:price:amount'),ogImg:M('og:image'),ogTitle:M('og:title')}:null," +
-    "mainText:(mn?mn.innerText:D.body?.innerText||'').replace(/\\s+/g,' ').trim().slice(0,450)});" +
+    "mainText:(mn?mn.innerText:'').replace(/\\s+/g,' ').trim().slice(0,450)});" +
     "(D.body||D.documentElement).appendChild(s);}catch(e){}})()"
   );
 }
 
 function buildZenrowsSearchSubmitScript(searchKw) {
   const kwJson = JSON.stringify(String(searchKw || ''));
-  return (
-    `(()=>{try{const D=document,kw=${kwJson},i=D.querySelector('input.shopee-searchbar-input__input,input[role="combobox"],header input[type="text"],input[placeholder*="Tìm"]');` +
-    `if(i){i.focus();const d=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value');d?.set?d.set.call(i,kw):(i.value=kw);` +
-    `i.dispatchEvent(new Event('input',{bubbles:true}));i.dispatchEvent(new Event('change',{bubbles:true}));` +
-    `const b=D.querySelector('button.shopee-searchbar__search-button,.shopee-searchbar button');if(b){b.click();return;}` +
-    `const f=i.closest('form');if(f){f.dispatchEvent(new Event('submit',{bubbles:true,cancelable:true}));if(f.requestSubmit){f.requestSubmit();return;}}` +
-    `i.dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',code:'Enter',keyCode:13,which:13,bubbles:true}));}` +
-    `else{location.href='https://shopee.vn/search?keyword='+encodeURIComponent(kw);}}catch(e){}})()`
-  );
+  return `(()=>{try{location.assign('https://shopee.vn/search?keyword='+encodeURIComponent(${kwJson}));}catch(e){}})()`;
 }
 
 export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
@@ -1981,8 +1976,10 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   } else {
     attempt2Label = shouldUseCoreCookieOn2 ? 'ZenRows #2 CoreWait' : 'ZenRows #2 FullWait';
     const boundedInstructions = JSON.stringify([
-      { wait: 6500 },
-      { scroll_y: 850 },
+      { wait: 8000 },
+      { scroll_y: 950 },
+      { wait: 3000 },
+      { scroll_y: 1700 },
       { wait: 2500 },
       { evaluate: domEvalScript }
     ]);
@@ -1991,7 +1988,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
         `${shouldUseCoreCookieOn2 ? ' + CoreCookie' : attempt2Cookie ? ' + Cookie Shopee' : ''}) cho '${kw}'...`
     );
     attempt2Params = {
-      url: targetInfo.fallbackUrl,
+      url: targetInfo.kind === 'category' && shouldUseCoreCookieOn2 ? targetInfo.targetUrl : targetInfo.fallbackUrl,
       js_render: 'true',
       premium_proxy: 'true',
       proxy_country: 'vn',
@@ -2209,9 +2206,8 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
             isJsTier: true,
             params: {
               url: targetInfo.targetUrl,
-              country: 'VN',
               format: 'json',
-              page_wait: '4000',
+              page_wait: '5000',
               ajax_wait: 'true',
               scroll: 'true',
               cookies: activeCookie
@@ -2224,20 +2220,10 @@ export async function fetchViaCrawlbase(kw, token, maxItems, options = {}) {
       isJsTier: true,
       params: {
         url: targetInfo.targetUrl,
-        country: 'VN',
         format: 'json',
-        page_wait: '4000',
+        page_wait: '5000',
         ajax_wait: 'true',
         scroll: 'true'
-      }
-    },
-    {
-      label: 'Crawlbase TCP VN',
-      isJsTier: false,
-      params: {
-        url: targetInfo.targetUrl,
-        country: 'VN',
-        format: 'json'
       }
     },
     {
