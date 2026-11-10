@@ -24,6 +24,7 @@ RUN npm run build
 ENV NODE_ENV=production
 ENV PORT=5000
 ENV PYTHON_BIN=python3
+ENV NODE_OPTIONS="--max-old-space-size=256"
 
 EXPOSE 5000
 CMD ["npm", "start"]

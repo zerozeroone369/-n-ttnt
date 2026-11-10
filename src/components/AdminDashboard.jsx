@@ -230,9 +230,26 @@ export default function AdminDashboard({
   const pollScrapeSession = async (activeSessionId, keywords, limitVal) => {
     const maxDeadline = Date.now() + 360 * 1000;
     let finalState = null;
+    let consecutivePollErrors = 0;
 
     while (isMountedRef.current && Date.now() < maxDeadline) {
-      const statusData = await ApiClient.shopee.getStatus(activeSessionId);
+      let statusData;
+      try {
+        statusData = await ApiClient.shopee.getStatus(activeSessionId);
+        consecutivePollErrors = 0;
+      } catch (pollErr) {
+        consecutivePollErrors += 1;
+        if (pollErr?.status === 404) {
+          throw new Error(
+            'Phiên cào tạm bị ngắt do máy chủ backend (Render Free) vừa khởi động lại. Vui lòng thử lại hoặc dán Link chi tiết 1 sản phẩm Shopee cụ thể để xử lý nhẹ hơn.'
+          );
+        }
+        if (pollErr?.status === 401 || pollErr?.status === 403 || consecutivePollErrors >= 5) {
+          throw pollErr;
+        }
+        await new Promise(resolve => setTimeout(resolve, 2500));
+        continue;
+      }
       if (!isMountedRef.current) return;
       if (statusData.progress) {
         setShopeeProgress(statusData.progress);

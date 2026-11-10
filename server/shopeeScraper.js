@@ -389,24 +389,30 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
     const pPrice = dp.product_price || {};
     const pImages = dp.product_images || {};
     const pReview = dp.product_review || {};
+    const firstModel = Array.isArray(it.models) ? it.models[0] : Array.isArray(dp.models) ? dp.models[0] : null;
     const priceVal =
       it.price ||
       it.price_min ||
       pPrice?.price?.single_value ||
       pPrice?.price?.range_min ||
       dp.price?.single_value ||
+      firstModel?.price ||
       0;
     const origVal =
       it.price_before_discount ||
       it.price_max_before_discount ||
       pPrice?.price_before_discount?.single_value ||
       pPrice?.price_before_discount?.range_min ||
+      firstModel?.price_before_discount ||
       0;
+    const tierImgs = Array.isArray(it.tier_variations?.[0]?.images) ? it.tier_variations[0].images : [];
     const imgList = Array.isArray(it.images) && it.images.length > 0
       ? it.images
-      : Array.isArray(pImages?.images)
+      : Array.isArray(pImages?.images) && pImages.images.length > 0
         ? pImages.images
-        : [];
+        : Array.isArray(pImages?.preselected_images) && pImages.preselected_images.length > 0
+          ? pImages.preselected_images
+          : tierImgs;
     const shopFallback =
       it.shop_id || it.shopid || dp.shop_detailed?.shopid || dp.shop_detailed?.shop_id || dp.shopid || dp.shop_id || '';
     const merged = {
@@ -746,7 +752,10 @@ function extractJsonLdProducts(html, kw, fallbackIds = null) {
 
 function extractPdpMetaFallback(html, directProduct, kw) {
   if (!directProduct || !html) return [];
-  const mainHtml = html.replace(/<(header|nav|footer)\b[\s\S]*?<\/\1>/gi, ' ');
+  const mainHtml = html.replace(
+    /<(header|nav|footer|script|style|svg|noscript)\b[\s\S]*?<\/\1>/gi,
+    ' '
+  );
   const h1Match = mainHtml.match(/<h1[^>]*>([\s\S]*?)<\/h1>/i);
   const ogTitleMatch =
     html.match(/<meta[^>]+property=["']og:title["'][^>]+content=(["'])([\s\S]*?)\1/i) ||
@@ -962,21 +971,20 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       lowUrl.includes('event_batch') ||
       lowUrl.includes('/metrics');
 
+    const isExcluded = EXCLUDED_NON_CATALOG_XHR_RE.test(lowUrl);
     let bodyJson = null;
     const bodyRaw = entry.body;
-    const bodyLen =
-      typeof bodyRaw === 'string'
-        ? bodyRaw.length
-        : bodyRaw && typeof bodyRaw === 'object'
-          ? JSON.stringify(bodyRaw).length
-          : 0;
-    if (bodyRaw && typeof bodyRaw === 'object') {
-      bodyJson = bodyRaw;
-    } else if (typeof bodyRaw === 'string' && bodyRaw.trim()) {
-      try {
-        bodyJson = JSON.parse(bodyRaw);
-      } catch {
-        bodyJson = null;
+    const bodyLen = typeof bodyRaw === 'string' ? bodyRaw.length : 0;
+
+    if (!isExcluded || bodyLen < 16384) {
+      if (bodyRaw && typeof bodyRaw === 'object') {
+        bodyJson = bodyRaw;
+      } else if (typeof bodyRaw === 'string' && bodyRaw.trim()) {
+        try {
+          bodyJson = JSON.parse(bodyRaw);
+        } catch {
+          bodyJson = null;
+        }
       }
     }
 
@@ -985,7 +993,9 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       const keysTag =
         bodyJson && typeof bodyJson === 'object'
           ? ` keys=${Object.keys(bodyJson).slice(0, 4).join('|')}`
-          : ` ${method} ${bodyLen}B`;
+          : bodyRaw && typeof bodyRaw === 'object'
+            ? ` ${method} [obj]`
+            : ` ${method} ${bodyLen}B`;
       const summaryLabel = `${redactUrlForLogs(rawUrl)}(${status ?? '?'}${errTag}${keysTag})`;
       if (PRIMARY_SEARCH_XHR_RE.test(lowUrl) && catalogXhrSummary.length < 8) {
         catalogXhrSummary.push(summaryLabel);
@@ -1000,7 +1010,7 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
       xhrLoginRequired = true;
     }
 
-    if (EXCLUDED_NON_CATALOG_XHR_RE.test(lowUrl)) {
+    if (isExcluded) {
       continue;
     }
 
@@ -1008,6 +1018,10 @@ export function parseZenrowsJsonPayload(payload, kw, maxItems = 40) {
 
     if (bodyJson.error && bodyJson.error !== 0) {
       xhrBlocked = true;
+    }
+
+    if (directProduct && pdpXhrItems.some((it) => scoreProductMatch(it, kw) > 0)) {
+      continue;
     }
 
     if (PRIMARY_PDP_XHR_RE.test(lowUrl)) {
@@ -1271,17 +1285,21 @@ async function callZenrowsOnce({ apiKey, paramsObj, extraHeaders = {}, timeoutMs
     return { status: 0, text: '', jsonBody: null, timedOut: true, timeoutMs };
   }
 
-  const { res, text } = out;
+  const status = out.res.status;
+  const ctype = (out.res.headers?.get?.('content-type') || '').toLowerCase();
+  let rawText = out.text;
+  out.text = '';
   let jsonBody = null;
-  const ctype = (res.headers?.get?.('content-type') || '').toLowerCase();
-  if (ctype.includes('application/json') || text.trimStart().startsWith('{')) {
+  if (ctype.includes('application/json') || rawText.trimStart().startsWith('{')) {
     try {
-      jsonBody = JSON.parse(text);
+      jsonBody = JSON.parse(rawText);
+      // Release multi-MB raw JSON string so V8 can reclaim memory under 512MB RAM cap
+      rawText = '';
     } catch {
       jsonBody = null;
     }
   }
-  return { status: res.status, text, jsonBody, timedOut: false };
+  return { status, text: rawText, jsonBody, timedOut: false };
 }
 
 function handleZenrowsFatalStatus(status, jsonBody) {
@@ -1309,16 +1327,14 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
   const log = (msg) => onProgress(`${sanitizeErrorText(msg)}\n`);
   const targetInfo = resolveTargetForInput(kw);
   const isDirectProduct = targetInfo.kind === 'product';
-  const jsInstructionsStd = JSON.stringify(
-    isDirectProduct
-      ? [{ wait: 3500 }, { scroll_y: 500 }, { wait: 1500 }]
-      : [{ wait: 4000 }, { scroll_y: 800 }, { wait: 2000 }]
-  );
-  const jsInstructionsDeep = JSON.stringify(
+  const jsInstructionsPrimary = JSON.stringify(
     isDirectProduct
       ? [{ wait: 4500 }, { scroll_y: 650 }, { wait: 2500 }]
-      : [{ wait: 4500 }, { scroll_y: 900 }, { wait: 3000 }, { scroll_y: 1600 }, { wait: 2000 }]
+      : [{ wait: 5000 }, { scroll_y: 950 }, { wait: 3000 }, { scroll_y: 1700 }, { wait: 2500 }]
   );
+  const waitSelector = isDirectProduct
+    ? 'meta[property="product:price:amount"], script[type="application/ld+json"], .product-briefing, [data-sqe="price"]'
+    : '.shopee-search-item-result__item, [data-sqe="item"], a[href*="-i."], a[href*="/product/"]';
 
   let anyBlocked = false;
   let anyLoginRequired = false;
@@ -1419,7 +1435,7 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
     return { ...htmlRes, items: matched, timedOut: false, code: '200' };
   };
 
-  // Attempt 1: Fast JS Render + Residential VN Proxy + block_resources=image,stylesheet,font (+ Cookie if configured)
+  // Attempt 1 (Direct Stealth): antibot=true + VN residential proxy + full assets (no block_resources) + Cookie
   const r1 = await callZenrowsOnce({
     apiKey,
     paramsObj: {
@@ -1427,75 +1443,85 @@ export async function fetchViaZenrows(kw, apiKey, maxItems, options = {}) {
       js_render: 'true',
       premium_proxy: 'true',
       proxy_country: 'vn',
+      antibot: 'true',
       json_response: 'true',
-      block_resources: 'image,stylesheet,font',
       window_width: '1366',
       window_height: '900',
       ...(cookieHeader ? { custom_headers: 'true' } : {}),
-      js_instructions: jsInstructionsStd
+      js_instructions: jsInstructionsPrimary
     },
-    extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
-    timeoutMs: 85000,
-    fetchImpl
-  });
-  const p1 = inspectAndParse('ZenRows #1 Standard', r1);
-  if (p1.items.length > 0) {
-    return { items: p1.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
-  }
-
-  // Attempt 2: Escalate to antibot=true + block_resources=image,stylesheet,font + deep wait/scroll
-  log(`    [*] Leo thang ZenRows #2 (antibot=true + block_resources${cookieHeader ? ' + Cookie Shopee' : ''}) cho '${kw}'...`);
-  const attempt2Params = {
-    url: targetInfo.targetUrl,
-    js_render: 'true',
-    premium_proxy: 'true',
-    proxy_country: 'vn',
-    antibot: 'true',
-    json_response: 'true',
-    block_resources: 'image,stylesheet,font',
-    window_width: '1366',
-    window_height: '900',
-    ...(cookieHeader ? { custom_headers: 'true' } : {}),
-    ...(p1.code === '400' ? { wait: '6000' } : { js_instructions: jsInstructionsDeep })
-  };
-  const r2 = await callZenrowsOnce({
-    apiKey,
-    paramsObj: attempt2Params,
     extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
     timeoutMs: 110000,
     fetchImpl
   });
-  const p2 = inspectAndParse('ZenRows #2 Antibot', r2);
-  if (p2.items.length > 0) {
-    return { items: p2.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
+  const p1 = inspectAndParse('ZenRows #1 Antibot', r1);
+  if (p1.items.length > 0) {
+    return { items: p1.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
   }
 
-  // Attempt 3: Wait explicitly for Shopee item/product selector (allow stylesheets in case layout check needs CSS)
-  if (!p2.loginRequired && !(p1.timedOut && p2.timedOut)) {
-    const waitSelector = isDirectProduct
-      ? 'script[type="application/ld+json"], [data-sqe="price"], .product-briefing, h1'
-      : '.shopee-search-item-result__item, [data-sqe="item"], a[href*="-i."], a[href*="/product/"]';
-    log(`    [*] Thu ZenRows #3 (antibot=true + wait_for + block_resources=image,media,font) cho '${kw}'...`);
-    const r3 = await callZenrowsOnce({
-      apiKey,
-      paramsObj: {
+  // Attempt 2: Full resources unlocked (block_resources=none) + selector wait_for (or Adaptive mode if no-cookie hit login wall)
+  const useModeAutoOnAttempt2 = !cookieHeader && p1.loginRequired;
+  const attempt2UseCookie = Boolean(cookieHeader) && !p1.loginRequired;
+  log(
+    useModeAutoOnAttempt2
+      ? `    [*] Thu ZenRows #2 (mode=auto · phien sach) cho '${kw}'...`
+      : `    [*] Leo thang ZenRows #2 (antibot=true + block_resources=none + wait_for${attempt2UseCookie ? ' + Cookie Shopee' : ''}) cho '${kw}'...`
+  );
+  const attempt2Params = useModeAutoOnAttempt2
+    ? {
+        url: targetInfo.fallbackUrl,
+        mode: 'auto',
+        proxy_country: 'vn',
+        json_response: 'true',
+        wait: '8000'
+      }
+    : {
         url: targetInfo.fallbackUrl,
         js_render: 'true',
         premium_proxy: 'true',
         proxy_country: 'vn',
         antibot: 'true',
         json_response: 'true',
-        block_resources: 'image,media,font',
+        block_resources: 'none',
         window_width: '1366',
         window_height: '900',
-        wait_for: waitSelector,
-        ...(cookieHeader ? { custom_headers: 'true' } : {})
-      },
-      extraHeaders: cookieHeader ? { Cookie: cookieHeader } : {},
-      timeoutMs: 100000,
+        ...(p1.timedOut || p1.code === '400' ? { wait: '9000' } : { wait_for: waitSelector }),
+        ...(attempt2UseCookie ? { custom_headers: 'true' } : {})
+      };
+  const r2 = await callZenrowsOnce({
+    apiKey,
+    paramsObj: attempt2Params,
+    extraHeaders: attempt2UseCookie ? { Cookie: cookieHeader } : {},
+    timeoutMs: 95000,
+    fetchImpl
+  });
+  const p2 = inspectAndParse(useModeAutoOnAttempt2 ? 'ZenRows #2 Auto' : 'ZenRows #2 FullWait', r2);
+  if (p2.items.length > 0) {
+    return { items: p2.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
+  }
+
+  // Attempt 3: Clean-session Adaptive mode=auto rescue (omits stale Cookie & skips json_response for light PDP HTML)
+  const skipAttempt3 = !cookieHeader && p2.loginRequired;
+  if (!skipAttempt3 && !(p1.timedOut && p2.timedOut)) {
+    const attempt3Label = isDirectProduct ? 'ZenRows #3 CleanHTML' : 'ZenRows #3 AutoClean';
+    log(
+      `    [*] Thu ${attempt3Label} (mode=auto${isDirectProduct ? ' + LightHTML' : ''}, khong gui cookie cu) cho '${kw}'...`
+    );
+    const attempt3Params = {
+      url: targetInfo.fallbackUrl,
+      mode: 'auto',
+      proxy_country: 'vn',
+      wait: '8000',
+      ...(isDirectProduct ? {} : { json_response: 'true' })
+    };
+    const r3 = await callZenrowsOnce({
+      apiKey,
+      paramsObj: attempt3Params,
+      extraHeaders: {},
+      timeoutMs: 95000,
       fetchImpl
     });
-    const p3 = inspectAndParse('ZenRows #3 WaitFor', r3);
+    const p3 = inspectAndParse(attempt3Label, r3);
     if (p3.items.length > 0) {
       return { items: p3.items.slice(0, maxItems), blocked: false, loginRequired: false, timedOut: false };
     }
