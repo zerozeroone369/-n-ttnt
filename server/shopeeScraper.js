@@ -750,7 +750,8 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
         it.item_rating || (pReview?.rating_star ? { rating_star: pReview.rating_star } : undefined)
     };
     const parsed = parseShopeeItem(merged, kw);
-    if (parsed && !seenIds.has(parsed.shopee_id)) {
+    const directProd = parseShopeeProductUrl(kw);
+    if (parsed && !seenIds.has(parsed.shopee_id) && (!directProd || scoreProductMatch(parsed, kw) > 0)) {
       seenIds.add(parsed.shopee_id);
       outItems.push(parsed);
       return;
@@ -759,7 +760,8 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
 
   if (dp.itemid || dp.item_id || dp.itemId) {
     const parsedDirect = parseShopeeItem(dp, kw);
-    if (parsedDirect && !seenIds.has(parsedDirect.shopee_id)) {
+    const directProd = parseShopeeProductUrl(kw);
+    if (parsedDirect && !seenIds.has(parsedDirect.shopee_id) && (!directProd || scoreProductMatch(parsedDirect, kw) > 0)) {
       seenIds.add(parsedDirect.shopee_id);
       outItems.push(parsedDirect);
     }
@@ -769,9 +771,18 @@ function extractPdpItemFromObject(root, kw, seenIds, outItems) {
 function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems, maxDepth = 16) {
   if (!root || typeof root !== 'object' || outItems.length >= maxItems) return;
 
+  const directProd = parseShopeeProductUrl(kw);
+  const acceptItem = (cand) => {
+    if (!cand || seenIds.has(cand.shopee_id)) return false;
+    if (directProd && scoreProductMatch(cand, kw) <= 0) return false;
+    seenIds.add(cand.shopee_id);
+    outItems.push(cand);
+    return true;
+  };
+
   extractPdpItemFromObject(root, kw, seenIds, outItems);
   if (outItems.length >= maxItems) return;
-  if (parseShopeeProductUrl(kw) && outItems.some((it) => scoreProductMatch(it, kw) > 0)) {
+  if (directProd && outItems.some((it) => scoreProductMatch(it, kw) > 0)) {
     return;
   }
 
@@ -787,10 +798,8 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems, max
       for (const el of node) {
         if (outItems.length >= maxItems) break;
         if (el && typeof el === 'object' && !Array.isArray(el)) {
-          const parsed = parseShopeeItem(el, kw);
-          if (parsed && !seenIds.has(parsed.shopee_id)) {
-            seenIds.add(parsed.shopee_id);
-            outItems.push(parsed);
+          if (acceptItem(parseShopeeItem(el, kw))) {
+            if (directProd) return;
             continue;
           }
           if (depth < maxDepth) queue.push({ node: el, depth: depth + 1 });
@@ -799,12 +808,12 @@ function collectShopeeItemsFromObject(root, kw, seenIds, outItems, maxItems, max
         }
       }
     } else {
+      if (node.item || node.item_basic || node.product_price || node.productPrice) {
+        extractPdpItemFromObject(node, kw, seenIds, outItems);
+        if (directProd && outItems.some((it) => scoreProductMatch(it, kw) > 0)) return;
+      }
       if (node.itemid || node.item_id || node.itemId || node.item_card || node.item_data) {
-        const parsedObj = parseShopeeItem(node, kw);
-        if (parsedObj && !seenIds.has(parsedObj.shopee_id)) {
-          seenIds.add(parsedObj.shopee_id);
-          outItems.push(parsedObj);
-        }
+        if (acceptItem(parseShopeeItem(node, kw)) && directProd) return;
       }
       if (depth < maxDepth) {
         for (const val of Object.values(node)) {
