@@ -2276,7 +2276,7 @@ export default function AdminDashboard({
                           )}
                         </button>
                         <span className="text-[11px] text-stone-500">
-                          🔒 Cookie chỉ lưu tạm an toàn trên backend, không hiển thị lại ra giao diện.
+                          🔒 Cookie chỉ lưu tạm trên máy chủ (sẽ cần dán lại sau mỗi lần Render redeploy, hoặc thêm biến môi trường <code className="bg-stone-100 px-1 rounded">SHOPEE_COOKIE</code> trên Render để giữ vĩnh viễn).
                         </span>
                       </div>
                     </form>
