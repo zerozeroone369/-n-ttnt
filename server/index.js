@@ -150,6 +150,12 @@ const PORT = process.env.PORT || 5000;
 
 // Middleware
 app.use(cors({ origin: true, credentials: true }));
+app.use('/api', (req, res, next) => {
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+  res.setHeader('Expires', '0');
+  next();
+});
 const jsonBody2mb = express.json({ limit: '2mb' });
 const jsonBody10mb = express.json({ limit: '10mb' });
 app.use((req, res, next) => {

@@ -87,6 +87,7 @@ async function request(endpoint, options = {}) {
   let response;
   try {
     response = await fetch(`${API_BASE}${endpoint}`, {
+      cache: options.cache || 'no-store',
       ...options,
       headers
     });
@@ -104,6 +105,7 @@ async function request(endpoint, options = {}) {
       : {};
     const err = new Error(errorData.error || `Request failed with status ${response.status}`);
     err.status = response.status;
+    err.isAuthError = response.status === 401 || response.status === 403;
     err.data = errorData;
     throw err;
   }
@@ -118,8 +120,8 @@ async function request(endpoint, options = {}) {
 }
 
 export const ApiClient = {
-  // Health check (tự động thử lại 1 lần nếu Render Free đang khởi động lại)
-  async isServerOnline(retries = 1) {
+  // Health check (tự động thử lại tối đa 2 lần nếu Render Free đang khởi động lại)
+  async isServerOnline(retries = 2) {
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const res = await fetch(`${API_BASE}/health`, {
@@ -257,7 +259,7 @@ export const ApiClient = {
 
   // Products
   products: {
-    getAll: () => request('/products'),
+    getAll: () => request('/products', { cache: 'no-store' }),
     create: (data) => request('/products', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
     publishDrafts: (payload = {}) => request('/products/publish-drafts', {

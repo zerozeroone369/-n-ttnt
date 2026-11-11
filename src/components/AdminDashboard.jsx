@@ -17,9 +17,11 @@ export default function AdminDashboard({
   setOrders,
   onExitAdmin,
   onPrintInvoice,
-  currentUser
+  currentUser,
+  onSessionExpired
 }) {
   const isStaff = currentUser?.role === 'staff';
+  const isOfflineDemo = Boolean(currentUser?.isOfflineDemo);
   const [activeTab, setActiveTab] = useState('orders'); // orders, products, coupons, auditLogs, settings
   const [auditLogs, setAuditLogs] = useState([]);
   const [orderFilter, setOrderFilter] = useState('all');
@@ -80,6 +82,7 @@ export default function AdminDashboard({
   const [shopeeImporting, setShopeeImporting] = useState(false);
   const [shopeePublishStock, setShopeePublishStock] = useState(10);
   const [shopeeLastPublished, setShopeeLastPublished] = useState(false);
+  const [shopeeNeedsReauth, setShopeeNeedsReauth] = useState(false);
   const [shopeeError, setShopeeError] = useState(null);
   const [shopeeSuccess, setShopeeSuccess] = useState(null);
   const [shopeeServerOnline, setShopeeServerOnline] = useState(null);
@@ -427,6 +430,14 @@ export default function AdminDashboard({
   });
 
   useEffect(() => {
+    if (activeTab === 'products' && !isOfflineDemo) {
+      (async () => {
+        if (await ApiClient.isServerOnline(2) && isMountedRef.current) {
+          await syncCatalogFromServer();
+        }
+      })();
+    }
+
     if (activeTab === 'auditLogs' && !isStaff) {
       ApiClient.auditLogs.getAll()
         .then(data => { if (isMountedRef.current) setAuditLogs(data); })
@@ -532,19 +543,84 @@ export default function AdminDashboard({
     }
   };
 
-  // Handle Create Product – ghi vào backend JSON, fallback localStorage
+  const syncCatalogFromServer = async (fallbackUpdatedList = null) => {
+    try {
+      const fresh = await ApiClient.products.getAll();
+      if (Array.isArray(fresh)) {
+        setProducts(fresh);
+        StorageService.saveProducts(fresh);
+        return fresh;
+      }
+    } catch (syncErr) {
+      console.warn('Refresh catalog from server failed:', syncErr);
+    }
+    if (fallbackUpdatedList) {
+      setProducts(fallbackUpdatedList);
+      StorageService.saveProducts(fallbackUpdatedList);
+      return fallbackUpdatedList;
+    }
+    return products;
+  };
+
+  const ensureServerWriteReady = async () => {
+    if (isOfflineDemo) {
+      return { ok: true, offlineDemo: true };
+    }
+    if (!ApiClient.auth.getToken()) {
+      setProductActionFeedback({
+        type: 'error',
+        published: false,
+        needsReauth: true,
+        message: 'Phiên đăng nhập quản trị không còn hợp lệ — thao tác CHƯA được lưu lên máy chủ để tránh lệch dữ liệu với Nhân viên & Khách hàng. Vui lòng đăng nhập lại tài khoản Chủ Shop (admin@tiemnhanho.vn).'
+      });
+      return { ok: false };
+    }
+    const online = await ApiClient.isServerOnline(2);
+    if (!online) {
+      setProductActionFeedback({
+        type: 'error',
+        published: false,
+        needsReauth: false,
+        message: 'Không kết nối được tới máy chủ backend (Render có thể đang thức dậy). Thay đổi CHƯA được lưu lên hệ thống chung — vui lòng thử lại sau vài giây.'
+      });
+      return { ok: false };
+    }
+    return { ok: true, offlineDemo: false };
+  };
+
+  const reportWriteFailure = (err, fallbackText) => {
+    const isAuthErr = Boolean(err?.isAuthError || err?.status === 401 || err?.status === 403);
+    setProductActionFeedback({
+      type: 'error',
+      published: false,
+      needsReauth: isAuthErr,
+      message: isAuthErr
+        ? 'Phiên đăng nhập Chủ Shop đã hết hạn (401/403) — dữ liệu CHƯA được lưu lên máy chủ! Vui lòng đăng nhập lại Admin rồi thao tác lại.'
+        : (err?.message || fallbackText)
+    });
+  };
+
+  // Handle Create Product – Bắt buộc đồng bộ thật lên backend DB (chỉ lưu localStorage khi ở Demo Offline)
   const handleCreateProduct = async (e) => {
     e.preventDefault();
     if (!newProduct.name || !newProduct.price || !newProduct.stock) {
-      alert('Vui lòng nhập tên sản phẩm, giá bán và số lượng tồn kho.');
+      setProductActionFeedback({
+        type: 'error',
+        published: false,
+        message: 'Vui lòng nhập đầy đủ tên sản phẩm, giá bán và số lượng tồn kho.'
+      });
       return;
     }
+
+    setProductActionFeedback(null);
+    const guard = await ensureServerWriteReady();
+    if (!guard.ok) return;
 
     const defaultImg = newProduct.imageUrl.trim() || "/placeholder.svg";
 
     const productPayload = {
       id: `sp-${Date.now()}`,
-      name: newProduct.name,
+      name: newProduct.name.trim(),
       category: newProduct.category,
       price: parseInt(newProduct.price, 10),
       originalPrice: newProduct.originalPrice ? parseInt(newProduct.originalPrice, 10) : null,
@@ -554,93 +630,122 @@ export default function AdminDashboard({
       isFeatured: true,
       isNew: true,
       isFlashSale: false,
+      isDraft: false,
+      status: 'active',
       images: [defaultImg],
       variants: {
         colors: ["Mặc định"],
         sizes: ["Tiêu chuẩn"]
       },
-      shortDesc: newProduct.shortDesc || newProduct.name,
-      desc: newProduct.desc || newProduct.shortDesc || newProduct.name,
+      shortDesc: newProduct.shortDesc || newProduct.name.trim(),
+      desc: newProduct.desc || newProduct.shortDesc || newProduct.name.trim(),
       specs: {
         "Xuất xứ": "Việt Nam",
         "Tình trạng": "Mới 100%"
       },
-      tags: newProduct.tags ? newProduct.tags.split(',').map(t => t.trim().toLowerCase()) : [newProduct.name.toLowerCase()],
+      tags: newProduct.tags ? newProduct.tags.split(',').map(t => t.trim().toLowerCase()) : [newProduct.name.trim().toLowerCase()],
       reviews: []
     };
 
     try {
-      let savedProduct = productPayload;
-      if (await ApiClient.isServerOnline()) {
-        savedProduct = await ApiClient.products.create(productPayload);
+      if (guard.offlineDemo) {
+        const updated = [productPayload, ...products];
+        setProducts(updated);
+        StorageService.saveProducts(updated);
+      } else {
+        const savedProduct = await ApiClient.products.create(productPayload);
+        await syncCatalogFromServer([savedProduct, ...products]);
       }
-      const updated = [savedProduct, ...products];
-      setProducts(updated);
-      StorageService.saveProducts(updated);
-    } catch (err) {
-      console.warn('Create product fallback to localStorage:', err);
-      const updated = [productPayload, ...products];
-      setProducts(updated);
-      StorageService.saveProducts(updated);
-    }
 
-    setIsAddingProduct(false);
-    setNewProduct({
-      name: '',
-      category: 'fashion',
-      price: '',
-      originalPrice: '',
-      stock: '',
-      imageUrl: '',
-      shortDesc: '',
-      desc: '',
-      tags: ''
-    });
+      setProductActionFeedback({
+        type: 'success',
+        published: true,
+        message: `✅ Đã thêm "${productPayload.name}" lên máy chủ — mọi tài khoản (Nhân viên, Khách hàng, Khách mới) đều thấy trên trang chủ!`
+      });
+      setIsAddingProduct(false);
+      setNewProduct({
+        name: '',
+        category: 'fashion',
+        price: '',
+        originalPrice: '',
+        stock: '',
+        imageUrl: '',
+        shortDesc: '',
+        desc: '',
+        tags: ''
+      });
+    } catch (err) {
+      console.error('Create product failed:', err);
+      reportWriteFailure(err, 'Không thể lưu sản phẩm mới lên máy chủ.');
+    }
   };
 
-  // Handle Edit Product Save – ghi vào backend JSON, fallback localStorage
+  // Handle Edit Product Save – Bắt buộc đồng bộ thật lên backend DB
   const handleSaveEditedProduct = async (e) => {
     e.preventDefault();
     if (!editingProduct) return;
 
-    try {
-      let savedProduct = editingProduct;
-      if (await ApiClient.isServerOnline()) {
-        savedProduct = await ApiClient.products.update(editingProduct.id, editingProduct);
-      }
-      const updated = products.map(p => p.id === editingProduct.id ? savedProduct : p);
-      setProducts(updated);
-      StorageService.saveProducts(updated);
-    } catch (err) {
-      console.warn('Update product fallback to localStorage:', err);
-      const updated = products.map(p => p.id === editingProduct.id ? editingProduct : p);
-      setProducts(updated);
-      StorageService.saveProducts(updated);
-    }
+    setProductActionFeedback(null);
+    const guard = await ensureServerWriteReady();
+    if (!guard.ok) return;
 
-    setEditingProduct(null);
+    try {
+      if (guard.offlineDemo) {
+        const updated = products.map(p => p.id === editingProduct.id ? editingProduct : p);
+        setProducts(updated);
+        StorageService.saveProducts(updated);
+      } else {
+        const savedProduct = await ApiClient.products.update(editingProduct.id, editingProduct);
+        await syncCatalogFromServer(products.map(p => p.id === editingProduct.id ? savedProduct : p));
+      }
+
+      setProductActionFeedback({
+        type: 'success',
+        published: !isProductDraft(editingProduct),
+        message: `✅ Đã lưu thay đổi cho "${editingProduct.name}" lên máy chủ.`
+      });
+      setEditingProduct(null);
+    } catch (err) {
+      console.error('Update product failed:', err);
+      reportWriteFailure(err, 'Không thể cập nhật sản phẩm lên máy chủ.');
+    }
   };
 
-  // Delete product – ghi vào backend JSON, fallback localStorage
+  // Delete product – Bắt buộc đồng bộ thật lên backend DB
   const handleDeleteProduct = async (id) => {
     if (!confirm('Bạn có chắc chắn muốn xóa sản phẩm này?')) return;
 
-    try {
-      if (await ApiClient.isServerOnline()) {
-        await ApiClient.products.delete(id);
-      }
-    } catch (err) {
-      console.warn('Delete product API error, removing locally:', err);
-    }
+    setProductActionFeedback(null);
+    const guard = await ensureServerWriteReady();
+    if (!guard.ok) return;
 
-    const updated = products.filter(p => p.id !== id);
-    setProducts(updated);
-    StorageService.saveProducts(updated);
+    try {
+      const optimistic = products.filter(p => p.id !== id);
+      if (guard.offlineDemo) {
+        setProducts(optimistic);
+        StorageService.saveProducts(optimistic);
+      } else {
+        await ApiClient.products.delete(id);
+        await syncCatalogFromServer(optimistic);
+      }
+      setProductActionFeedback({
+        type: 'success',
+        published: false,
+        message: '✅ Đã xóa sản phẩm khỏi hệ thống.'
+      });
+    } catch (err) {
+      console.error('Delete product failed:', err);
+      reportWriteFailure(err, 'Không thể xóa sản phẩm trên máy chủ.');
+    }
   };
 
   // Toggle Publish / Draft status for a single product
   const handleTogglePublishProduct = async (product) => {
     if (!product) return;
+    setProductActionFeedback(null);
+    const guard = await ensureServerWriteReady();
+    if (!guard.ok) return;
+
     const currentlyDraft = isProductDraft(product);
     const publish = currentlyDraft;
     const stockAssigned = Math.min(99999, Math.max(1, parseInt(draftPublishStock, 10) || 10));
@@ -660,26 +765,24 @@ export default function AdminDashboard({
 
     try {
       let savedProduct = payload;
-      if (await ApiClient.isServerOnline() && ApiClient.auth.getToken()) {
+      if (guard.offlineDemo) {
+        const updated = products.map(p => p.id === product.id ? payload : p);
+        setProducts(updated);
+        StorageService.saveProducts(updated);
+      } else {
         savedProduct = await ApiClient.products.update(product.id, payload);
+        await syncCatalogFromServer(products.map(p => p.id === product.id ? savedProduct : p));
       }
-      const updated = products.map(p => p.id === product.id ? savedProduct : p);
-      setProducts(updated);
-      StorageService.saveProducts(updated);
       setProductActionFeedback({
         type: 'success',
         published: publish,
         message: publish
-          ? `✅ Đã đăng bán "${product.name}" lên trang chủ (Tồn kho: ${savedProduct.stock})!`
-          : `Đã chuyển "${product.name}" về Bản Nháp (tạm ẩn khỏi trang chủ).`
+          ? `✅ Đã đăng bán "${product.name}" lên máy chủ (Tồn kho: ${savedProduct.stock}) — Nhân viên & Khách hàng đều thấy ngay trên trang chủ!`
+          : `Đã chuyển "${product.name}" về Bản Nháp trên máy chủ (tạm ẩn khỏi trang chủ cho mọi tài khoản).`
       });
     } catch (err) {
       console.warn('Toggle publish product error:', err);
-      setProductActionFeedback({
-        type: 'error',
-        published: false,
-        message: err.message || 'Không thể cập nhật trạng thái sản phẩm.'
-      });
+      reportWriteFailure(err, 'Không thể cập nhật trạng thái sản phẩm trên máy chủ.');
     }
   };
 
@@ -691,18 +794,10 @@ export default function AdminDashboard({
 
     const stockAssigned = Math.min(99999, Math.max(1, parseInt(draftPublishStock, 10) || 10));
     try {
-      if (await ApiClient.isServerOnline() && ApiClient.auth.getToken()) {
-        const res = await ApiClient.products.publishDrafts({ defaultStock: stockAssigned });
-        const freshProducts = await ApiClient.products.getAll();
-        setProducts(freshProducts);
-        StorageService.saveProducts(freshProducts);
-        setProductStatusFilter('all');
-        setProductActionFeedback({
-          type: 'success',
-          published: true,
-          message: `🚀 Đã đăng bán ${res.publishedCount || draftProductsCount} sản phẩm Bản Nháp lên đầu trang chủ (tồn kho mặc định ${res.stockAssigned || stockAssigned} món/sp)!`
-        });
-      } else {
+      const guard = await ensureServerWriteReady();
+      if (!guard.ok) return;
+
+      if (guard.offlineDemo) {
         const nowIso = new Date().toISOString();
         const updated = products.map(p => (
           isProductDraft(p)
@@ -722,16 +817,21 @@ export default function AdminDashboard({
         setProductActionFeedback({
           type: 'success',
           published: true,
-          message: `🚀 Đã đăng bán ${draftProductsCount} sản phẩm Bản Nháp trên trình duyệt (chế độ cục bộ).`
+          message: `🚀 Đã đăng bán ${draftProductsCount} sản phẩm Bản Nháp trên trình duyệt (chế độ Demo Offline cục bộ).`
+        });
+      } else {
+        const res = await ApiClient.products.publishDrafts({ defaultStock: stockAssigned });
+        await syncCatalogFromServer();
+        setProductStatusFilter('all');
+        setProductActionFeedback({
+          type: 'success',
+          published: true,
+          message: `🚀 Đã đăng bán ${res.publishedCount ?? draftProductsCount} sản phẩm Bản Nháp lên máy chủ (tồn kho mặc định ${res.stockAssigned || stockAssigned} món/sp) — Nhân viên & Khách hàng đều thấy ngay trên trang chủ!`
         });
       }
     } catch (err) {
       console.error('Publish all drafts error:', err);
-      setProductActionFeedback({
-        type: 'error',
-        published: false,
-        message: err.message || 'Lỗi khi mở bán hàng loạt bản nháp.'
-      });
+      reportWriteFailure(err, 'Lỗi khi mở bán hàng loạt bản nháp lên máy chủ.');
     } finally {
       setBulkPublishingDrafts(false);
     }
@@ -955,6 +1055,7 @@ export default function AdminDashboard({
     setScrapeMode('server');
     setShopeeLoading(true);
     setShopeeError(null);
+    setShopeeNeedsReauth(false);
     setShopeeSuccess(null);
     setShopeeLastPublished(false);
     setShopeeResults([]);
@@ -986,7 +1087,8 @@ export default function AdminDashboard({
       }
 
       if (!ApiClient.auth.getToken()) {
-        setShopeeError('Bạn chưa có phiên xác thực Chủ Shop trên máy chủ. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản Chủ Shop để chạy trình cào.');
+        setShopeeNeedsReauth(true);
+        setShopeeError('Bạn chưa có phiên xác thực Chủ Shop trên máy chủ. Vui lòng đăng nhập lại tài khoản Chủ Shop để chạy trình cào.');
         setShopeeLoading(false);
         return;
       }
@@ -1002,6 +1104,9 @@ export default function AdminDashboard({
       await pollScrapeSession(activeSessionId, keywords, shopeeLimit);
     } catch (err) {
       console.error('Shopee scrape error:', err);
+      if (err?.isAuthError || err?.status === 401 || err?.status === 403) {
+        setShopeeNeedsReauth(true);
+      }
       if (err?.data?.code === 'SCRAPER_CONFIG_REQUIRED') {
         setScraperConfigOpen(true);
       }
@@ -1016,6 +1121,7 @@ export default function AdminDashboard({
     setScrapeMode('bridge');
     setShopeeLoading(true);
     setShopeeError(null);
+    setShopeeNeedsReauth(false);
     setShopeeSuccess(null);
     setShopeeLastPublished(false);
     setShopeeResults([]);
@@ -1060,7 +1166,8 @@ export default function AdminDashboard({
       }
 
       if (!ApiClient.auth.getToken()) {
-        setShopeeError('Bạn chưa có phiên xác thực Chủ Shop trên máy chủ. Vui lòng đăng xuất và đăng nhập lại bằng tài khoản Chủ Shop để tiếp nhận dữ liệu Extension.');
+        setShopeeNeedsReauth(true);
+        setShopeeError('Bạn chưa có phiên xác thực Chủ Shop trên máy chủ. Vui lòng đăng nhập lại tài khoản Chủ Shop để tiếp nhận dữ liệu Extension.');
         setShopeeLoading(false);
         return;
       }
@@ -1206,6 +1313,9 @@ export default function AdminDashboard({
     } catch (err) {
       console.error('Chrome Extension Bridge scrape error:', err);
       if (isMountedRef.current) {
+        if (err?.isAuthError || err?.status === 401 || err?.status === 403) {
+          setShopeeNeedsReauth(true);
+        }
         setShopeeError(err.message || 'Không thể hoàn tất phiên cào qua Chrome Extension Bridge.');
         setShopeeLoading(false);
       }
@@ -1220,20 +1330,22 @@ export default function AdminDashboard({
 
     setShopeeImporting(true);
     setShopeeError(null);
+    setShopeeNeedsReauth(false);
     setShopeeLastPublished(false);
 
     try {
       const selectedProducts = shopeeResults.filter((_, i) => shopeeSelected.has(i));
-      const online = await ApiClient.isServerOnline(1);
+      const online = await ApiClient.isServerOnline(2);
       setShopeeServerOnline(online);
 
       if (!online) {
-        setShopeeError('Máy chủ backend đang ngoại tuyến hoặc đang khởi động lại. Vui lòng kết nối lại backend trước khi nhập sản phẩm Shopee vào kho.');
+        setShopeeError('Máy chủ backend đang ngoại tuyến hoặc đang khởi động lại (vui lòng chờ 20–40s cho Render Free thức dậy). Sản phẩm CHƯA được lưu lên hệ thống.');
         return;
       }
 
       if (!ApiClient.auth.getToken()) {
-        setShopeeError('Bạn chưa đăng nhập tài khoản Chủ Shop trên backend để lưu sản phẩm vào CSDL máy chủ.');
+        setShopeeNeedsReauth(true);
+        setShopeeError('Phiên đăng nhập Chủ Shop trên máy chủ không hợp lệ — sản phẩm CHƯA được lưu lên kho chung! Vui lòng đăng nhập lại Admin.');
         return;
       }
 
@@ -1277,7 +1389,13 @@ export default function AdminDashboard({
       setShopeeSelected(new Set());
     } catch (err) {
       console.error('Shopee import error:', err);
-      setShopeeError(err.message || 'Lỗi nhập sản phẩm.');
+      const isAuthErr = Boolean(err?.isAuthError || err?.status === 401 || err?.status === 403);
+      if (isAuthErr) {
+        setShopeeNeedsReauth(true);
+        setShopeeError('Phiên đăng nhập Chủ Shop đã hết hạn (401/403) — dữ liệu CHƯA được nhập lên máy chủ! Vui lòng đăng nhập lại Admin rồi thao tác lại.');
+      } else {
+        setShopeeError(err.message || 'Lỗi nhập sản phẩm lên máy chủ.');
+      }
     } finally {
       setShopeeImporting(false);
     }
@@ -1595,6 +1713,16 @@ export default function AdminDashboard({
               }`}>
                 <span className="font-semibold">{productActionFeedback.message}</span>
                 <div className="flex items-center gap-2">
+                  {productActionFeedback.needsReauth && onSessionExpired && (
+                    <button
+                      type="button"
+                      onClick={onSessionExpired}
+                      className="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
+                    >
+                      <Key className="w-3.5 h-3.5" />
+                      <span>Đăng nhập lại Admin</span>
+                    </button>
+                  )}
                   {productActionFeedback.published && (
                     <button
                       type="button"
@@ -3032,8 +3160,20 @@ export default function AdminDashboard({
                   <div className="flex-1">
                     <p className="text-sm font-semibold text-red-800">Không có kết quả hoặc có lỗi</p>
                     <p className="text-sm text-red-700 mt-0.5">{shopeeError}</p>
+                    {shopeeNeedsReauth && onSessionExpired && (
+                      <div className="mt-2.5">
+                        <button
+                          type="button"
+                          onClick={onSessionExpired}
+                          className="px-3.5 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold inline-flex items-center gap-1.5 shadow-xs"
+                        >
+                          <Key className="w-3.5 h-3.5" />
+                          <span>Đăng nhập lại Admin</span>
+                        </button>
+                      </div>
+                    )}
                   </div>
-                  <button onClick={() => setShopeeError(null)} className="ml-auto text-red-400 hover:text-red-600">
+                  <button onClick={() => { setShopeeError(null); setShopeeNeedsReauth(false); }} className="ml-auto text-red-400 hover:text-red-600">
                     <XCircle className="w-4 h-4" />
                   </button>
                 </div>

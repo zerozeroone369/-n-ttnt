@@ -99,7 +99,7 @@ export default function App() {
 
       if (!token) return;
 
-      const online = await ApiClient.isServerOnline();
+      const online = await ApiClient.isServerOnline(2);
       if (!online || !active) return;
 
       try {
@@ -121,10 +121,11 @@ export default function App() {
     return () => { active = false; };
   }, []);
 
-  // Initial Sync from Backend Database Server
+  // Sync from Backend Database Server (on startup, role switch, registration, and returning to storefront)
   useEffect(() => {
+    let active = true;
     const syncDataWithServer = async () => {
-      if (!(await ApiClient.isServerOnline())) return;
+      if (!(await ApiClient.isServerOnline(2)) || !active) return;
 
       const hasServerToken = Boolean(ApiClient.auth.getToken());
       const [productsResult, ordersResult] = await Promise.allSettled([
@@ -132,9 +133,12 @@ export default function App() {
         (currentUser && hasServerToken) ? ApiClient.orders.getAll() : Promise.resolve([])
       ]);
 
-      if (productsResult.status === 'fulfilled') {
+      if (!active) return;
+
+      if (productsResult.status === 'fulfilled' && Array.isArray(productsResult.value)) {
         setProducts(productsResult.value);
-      } else {
+        StorageService.saveProducts(productsResult.value);
+      } else if (productsResult.status === 'rejected') {
         console.warn('Product sync error (using local storage):', productsResult.reason);
       }
 
@@ -151,7 +155,8 @@ export default function App() {
       }
     };
     syncDataWithServer();
-  }, [currentUser?.id, currentUser?.role]);
+    return () => { active = false; };
+  }, [currentUser?.id, currentUser?.role, isAdminView]);
 
   // Persist cart
   useEffect(() => {
@@ -351,9 +356,7 @@ export default function App() {
     setCurrentUser(user);
     setOrders(getOrdersForUser(StorageService.getOrders(), user));
     showToast(`Xin chào, ${user.name}! 👋`);
-    if (user.role === 'admin' || user.role === 'staff') {
-      setIsAdminView(true);
-    }
+    setIsAdminView(user?.role === 'admin' || user?.role === 'staff');
   };
 
   const handleLogout = async () => {
@@ -428,6 +431,14 @@ export default function App() {
           onExitAdmin={() => setIsAdminView(false)}
           onPrintInvoice={handlePrintInvoice}
           currentUser={currentUser}
+          onSessionExpired={() => {
+            ApiClient.auth.clearLocalSession();
+            setCurrentUser(null);
+            setOrders([]);
+            setIsAdminView(false);
+            setIsAuthModalOpen(true);
+            showToast('Phiên đăng nhập quản trị đã hết hạn, vui lòng đăng nhập lại.');
+          }}
         />
       ) : (
         <main className="flex-1">
