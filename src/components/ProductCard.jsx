@@ -126,13 +126,13 @@ export default function ProductCard({
         </div>
 
         {/* Price & Add to Cart button */}
-        <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between">
-          <div>
-            <div className="text-base font-extrabold text-stone-900">
+        <div className="mt-3 pt-3 border-t border-stone-100 flex items-center justify-between gap-2 min-w-0">
+          <div className="min-w-0">
+            <div className="text-sm sm:text-base font-extrabold text-stone-900 truncate">
               {formatCurrency(product.price)}
             </div>
             {product.originalPrice && (
-              <div className="text-[11px] text-stone-400 line-through">
+              <div className="text-[11px] text-stone-400 line-through truncate">
                 {formatCurrency(product.originalPrice)}
               </div>
             )}
@@ -141,7 +141,7 @@ export default function ProductCard({
           <button
             onClick={handleQuickAdd}
             aria-label="Thêm vào giỏ"
-            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shadow-sm ${
+            className={`w-9 h-9 rounded-xl flex items-center justify-center transition-all shadow-sm shrink-0 ${
               added 
                 ? 'bg-emerald-600 text-white scale-95' 
                 : 'bg-stone-100 hover:bg-amber-800 hover:text-white text-stone-800'

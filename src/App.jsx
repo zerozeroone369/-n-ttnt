@@ -49,21 +49,59 @@ export default function App() {
   const [deferredPrompt, setDeferredPrompt] = useState(null);
   const [showInstallBanner, setShowInstallBanner] = useState(false);
   const [isAppDownloadOpen, setIsAppDownloadOpen] = useState(false);
+  const [isStandalonePwa, setIsStandalonePwa] = useState(() => {
+    if (typeof window === 'undefined') return false;
+    return Boolean(
+      window.matchMedia?.('(display-mode: standalone)')?.matches ||
+      window.matchMedia?.('(display-mode: fullscreen)')?.matches ||
+      window.navigator?.standalone === true
+    );
+  });
 
-  // PWA install prompt handler (Đã gộp listener duy nhất, tối ưu kiểm tra thiết bị)
+  // PWA install prompt handler (Đã gộp listener duy nhất, tự ẩn khi đã chạy dạng App Standalone)
   useEffect(() => {
+    const syncStandalone = () => {
+      const standalone = Boolean(
+        window.matchMedia?.('(display-mode: standalone)')?.matches ||
+        window.matchMedia?.('(display-mode: fullscreen)')?.matches ||
+        window.navigator?.standalone === true
+      );
+      setIsStandalonePwa(standalone);
+      if (standalone) {
+        setShowInstallBanner(false);
+      }
+    };
+    syncStandalone();
+
     const handleBeforeInstallPrompt = (e) => {
       e.preventDefault();
       setDeferredPrompt(e);
+      const standaloneNow = Boolean(
+        window.matchMedia?.('(display-mode: standalone)')?.matches ||
+        window.matchMedia?.('(display-mode: fullscreen)')?.matches ||
+        window.navigator?.standalone === true
+      );
+      if (standaloneNow) return;
       const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768;
       if (isMobile) {
         setShowInstallBanner(true);
       }
     };
 
+    const handleAppInstalled = () => {
+      setShowInstallBanner(false);
+      setDeferredPrompt(null);
+      setIsStandalonePwa(true);
+    };
+
     window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+    window.addEventListener('appinstalled', handleAppInstalled);
+    const mq = window.matchMedia?.('(display-mode: standalone)');
+    mq?.addEventListener?.('change', syncStandalone);
     return () => {
       window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
+      window.removeEventListener('appinstalled', handleAppInstalled);
+      mq?.removeEventListener?.('change', syncStandalone);
     };
   }, []);
 
@@ -386,12 +424,12 @@ export default function App() {
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
   return (
-    <div className="min-h-screen bg-[#faf8f5] text-stone-800 flex flex-col selection:bg-amber-100 selection:text-amber-900">
+    <div className="min-h-screen w-full max-w-full overflow-x-clip bg-[#faf8f5] text-stone-800 flex flex-col selection:bg-amber-100 selection:text-amber-900">
       
       {/* Toast Notification */}
       {toastMessage && (
-        <div className="fixed top-24 right-5 z-50 bg-stone-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-stone-800 flex items-center gap-2.5 text-xs font-semibold animate-slideDown">
-          <div className="w-5 h-5 rounded-full bg-emerald-500 text-stone-950 flex items-center justify-center">
+        <div className="fixed top-20 sm:top-24 right-3 sm:right-5 left-3 sm:left-auto sm:max-w-sm z-50 bg-stone-900 text-white px-4 py-3 rounded-2xl shadow-xl border border-stone-800 flex items-center gap-2.5 text-xs font-semibold animate-slideDown">
+          <div className="w-5 h-5 rounded-full bg-emerald-500 text-stone-950 flex items-center justify-center flex-shrink-0">
             <Check className="w-3.5 h-3.5" />
           </div>
           <span>{toastMessage}</span>
@@ -441,7 +479,7 @@ export default function App() {
           }}
         />
       ) : (
-        <main className="flex-1">
+        <main className="flex-1 w-full min-w-0">
           {/* Hero Banner with Flash Sale countdown */}
           <Banner
             onOpenChat={() => {
@@ -560,18 +598,18 @@ export default function App() {
       )}
 
       {/* PWA Install Banner */}
-      {!isAdminView && showInstallBanner && (
-        <div className="fixed bottom-0 left-0 right-0 z-50 bg-stone-900 text-white p-4 flex items-center justify-between shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-stone-700 pb-safe">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-xl shadow-inner">
+      {!isAdminView && showInstallBanner && !isStandalonePwa && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 w-full max-w-full bg-stone-900 text-white px-4 pt-3.5 flex flex-wrap items-center justify-between gap-3 shadow-[0_-4px_10px_rgba(0,0,0,0.1)] border-t border-stone-700 pb-safe">
+          <div className="flex items-center gap-3 min-w-0 flex-1">
+            <div className="w-10 h-10 bg-amber-500 rounded-xl flex items-center justify-center text-xl shadow-inner shrink-0">
               🛍️
             </div>
-            <div>
-              <p className="font-bold text-sm">📱 Cài Tiệm Nhà Nhỏ lên điện thoại</p>
-              <p className="text-xs text-stone-300">Cài đặt ứng dụng để trải nghiệm tốt hơn</p>
+            <div className="min-w-0">
+              <p className="font-bold text-sm truncate">📱 Cài Tiệm Nhà Nhỏ lên điện thoại</p>
+              <p className="text-xs text-stone-300 truncate">Cài đặt ứng dụng để trải nghiệm tốt hơn</p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 shrink-0 ml-auto">
             <button 
               onClick={() => setShowInstallBanner(false)}
               className="px-3 py-1.5 text-xs font-medium text-stone-300 hover:text-white"

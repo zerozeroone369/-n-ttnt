@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tiem-nha-nho-v1';
+const CACHE_NAME = 'tiem-nha-nho-v2';
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html'
@@ -20,16 +20,15 @@ self.addEventListener('activate', (event) => {
           .filter((name) => name !== CACHE_NAME)
           .map((name) => caches.delete(name))
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
 self.addEventListener('fetch', (event) => {
   const url = new URL(event.request.url);
 
   // API requests: Luôn gọi trực tiếp mạng (Network-only), TUYỆT ĐỐI không cache các API chứa thông tin cá nhân/nhạy cảm
-  if (url.pathname.startsWith('/api/')) {
+  if (url.pathname.startsWith('/api/') || url.pathname === '/sw.js') {
     // Không can thiệp cache đối với toàn bộ request API (đơn hàng, tài khoản, audit logs, v.v.)
     event.respondWith(fetch(event.request));
     return;

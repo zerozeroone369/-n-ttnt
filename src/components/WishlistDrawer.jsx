@@ -20,7 +20,7 @@ export default function WishlistDrawer({
     <div className="fixed inset-0 z-50 overflow-hidden bg-black/50 backdrop-blur-sm transition-opacity">
       <div className="absolute inset-0" onClick={onClose} />
 
-      <div className="fixed inset-y-0 right-0 max-w-full flex pl-10">
+      <div className="fixed inset-y-0 right-0 max-w-full flex pl-4 sm:pl-10">
         <div className="w-screen max-w-md bg-white shadow-2xl flex flex-col justify-between">
           
           {/* Drawer Header */}

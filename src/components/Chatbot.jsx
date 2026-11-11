@@ -646,7 +646,7 @@ export default function Chatbot({
     <>
       {/* Floating Launcher Trigger */}
       {!isOpen && (
-        <div className="fixed bottom-5 right-5 z-40 flex items-center gap-3">
+        <div className="fixed bottom-4 right-4 sm:bottom-5 sm:right-5 z-40 flex items-center gap-3">
           {/* Greeting Bubble */}
           <div 
             onClick={() => setIsOpen(true)}
@@ -669,7 +669,7 @@ export default function Chatbot({
 
       {/* Floating Chat Box Window */}
       {isOpen && (
-        <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 w-[94vw] sm:w-[440px] h-[620px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-slideUp">
+        <div className="fixed bottom-3 left-3 right-3 sm:left-auto sm:bottom-6 sm:right-6 z-50 sm:w-[440px] max-w-full h-[620px] max-h-[88vh] bg-white rounded-3xl shadow-2xl border border-stone-200/90 flex flex-col overflow-hidden animate-slideUp">
           
           {/* Header */}
           <div className="bg-stone-900 text-white px-4 py-3.5 flex items-center justify-between flex-shrink-0">
