@@ -63,10 +63,7 @@ export default function Header({
               <Store className="w-6 h-6 text-amber-100" />
             </div>
             <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-stone-900 font-serif">Tiệm Nhà Nhỏ</span>
-                <span className="text-[10px] uppercase font-bold tracking-widest bg-amber-100 text-amber-900 px-1.5 py-0.5 rounded-full border border-amber-300">Boutique</span>
-              </div>
+              <span className="font-extrabold text-xl sm:text-2xl tracking-tight text-stone-900 font-serif block">Tiệm Nhà Nhỏ</span>
               <p className="text-xs text-stone-500 hidden sm:block">Living & Lifestyle Selection</p>
             </div>
           </div>
