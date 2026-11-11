@@ -7,6 +7,7 @@ import { createSession, destroySession, authenticateUser, requireAuth, requireRo
 import { filterShopeeCatalog } from '../src/utils/shopeeFilter.js';
 import { normalizeShopeeCookieHeader } from '../src/utils/shopeeCookie.js';
 import { processBridgeShopeePayloads, scrapeShopeeLive } from './shopeeScraper.js';
+import { importShopeeProductsBatch, publishDraftProductsBatch } from './shopeeImporter.js';
 import { getChromeExtensionZipBuffer } from './extensionZip.js';
 import { spawn } from 'child_process';
 import { readFileSync, writeFileSync, statSync, existsSync, mkdirSync } from 'fs';
@@ -253,15 +254,62 @@ app.get('/api/products', (req, res) => {
 
 // Create product (Admin only)
 app.post('/api/products', requireRole(['admin']), (req, res) => {
-  const newProduct = db.insert('products', req.body);
+  const isDraft = req.body?.status === 'draft' || req.body?.isDraft === true;
+  const newProduct = db.insert('products', {
+    ...req.body,
+    status: isDraft ? 'draft' : (req.body?.status || 'active'),
+    isDraft,
+    ...(isDraft ? {} : { publishedAt: req.body?.publishedAt || new Date().toISOString() })
+  });
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_CREATE', newProduct.id, `Thêm sản phẩm mới: ${newProduct.name}`);
   res.status(201).json(newProduct);
+});
+
+// Publish draft products (e.g. scraped Shopee drafts) onto public storefront (Admin only)
+app.post('/api/products/publish-drafts', requireRole(['admin']), (req, res) => {
+  const result = publishDraftProductsBatch(db, req.body || {});
+  db.logAudit(
+    req.user.id,
+    req.user.name,
+    req.user.role,
+    'PRODUCTS_PUBLISH_BATCH',
+    'batch',
+    `Mở bán lên trang chủ ${result.publishedCount} sản phẩm bản nháp (tồn kho mặc định ${result.stockAssigned})`
+  );
+  res.json(result);
 });
 
 // Update product (Admin only)
 app.put('/api/products/:id', requireRole(['admin']), (req, res) => {
   const { id } = req.params;
-  const updated = db.update('products', p => p.id === id, req.body);
+  const updated = db.update('products', p => p.id === id, (prev) => {
+    const incoming = req.body || {};
+    const prevWasDraft = prev.status === 'draft' || prev.isDraft === true;
+    const nextIsDraft = incoming.status === 'draft' || incoming.isDraft === true
+      ? true
+      : (incoming.status === 'active' || incoming.isDraft === false ? false : prevWasDraft);
+    const nowIso = new Date().toISOString();
+
+    return {
+      ...prev,
+      ...incoming,
+      status: nextIsDraft ? 'draft' : 'active',
+      isDraft: nextIsDraft,
+      publishedAt: (!nextIsDraft && (prevWasDraft || !prev.publishedAt))
+        ? (incoming.publishedAt || nowIso)
+        : (incoming.publishedAt ?? prev.publishedAt ?? null),
+      updatedAt: nowIso,
+      specs: {
+        ...(prev.specs || {}),
+        ...(incoming.specs || {}),
+        ...(!nextIsDraft && prevWasDraft
+          ? { 'Trạng thái kiểm duyệt': 'Đã duyệt — Đang mở bán trên trang chủ' }
+          : nextIsDraft && !prevWasDraft
+            ? { 'Trạng thái kiểm duyệt': 'Bản nháp - Tạm ẩn khỏi trang chủ' }
+            : {})
+      }
+    };
+  });
   if (!updated) {
     return res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
   }
@@ -814,9 +862,10 @@ app.post('/api/chat', async (req, res) => {
   const normalizedScope = scope === 'general' ? 'general' : 'store';
   const vnd = (n) => new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(n);
 
-  const inStock = Array.isArray(products) && products.length > 0
-    ? products.filter(p => Number(p.stock) > 0)
-    : (db.get('products') || []).filter(p => Number(p.stock) > 0);
+  const inStock = (Array.isArray(products) && products.length > 0
+    ? products
+    : (db.get('products') || [])
+  ).filter(p => p && p.status !== 'draft' && p.isDraft !== true && Number(p.stock) > 0);
 
   const catLabels = {
     fashion: '👕 Thời Trang & Phụ Kiện',
@@ -1328,78 +1377,14 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
   });
 });
 
-// Import scraped products - Chống trùng lặp, không bịa dữ liệu, lưu dạng Bản Nháp (Draft)
+// Import scraped products - Chống trùng lặp, hỗ trợ giữ Bản Nháp hoặc mở bán ngay theo lệnh Admin
 app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
-  const { products } = req.body;
+  const { products, publish = false, defaultStock = 0 } = req.body || {};
   if (!Array.isArray(products) || products.length === 0) {
     return res.status(400).json({ error: 'Không có danh sách sản phẩm hợp lệ để nhập.' });
   }
 
-  const existingProducts = db.get('products') || [];
-  const insertedProducts = [];
-  let skippedDuplicates = 0;
-
-  products.forEach((product, index) => {
-    const rawName = (product.name || '').trim();
-    if (!rawName) return;
-
-    // Chống trùng lặp: Kiểm tra theo Mã Shopee hoặc Tên sản phẩm đã có
-    const isDuplicate = existingProducts.some(p =>
-      (product.shopee_id && p.specs?.['Mã Shopee'] === product.shopee_id) ||
-      p.name.toLowerCase() === rawName.toLowerCase()
-    );
-
-    if (isDuplicate) {
-      skippedDuplicates++;
-      return;
-    }
-
-    // TUYỆT ĐỐI KHÔNG BỊA DỮ LIỆU:
-    // - Tồn kho: Mặc định là 0 (để nhân viên/chủ shop tự kiểm kê nhập số lượng thực)
-    // - Giá gốc: Chỉ giữ nếu scraper trích xuất được giá gốc thật, không tự ý x1.3
-    // - Trạng thái: Lưu ở dạng Bản Nháp (draft), chưa kích hoạt bán trực tiếp trên storefront
-    const mappedProduct = {
-      id: `sp-${Date.now()}-${index}`,
-      name: rawName,
-      category: product.category || 'decor',
-      price: Number(product.price) || 0,
-      originalPrice: product.orig ? Number(product.orig) : null,
-      stock: Number(product.stock) || 0,
-      rating: product.rating ? Number(product.rating) : 5.0,
-      reviewsCount: Number(product.reviews) || 0,
-      soldCount: Number(product.sold) || 0,
-      isFeatured: false,
-      isNew: true,
-      isFlashSale: false,
-      isDraft: true,
-      status: 'draft',
-      images: (Array.isArray(product.images) && product.images.length > 0)
-        ? product.images
-        : ['/placeholder.svg'],
-      variants: { colors: ['Mặc định'], sizes: ['Tiêu chuẩn'] },
-      shortDesc: product.shortDesc || `Sản phẩm tham khảo Shopee - ${rawName.substring(0, 60)}`,
-      desc: product.desc || rawName,
-      specs: {
-        'Nguồn gốc': 'Shopee',
-        'Mã Shopee': product.shopee_id || '',
-        'URL gốc': product.source_url || '',
-        'Từ khóa': product.keyword || '',
-        'Trạng thái kiểm duyệt': 'Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán'
-      },
-      tags: [
-        product.category || 'decor',
-        'shopee',
-        ...(/^https?:\/\//i.test(String(product.keyword || '').trim())
-          ? []
-          : String(product.keyword || '').split(/\s+/).filter(w => w.length > 2))
-      ],
-      reviews: []
-    };
-
-    db.insert('products', mappedProduct);
-    insertedProducts.push(mappedProduct);
-    existingProducts.push(mappedProduct);
-  });
+  const result = importShopeeProductsBatch(db, { products, publish, defaultStock });
 
   db.logAudit(
     req.user?.id || 'admin',
@@ -1407,15 +1392,10 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
     req.user?.role || 'admin',
     'SHOPEE_IMPORT',
     'batch',
-    `Nhập ${insertedProducts.length} sản phẩm từ Shopee (Bỏ qua ${skippedDuplicates} sản phẩm trùng lặp)`
+    `Nhập ${result.imported} sản phẩm từ Shopee (${result.publish ? 'Mở bán ngay' : 'Bản nháp'}, duyệt nháp cũ: ${result.publishedExisting}, bỏ qua trùng: ${result.skippedDuplicates})`
   );
 
-  res.json({
-    success: true,
-    imported: insertedProducts.length,
-    skippedDuplicates,
-    products: insertedProducts
-  });
+  res.json(result);
 });
 
 // GET scraping status by sessionId (or latest session state in memory — never stale disk leakage)
@@ -1744,6 +1724,9 @@ app.get('/api/health', (req, res) => {
 const PUBLIC_PRODUCTS_PATH = join(PROJECT_ROOT, 'public', 'products');
 mkdirSync(PUBLIC_PRODUCTS_PATH, { recursive: true });
 app.use('/products', express.static(PUBLIC_PRODUCTS_PATH));
+app.use('/products', (req, res) => {
+  res.status(404).end();
+});
 
 // Serve static frontend build if dist exists (hỗ trợ deploy 24/7 trên Render / Cloud Server)
 const DIST_PATH = join(PROJECT_ROOT, 'dist');

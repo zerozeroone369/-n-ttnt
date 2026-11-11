@@ -1,6 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import ProductCard from './ProductCard';
 import { CATEGORIES } from '../data/initialData';
+import { isProductDraft, sortStorefrontProducts } from '../utils/productDisplay';
 import { SlidersHorizontal, Sparkles, Shirt, Home, Coffee, Smartphone, SearchX, Flame } from 'lucide-react';
 
 const ICON_MAP = {
@@ -22,14 +23,14 @@ export default function ProductList({
   onToggleWishlist
 }) {
   const [priceFilter, setPriceFilter] = useState('all'); // all, under200, 200to500, over500
-  const [sortBy, setSortBy] = useState('featured'); // featured, priceAsc, priceDesc, rating
+  const [sortBy, setSortBy] = useState('newest'); // newest, featured, priceAsc, priceDesc, rating
   const [onlyFlashSale, setOnlyFlashSale] = useState(false);
 
   // Filter & Sort Logic
   const filteredProducts = useMemo(() => {
-    return products.filter((product) => {
+    const filtered = products.filter((product) => {
       // 0. Hide Draft products (e.g. unverified Shopee scraped items) from public storefront
-      if (product.status === 'draft' || product.isDraft === true) {
+      if (isProductDraft(product)) {
         return false;
       }
 
@@ -46,7 +47,8 @@ export default function ProductList({
       // 3. Search query
       if (searchQuery.trim()) {
         const query = searchQuery.toLowerCase().trim();
-        const fullText = (product.name + ' ' + product.shortDesc + ' ' + product.tags.join(' ')).toLowerCase();
+        const tagText = Array.isArray(product.tags) ? product.tags.join(' ') : '';
+        const fullText = `${product.name || ''} ${product.shortDesc || ''} ${tagText}`.toLowerCase();
         if (!fullText.includes(query)) return false;
       }
 
@@ -56,13 +58,9 @@ export default function ProductList({
       if (priceFilter === 'over500' && product.price < 500000) return false;
 
       return true;
-    }).sort((a, b) => {
-      if (sortBy === 'priceAsc') return a.price - b.price;
-      if (sortBy === 'priceDesc') return b.price - a.price;
-      if (sortBy === 'rating') return b.rating - a.rating;
-      // Default: featured first
-      return (b.isFeatured ? 1 : 0) - (a.isFeatured ? 1 : 0);
     });
+
+    return sortStorefrontProducts(filtered, sortBy);
   }, [products, activeCategory, searchQuery, priceFilter, sortBy, onlyFlashSale]);
 
   return (
@@ -145,6 +143,7 @@ export default function ProductList({
             onChange={(e) => setSortBy(e.target.value)}
             className="bg-white border border-stone-200 rounded-xl px-3 py-1.5 text-xs text-stone-700 font-medium focus:outline-none focus:ring-2 focus:ring-amber-700 shadow-sm cursor-pointer"
           >
+            <option value="newest">Mới nhất / Vừa đăng bán</option>
             <option value="featured">Nổi bật nhất</option>
             <option value="priceAsc">Giá: Thấp đến Cao</option>
             <option value="priceDesc">Giá: Cao đến Thấp</option>

@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Package, ShoppingCart, DollarSign, AlertTriangle, Plus, Trash2, Edit, 
-  CheckCircle, XCircle, Search, Sparkles, RefreshCw, Key, ArrowLeft, Printer, Tag, History, Shield, Globe, Download, Loader2, CheckSquare, Square, Star, ChevronDown, ChevronUp, ExternalLink, Zap, Puzzle
+  CheckCircle, XCircle, Search, Sparkles, RefreshCw, Key, ArrowLeft, Printer, Tag, History, Shield, Globe, Download, Loader2, CheckSquare, Square, Star, ChevronDown, ChevronUp, ExternalLink, Zap, Puzzle, Eye, EyeOff, Rocket
 } from 'lucide-react';
 import { formatCurrency, AIChatEngine } from '../services/aiChatEngine';
 import { StorageService } from '../services/storage';
 import { ApiClient, resolveMediaUrl } from '../services/api';
 import { filterShopeeCatalog, splitScrapeInputs } from '../utils/shopeeFilter.js';
+import { isProductDraft } from '../utils/productDisplay.js';
 import { STORE_INFO } from '../data/initialData';
 
 export default function AdminDashboard({
@@ -23,6 +24,10 @@ export default function AdminDashboard({
   const [auditLogs, setAuditLogs] = useState([]);
   const [orderFilter, setOrderFilter] = useState('all');
   const [productSearch, setProductSearch] = useState('');
+  const [productStatusFilter, setProductStatusFilter] = useState('all'); // 'all' | 'active' | 'draft'
+  const [draftPublishStock, setDraftPublishStock] = useState(10);
+  const [bulkPublishingDrafts, setBulkPublishingDrafts] = useState(false);
+  const [productActionFeedback, setProductActionFeedback] = useState(null);
   
   // New product form state
   const [isAddingProduct, setIsAddingProduct] = useState(false);
@@ -73,6 +78,8 @@ export default function AdminDashboard({
   const [shopeeResults, setShopeeResults] = useState([]);
   const [shopeeSelected, setShopeeSelected] = useState(new Set());
   const [shopeeImporting, setShopeeImporting] = useState(false);
+  const [shopeePublishStock, setShopeePublishStock] = useState(10);
+  const [shopeeLastPublished, setShopeeLastPublished] = useState(false);
   const [shopeeError, setShopeeError] = useState(null);
   const [shopeeSuccess, setShopeeSuccess] = useState(null);
   const [shopeeServerOnline, setShopeeServerOnline] = useState(null);
@@ -398,7 +405,9 @@ export default function AdminDashboard({
 
   // Computed metrics
   const totalRevenue = orders.reduce((sum, o) => sum + (o.orderStatus !== 'cancelled' ? o.total : 0), 0);
-  const lowStockCount = products.filter(p => p.stock <= 15).length;
+  const activeProductsCount = products.filter(p => !isProductDraft(p)).length;
+  const draftProductsCount = products.length - activeProductsCount;
+  const lowStockCount = products.filter(p => !isProductDraft(p) && Number(p.stock) <= 15).length;
 
   // Filtered Orders
   const filteredOrders = orders.filter(o => {
@@ -408,8 +417,13 @@ export default function AdminDashboard({
 
   // Filtered Products
   const filteredProducts = products.filter(p => {
-    if (!productSearch) return true;
-    return p.name.toLowerCase().includes(productSearch.toLowerCase());
+    const draft = isProductDraft(p);
+    if (productStatusFilter === 'active' && draft) return false;
+    if (productStatusFilter === 'draft' && !draft) return false;
+    if (productSearch && !String(p.name || '').toLowerCase().includes(productSearch.toLowerCase())) {
+      return false;
+    }
+    return true;
   });
 
   useEffect(() => {
@@ -622,6 +636,105 @@ export default function AdminDashboard({
     const updated = products.filter(p => p.id !== id);
     setProducts(updated);
     StorageService.saveProducts(updated);
+  };
+
+  // Toggle Publish / Draft status for a single product
+  const handleTogglePublishProduct = async (product) => {
+    if (!product) return;
+    const currentlyDraft = isProductDraft(product);
+    const publish = currentlyDraft;
+    const stockAssigned = Math.min(99999, Math.max(1, parseInt(draftPublishStock, 10) || 10));
+    const nextStock = publish
+      ? (Number(product.stock) > 0 ? Number(product.stock) : stockAssigned)
+      : Number(product.stock || 0);
+    const nowIso = new Date().toISOString();
+
+    const payload = {
+      ...product,
+      status: publish ? 'active' : 'draft',
+      isDraft: !publish,
+      stock: nextStock,
+      isNew: publish ? true : product.isNew,
+      publishedAt: publish ? nowIso : null
+    };
+
+    try {
+      let savedProduct = payload;
+      if (await ApiClient.isServerOnline() && ApiClient.auth.getToken()) {
+        savedProduct = await ApiClient.products.update(product.id, payload);
+      }
+      const updated = products.map(p => p.id === product.id ? savedProduct : p);
+      setProducts(updated);
+      StorageService.saveProducts(updated);
+      setProductActionFeedback({
+        type: 'success',
+        published: publish,
+        message: publish
+          ? `✅ Đã đăng bán "${product.name}" lên trang chủ (Tồn kho: ${savedProduct.stock})!`
+          : `Đã chuyển "${product.name}" về Bản Nháp (tạm ẩn khỏi trang chủ).`
+      });
+    } catch (err) {
+      console.warn('Toggle publish product error:', err);
+      setProductActionFeedback({
+        type: 'error',
+        published: false,
+        message: err.message || 'Không thể cập nhật trạng thái sản phẩm.'
+      });
+    }
+  };
+
+  // Batch publish all draft products (or filtered drafts) onto storefront
+  const handlePublishAllDrafts = async () => {
+    if (draftProductsCount === 0) return;
+    setBulkPublishingDrafts(true);
+    setProductActionFeedback(null);
+
+    const stockAssigned = Math.min(99999, Math.max(1, parseInt(draftPublishStock, 10) || 10));
+    try {
+      if (await ApiClient.isServerOnline() && ApiClient.auth.getToken()) {
+        const res = await ApiClient.products.publishDrafts({ defaultStock: stockAssigned });
+        const freshProducts = await ApiClient.products.getAll();
+        setProducts(freshProducts);
+        StorageService.saveProducts(freshProducts);
+        setProductStatusFilter('all');
+        setProductActionFeedback({
+          type: 'success',
+          published: true,
+          message: `🚀 Đã đăng bán ${res.publishedCount || draftProductsCount} sản phẩm Bản Nháp lên đầu trang chủ (tồn kho mặc định ${res.stockAssigned || stockAssigned} món/sp)!`
+        });
+      } else {
+        const nowIso = new Date().toISOString();
+        const updated = products.map(p => (
+          isProductDraft(p)
+            ? {
+                ...p,
+                status: 'active',
+                isDraft: false,
+                isNew: true,
+                stock: Number(p.stock) > 0 ? Number(p.stock) : stockAssigned,
+                publishedAt: nowIso
+              }
+            : p
+        ));
+        setProducts(updated);
+        StorageService.saveProducts(updated);
+        setProductStatusFilter('all');
+        setProductActionFeedback({
+          type: 'success',
+          published: true,
+          message: `🚀 Đã đăng bán ${draftProductsCount} sản phẩm Bản Nháp trên trình duyệt (chế độ cục bộ).`
+        });
+      }
+    } catch (err) {
+      console.error('Publish all drafts error:', err);
+      setProductActionFeedback({
+        type: 'error',
+        published: false,
+        message: err.message || 'Lỗi khi mở bán hàng loạt bản nháp.'
+      });
+    } finally {
+      setBulkPublishingDrafts(false);
+    }
   };
 
   // Handle Add Coupon
@@ -843,6 +956,7 @@ export default function AdminDashboard({
     setShopeeLoading(true);
     setShopeeError(null);
     setShopeeSuccess(null);
+    setShopeeLastPublished(false);
     setShopeeResults([]);
     setShopeeSelected(new Set());
     setShopeeProgress('');
@@ -903,6 +1017,7 @@ export default function AdminDashboard({
     setShopeeLoading(true);
     setShopeeError(null);
     setShopeeSuccess(null);
+    setShopeeLastPublished(false);
     setShopeeResults([]);
     setShopeeSelected(new Set());
     setShopeeProgress('');
@@ -1097,7 +1212,7 @@ export default function AdminDashboard({
     }
   };
 
-  const handleShopeeImport = async () => {
+  const handleShopeeImport = async (shouldPublish = true) => {
     if (shopeeSelected.size === 0) {
       setShopeeError('Vui lòng chọn ít nhất 1 sản phẩm để nhập vào kho.');
       return;
@@ -1105,6 +1220,7 @@ export default function AdminDashboard({
 
     setShopeeImporting(true);
     setShopeeError(null);
+    setShopeeLastPublished(false);
 
     try {
       const selectedProducts = shopeeResults.filter((_, i) => shopeeSelected.has(i));
@@ -1121,15 +1237,41 @@ export default function AdminDashboard({
         return;
       }
 
-      const data = await ApiClient.shopee.importProducts(selectedProducts);
+      const parsedStock = parseInt(shopeePublishStock, 10);
+      const defaultStock = shouldPublish
+        ? Math.min(99999, Math.max(1, Number.isFinite(parsedStock) ? parsedStock : 10))
+        : 0;
+
+      const data = await ApiClient.shopee.importProducts(selectedProducts, {
+        publish: Boolean(shouldPublish),
+        defaultStock
+      });
 
       const freshProducts = await ApiClient.products.getAll();
       setProducts(freshProducts);
       StorageService.saveProducts(freshProducts);
 
-      const successMsg = data.skippedDuplicates > 0
-        ? `✅ Đã nhập thành công ${data.imported} sản phẩm vào CSDL kho hàng (Trạng thái Bản Nháp)! Đã tự động bỏ qua ${data.skippedDuplicates} sản phẩm trùng lặp.`
-        : `✅ Đã nhập thành công ${data.imported || selectedProducts.length} sản phẩm vào CSDL kho hàng (Trạng thái Bản Nháp)!`;
+      const importedCount = Number(data.imported || 0);
+      const promotedCount = Number(data.publishedExisting || 0);
+      const dupCount = Number(data.skippedDuplicates || 0);
+
+      let successMsg;
+      if (shouldPublish) {
+        const totalPublished = importedCount + promotedCount;
+        const details = [];
+        if (importedCount > 0) details.push(`nhập mới ${importedCount} sp`);
+        if (promotedCount > 0) details.push(`kích hoạt ${promotedCount} bản nháp sẵn có`);
+        if (dupCount > 0) details.push(`bỏ qua ${dupCount} sp đã đang bán`);
+        successMsg = totalPublished > 0
+          ? `🚀 Đã đăng bán thành công ${totalPublished} sản phẩm Shopee lên đầu Trang Chủ (Tồn kho: ${defaultStock} món/sp${details.length ? ` · ${details.join(', ')}` : ''})!`
+          : `Tất cả ${dupCount} sản phẩm được chọn đã đang mở bán trên cửa hàng rồi.`;
+        setShopeeLastPublished(true);
+      } else {
+        successMsg = dupCount > 0
+          ? `✅ Đã nhập ${importedCount} sản phẩm vào CSDL kho hàng (Trạng thái Bản Nháp · ẩn khỏi trang chủ). Đã bỏ qua ${dupCount} sản phẩm trùng lặp.`
+          : `✅ Đã nhập ${importedCount || selectedProducts.length} sản phẩm vào CSDL kho hàng (Trạng thái Bản Nháp · vào "Quản Lý Sản Phẩm" để duyệt mở bán)!`;
+        setShopeeLastPublished(false);
+      }
 
       setShopeeSuccess(successMsg);
       setShopeeSelected(new Set());
@@ -1226,13 +1368,15 @@ export default function AdminDashboard({
 
           <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
             <div className="flex items-center justify-between text-stone-500 mb-2">
-              <span className="text-xs font-medium">Sản phẩm trong kho</span>
+              <span className="text-xs font-medium">Sản phẩm đang bán</span>
               <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-800 flex items-center justify-center">
                 <Package className="w-4 h-4" />
               </div>
             </div>
-            <div className="text-xl font-extrabold text-stone-900">{products.length}</div>
-            <span className="text-[11px] text-stone-400">Đang hiển thị bán</span>
+            <div className="text-xl font-extrabold text-stone-900">{activeProductsCount}</div>
+            <span className="text-[11px] text-stone-400">
+              {draftProductsCount > 0 ? `Đang hiển thị · ${draftProductsCount} bản nháp đang ẩn` : 'Đang hiển thị trên trang chủ'}
+            </span>
           </div>
 
           <div className="bg-white p-4 rounded-2xl border border-stone-200 shadow-xs">
@@ -1273,6 +1417,11 @@ export default function AdminDashboard({
               >
                 <Package className="w-4 h-4" />
                 <span>Quản Lý Sản Phẩm ({products.length})</span>
+                {draftProductsCount > 0 && (
+                  <span className="px-1.5 py-0.5 text-[10px] rounded-full bg-amber-100 text-amber-800 font-bold">
+                    {draftProductsCount} nháp
+                  </span>
+                )}
               </button>
 
               <button
@@ -1438,16 +1587,115 @@ export default function AdminDashboard({
         {/* Tab Content: PRODUCTS */}
         {activeTab === 'products' && (
           <div className="space-y-4">
+            {productActionFeedback && (
+              <div className={`rounded-xl p-3.5 border flex flex-wrap items-center justify-between gap-3 text-xs ${
+                productActionFeedback.type === 'error'
+                  ? 'bg-red-50 border-red-200 text-red-700'
+                  : 'bg-emerald-50 border-emerald-200 text-emerald-800'
+              }`}>
+                <span className="font-semibold">{productActionFeedback.message}</span>
+                <div className="flex items-center gap-2">
+                  {productActionFeedback.published && (
+                    <button
+                      type="button"
+                      onClick={onExitAdmin}
+                      className="px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold flex items-center gap-1.5 shadow-xs"
+                    >
+                      <Eye className="w-3.5 h-3.5" />
+                      <span>Xem Ngay Trên Trang Chủ</span>
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    onClick={() => setProductActionFeedback(null)}
+                    className="text-stone-400 hover:text-stone-600"
+                  >
+                    <XCircle className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {draftProductsCount > 0 && (
+              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 flex flex-col lg:flex-row lg:items-center justify-between gap-3">
+                <div className="space-y-1">
+                  <div className="flex items-center gap-2 text-amber-900 font-bold text-sm">
+                    <AlertTriangle className="w-4 h-4 text-amber-600 flex-shrink-0" />
+                    <span>Đang có {draftProductsCount} sản phẩm Bản Nháp (từ Shopee) chưa hiện trên trang chủ</span>
+                  </div>
+                  <p className="text-xs text-amber-800">
+                    Sản phẩm mới nhập từ Shopee mặc định được giữ ở Bản Nháp (tồn kho = 0) để kiểm duyệt. Nhập số lượng kho mặc định và bấm &ldquo;Đăng Bán Tất Cả Bản Nháp&rdquo; để đưa ngay lên đầu trang chủ.
+                  </p>
+                </div>
+
+                <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
+                  <label className="flex items-center gap-1.5 bg-white border border-amber-200 rounded-xl px-2.5 py-1.5 text-xs text-stone-700">
+                    <span className="font-medium">Tồn kho:</span>
+                    <input
+                      type="number"
+                      min={1}
+                      max={99999}
+                      value={draftPublishStock}
+                      onChange={(e) => setDraftPublishStock(e.target.value)}
+                      className="w-16 font-bold text-amber-900 focus:outline-none text-center"
+                    />
+                  </label>
+                  <button
+                    type="button"
+                    onClick={handlePublishAllDrafts}
+                    disabled={bulkPublishingDrafts}
+                    className="px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 disabled:bg-stone-300 text-white text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all"
+                  >
+                    {bulkPublishingDrafts ? (
+                      <><Loader2 className="w-3.5 h-3.5 animate-spin" /><span>Đang mở bán...</span></>
+                    ) : (
+                      <><Rocket className="w-3.5 h-3.5" /><span>Đăng Bán Tất Cả ({draftProductsCount})</span></>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setProductStatusFilter('draft')}
+                    className="px-3 py-2 rounded-xl border border-amber-300 bg-white hover:bg-amber-100 text-amber-900 text-xs font-semibold transition-colors"
+                  >
+                    Xem danh sách nháp
+                  </button>
+                </div>
+              </div>
+            )}
+
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-              <div className="relative flex-1 max-w-sm">
-                <input
-                  type="text"
-                  placeholder="Tìm sản phẩm theo tên..."
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-700"
-                />
-                <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <div className="flex flex-wrap items-center gap-2 flex-1">
+                <div className="relative flex-1 min-w-[200px] max-w-sm">
+                  <input
+                    type="text"
+                    placeholder="Tìm sản phẩm theo tên..."
+                    value={productSearch}
+                    onChange={(e) => setProductSearch(e.target.value)}
+                    className="w-full pl-9 pr-3 py-2 rounded-xl border border-stone-200 bg-white text-xs focus:outline-none focus:ring-2 focus:ring-amber-700"
+                  />
+                  <Search className="w-3.5 h-3.5 text-stone-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                </div>
+
+                <div className="flex items-center gap-1.5 text-xs">
+                  {[
+                    { id: 'all', label: `Tất cả (${products.length})` },
+                    { id: 'active', label: `Đang bán (${activeProductsCount})` },
+                    { id: 'draft', label: `Bản nháp Shopee (${draftProductsCount})` }
+                  ].map(pill => (
+                    <button
+                      key={pill.id}
+                      type="button"
+                      onClick={() => setProductStatusFilter(pill.id)}
+                      className={`px-3 py-1.5 rounded-xl font-semibold border transition-all ${
+                        productStatusFilter === pill.id
+                          ? 'bg-stone-900 text-white border-stone-900'
+                          : 'bg-white text-stone-600 border-stone-200 hover:bg-stone-50'
+                      }`}
+                    >
+                      {pill.label}
+                    </button>
+                  ))}
+                </div>
               </div>
 
               <button
@@ -1715,8 +1963,11 @@ export default function AdminDashboard({
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-stone-100">
-                  {filteredProducts.map(p => (
-                    <tr key={p.id} className="hover:bg-stone-50/70 transition-colors">
+                  {filteredProducts.map(p => {
+                    const rowIsDraft = isProductDraft(p);
+                    const isShopeeItem = p.specs?.['Nguồn gốc'] === 'Shopee' || String(p.id || '').startsWith('sp-17');
+                    return (
+                    <tr key={p.id} className={`transition-colors ${rowIsDraft ? 'bg-amber-50/35 hover:bg-amber-50/70' : 'hover:bg-stone-50/70'}`}>
                       <td className="p-3 flex items-center gap-3">
                         <img
                           src={resolveMediaUrl(p.images?.[0])}
@@ -1728,9 +1979,24 @@ export default function AdminDashboard({
                             else e.target.src = '/placeholder.svg';
                           }}
                         />
-                        <div>
+                        <div className="min-w-0">
                           <div className="font-bold text-stone-900 line-clamp-1">{p.name}</div>
-                          <div className="text-[10px] text-stone-400 font-mono">{p.id}</div>
+                          <div className="flex flex-wrap items-center gap-1.5 mt-0.5">
+                            <span className="text-[10px] text-stone-400 font-mono">{p.id}</span>
+                            {rowIsDraft ? (
+                              <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-amber-100 text-amber-800">
+                                Bản nháp · Đang ẩn
+                              </span>
+                            ) : isShopeeItem ? (
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-orange-50 text-orange-700 border border-orange-200">
+                                Shopee · Đang bán
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded bg-emerald-50 text-emerald-700">
+                                Đang bán
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </td>
                       <td className="p-3 font-medium text-stone-600 capitalize">
@@ -1749,24 +2015,43 @@ export default function AdminDashboard({
                       <td className="p-3 text-stone-600">
                         ⭐ {p.rating} ({p.reviewsCount})
                       </td>
-                      <td className="p-3 text-right space-x-2">
-                        <button
-                          onClick={() => setEditingProduct({ ...p })}
-                          className="p-1.5 text-stone-400 hover:text-blue-600 transition-colors"
-                          title="Sửa sản phẩm"
-                        >
-                          <Edit className="w-4 h-4" />
-                        </button>
-                        <button
-                          onClick={() => handleDeleteProduct(p.id)}
-                          className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
-                          title="Xóa sản phẩm"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
+                      <td className="p-3 text-right">
+                        <div className="inline-flex items-center justify-end gap-1.5">
+                          <button
+                            type="button"
+                            onClick={() => handleTogglePublishProduct(p)}
+                            className={`px-2.5 py-1 rounded-lg text-[11px] font-bold inline-flex items-center gap-1 transition-all ${
+                              rowIsDraft
+                                ? 'bg-emerald-600 hover:bg-emerald-700 text-white shadow-xs'
+                                : 'bg-stone-100 hover:bg-stone-200 text-stone-700'
+                            }`}
+                            title={rowIsDraft ? 'Đăng bán lên trang chủ ngay' : 'Ẩn về Bản Nháp'}
+                          >
+                            {rowIsDraft ? (
+                              <><Eye className="w-3 h-3" /><span>Đăng bán</span></>
+                            ) : (
+                              <><EyeOff className="w-3 h-3" /><span>Ẩn nháp</span></>
+                            )}
+                          </button>
+                          <button
+                            onClick={() => setEditingProduct({ ...p })}
+                            className="p-1.5 text-stone-400 hover:text-blue-600 transition-colors"
+                            title="Sửa sản phẩm"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteProduct(p.id)}
+                            className="p-1.5 text-stone-400 hover:text-rose-600 transition-colors"
+                            title="Xóa sản phẩm"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
                       </td>
                     </tr>
-                  ))}
+                    );
+                  })}
                 </tbody>
               </table>
             </div>
@@ -2764,9 +3049,34 @@ export default function AdminDashboard({
             {shopeeSuccess && (
               <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4 flex items-start gap-3">
                 <CheckCircle className="w-5 h-5 text-emerald-500 mt-0.5 flex-shrink-0" />
-                <div>
-                  <p className="text-sm font-semibold text-emerald-800">Hoàn tất phiên cào trực tiếp</p>
+                <div className="flex-1">
+                  <p className="text-sm font-semibold text-emerald-800">
+                    {shopeeLastPublished ? 'Đã nhập & đăng bán lên Trang Chủ' : 'Hoàn tất thao tác dữ liệu Shopee'}
+                  </p>
                   <p className="text-sm text-emerald-700 mt-0.5">{shopeeSuccess}</p>
+                  {(shopeeLastPublished || /kho hàng|Bản Nháp/i.test(shopeeSuccess)) && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={onExitAdmin}
+                        className="px-3.5 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold flex items-center gap-1.5 shadow-xs transition-colors"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>Xem Ngay Trên Trang Chủ</span>
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setActiveTab('products');
+                          setProductStatusFilter(shopeeLastPublished ? 'active' : 'draft');
+                        }}
+                        className="px-3.5 py-1.5 rounded-lg bg-white hover:bg-emerald-100 text-emerald-800 border border-emerald-300 text-xs font-semibold flex items-center gap-1.5 transition-colors"
+                      >
+                        <Package className="w-3.5 h-3.5" />
+                        <span>{shopeeLastPublished ? 'Mở Quản Lý Sản Phẩm' : 'Duyệt Bản Nháp Trong Kho'}</span>
+                      </button>
+                    </div>
+                  )}
                 </div>
                 <button onClick={() => setShopeeSuccess(null)} className="ml-auto text-emerald-400 hover:text-emerald-600">
                   <XCircle className="w-4 h-4" />
@@ -2967,27 +3277,58 @@ export default function AdminDashboard({
                     )}
                   </div>
 
-                  <button
-                    onClick={handleShopeeImport}
-                    disabled={shopeeSelected.size === 0 || shopeeImporting}
-                    className={`px-5 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
-                      shopeeSelected.size === 0 || shopeeImporting
-                        ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
-                        : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white hover:shadow-md'
-                    }`}
-                  >
-                    {shopeeImporting ? (
-                      <>
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                        <span>Đang nhập...</span>
-                      </>
-                    ) : (
-                      <>
-                        <Download className="w-4 h-4" />
-                        <span>Nhập {shopeeSelected.size > 0 ? shopeeSelected.size : ''} Sản Phẩm Vào Kho</span>
-                      </>
-                    )}
-                  </button>
+                  <div className="flex flex-wrap items-center gap-2.5">
+                    <label className="flex items-center gap-1.5 bg-stone-50 border border-stone-200 rounded-xl px-3 py-2 text-xs text-stone-700">
+                      <span className="font-medium">Tồn kho mở bán:</span>
+                      <input
+                        type="number"
+                        min={1}
+                        max={99999}
+                        value={shopeePublishStock}
+                        onChange={(e) => setShopeePublishStock(e.target.value)}
+                        disabled={shopeeImporting}
+                        className="w-16 font-bold text-emerald-700 bg-transparent focus:outline-none text-center"
+                      />
+                    </label>
+
+                    <button
+                      type="button"
+                      onClick={() => handleShopeeImport(true)}
+                      disabled={shopeeSelected.size === 0 || shopeeImporting}
+                      className={`px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm ${
+                        shopeeSelected.size === 0 || shopeeImporting
+                          ? 'bg-stone-100 text-stone-400 cursor-not-allowed'
+                          : 'bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white hover:shadow-md'
+                      }`}
+                    >
+                      {shopeeImporting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>Đang xử lý...</span>
+                        </>
+                      ) : (
+                        <>
+                          <Rocket className="w-4 h-4" />
+                          <span>Nhập &amp; Đăng Bán {shopeeSelected.size > 0 ? `(${shopeeSelected.size})` : ''} Lên Trang Chủ</span>
+                        </>
+                      )}
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleShopeeImport(false)}
+                      disabled={shopeeSelected.size === 0 || shopeeImporting}
+                      className={`px-3.5 py-2.5 rounded-xl text-xs font-bold border flex items-center gap-1.5 transition-all ${
+                        shopeeSelected.size === 0 || shopeeImporting
+                          ? 'bg-stone-50 text-stone-400 border-stone-200 cursor-not-allowed'
+                          : 'bg-white hover:bg-stone-50 text-stone-700 border-stone-300'
+                      }`}
+                      title="Lưu dạng Bản Nháp (tồn kho = 0, chưa hiển thị trên trang chủ)"
+                    >
+                      <Download className="w-3.5 h-3.5" />
+                      <span>Lưu Bản Nháp</span>
+                    </button>
+                  </div>
                 </div>
 
                 {/* Product Grid */}
@@ -3135,7 +3476,7 @@ export default function AdminDashboard({
               <ul className="text-xs text-amber-800 space-y-1.5 leading-relaxed">
                 <li>• <strong>Quy chuẩn bảo mật:</strong> Hệ thống không hardcode API Key hoặc thông tin đăng nhập trong mã nguồn; Scraping API Key được lưu an toàn qua biến môi trường (Render / .env) và luôn được che giấu khi hiển thị.</li>
                 <li>• <strong>Kiểm soát dữ liệu thực tế (Zero Hallucination):</strong> Scraper không tự bịa giá gốc, không random tồn kho ảo, không gán số bán vào đánh giá.</li>
-                <li>• <strong>Quy trình nhập kho an toàn:</strong> Toàn bộ sản phẩm nhập từ Shopee được lưu ở trạng thái <strong>Bản Nháp (Draft)</strong> với <strong>Tồn kho = 0</strong>, giúp chủ shop kiểm kê và điều chỉnh giá trước khi kích hoạt bán thật trên storefront.</li>
+                <li>• <strong>Quy trình nhập kho &amp; đăng bán minh bạch:</strong> Chọn <strong>&ldquo;Nhập &amp; Đăng Bán Lên Trang Chủ&rdquo;</strong> kèm tồn kho mở bán do bạn nhập để đưa sản phẩm lên đầu trang chủ ngay lập tức; hoặc chọn <strong>&ldquo;Lưu Bản Nháp&rdquo;</strong> (tồn kho = 0, ẩn trên trang chủ) nếu muốn kiểm kê sau trong mục <strong>Quản Lý Sản Phẩm</strong>.</li>
                 <li>• <strong>Chống trùng lặp (Deduplication):</strong> Hệ thống tự động phát hiện và bỏ qua các sản phẩm đã có trong cơ sở dữ liệu để tránh nhập đè.</li>
               </ul>
             </div>

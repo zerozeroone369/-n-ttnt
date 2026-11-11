@@ -6,8 +6,91 @@ import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_COUPONS } from '../src/data/i
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
-const DATA_DIR = path.join(__dirname, 'data');
-const DB_FILE = path.join(DATA_DIR, 'ecommerce_db.json');
+const DEFAULT_DATA_DIR = path.join(__dirname, 'data');
+const PUBLIC_DIR = path.join(__dirname, '..', 'public');
+
+function resolveDbFilePath() {
+  if (process.env.DB_FILE && String(process.env.DB_FILE).trim()) {
+    return path.resolve(String(process.env.DB_FILE).trim());
+  }
+  return path.join(DEFAULT_DATA_DIR, 'ecommerce_db.json');
+}
+
+function getProductQualityScore(p) {
+  if (!p) return -1;
+  const isDraft = p.status === 'draft' || p.isDraft === true;
+  const stock = Math.max(0, Number(p.stock) || 0);
+  const imgs = Array.isArray(p.images) ? p.images : [];
+  const hasCdn = imgs.some((u) => /^https?:\/\//i.test(String(u || '')));
+  const hasRealImg = imgs.some((u) => u && u !== '/placeholder.svg');
+  const ts = Date.parse(p.publishedAt || p.updatedAt || p.createdAt || '') || 0;
+  return (isDraft ? 0 : 1_000_000_000_000) + Math.min(stock, 99999) * 1000 + (hasCdn ? 200 : 0) + (hasRealImg ? 100 : 0) + (ts > 0 ? 50 : 0);
+}
+
+export function normalizeProductImagesWithDiskFallback(product, publicRoot = PUBLIC_DIR) {
+  if (!product || !Array.isArray(product.images) || product.images.length === 0) {
+    return product;
+  }
+
+  const cleaned = product.images.map((u) => String(u || '').trim()).filter(Boolean);
+  if (cleaned.length <= 1) return product;
+
+  const first = cleaned[0];
+  if (publicRoot && /^\/products\/shopee_(?:live|real)\//i.test(first)) {
+    const localRel = first.replace(/^\/+/, '');
+    const localAbs = path.join(publicRoot, localRel);
+    if (!fs.existsSync(localAbs)) {
+      const cdnImages = cleaned.filter((u) => /^https?:\/\//i.test(u));
+      if (cdnImages.length > 0) {
+        const rest = cleaned.filter((u) => !/^https?:\/\//i.test(u) && u !== first);
+        return { ...product, images: [...cdnImages, ...rest, first] };
+      }
+    }
+  }
+  return product;
+}
+
+export function deduplicateProductsList(products = [], publicRoot = PUBLIC_DIR) {
+  if (!Array.isArray(products)) return { products: [], removedCount: 0, modified: false };
+
+  const deduped = [];
+  const indexById = new Map();
+  const indexByShopeeId = new Map();
+  let removedCount = 0;
+  let modified = false;
+
+  for (const rawItem of products) {
+    if (!rawItem || !rawItem.id) continue;
+    const item = normalizeProductImagesWithDiskFallback(rawItem, publicRoot);
+    if (item !== rawItem) modified = true;
+
+    const idKey = String(item.id).trim();
+    const shopeeIdKey = String(item.specs?.['Mã Shopee'] || item.shopee_id || '').trim();
+
+    let existingIdx = indexById.has(idKey) ? indexById.get(idKey) : -1;
+    if (existingIdx === -1 && shopeeIdKey) {
+      existingIdx = indexByShopeeId.has(shopeeIdKey) ? indexByShopeeId.get(shopeeIdKey) : -1;
+    }
+
+    if (existingIdx === -1) {
+      const nextIdx = deduped.length;
+      deduped.push(item);
+      indexById.set(idKey, nextIdx);
+      if (shopeeIdKey) indexByShopeeId.set(shopeeIdKey, nextIdx);
+    } else {
+      removedCount += 1;
+      modified = true;
+      const existing = deduped[existingIdx];
+      if (getProductQualityScore(item) > getProductQualityScore(existing)) {
+        deduped[existingIdx] = item;
+        indexById.set(idKey, existingIdx);
+        if (shopeeIdKey) indexByShopeeId.set(shopeeIdKey, existingIdx);
+      }
+    }
+  }
+
+  return { products: deduped, removedCount, modified };
+}
 
 // Password hashing helpers
 export function hashPassword(password, salt = crypto.randomBytes(16).toString('hex')) {
@@ -22,6 +105,7 @@ export function verifyPassword(password, salt, storedHash) {
 
 class PersistentDatabase {
   constructor() {
+    this.dbFile = resolveDbFilePath();
     this.data = {
       users: [],
       products: [],
@@ -33,15 +117,28 @@ class PersistentDatabase {
   }
 
   init() {
-    if (!fs.existsSync(DATA_DIR)) {
-      fs.mkdirSync(DATA_DIR, { recursive: true });
+    this.dbFile = resolveDbFilePath();
+    const dataDir = path.dirname(this.dbFile);
+    if (!fs.existsSync(dataDir)) {
+      fs.mkdirSync(dataDir, { recursive: true });
     }
 
-    if (fs.existsSync(DB_FILE)) {
+    if (fs.existsSync(this.dbFile)) {
       try {
-        const content = fs.readFileSync(DB_FILE, 'utf-8');
+        const content = fs.readFileSync(this.dbFile, 'utf-8');
         this.data = JSON.parse(content);
-        console.log(`[Database] Loaded successfully from ${DB_FILE}`);
+        const { products: cleanProducts, removedCount, modified } = deduplicateProductsList(
+          this.data.products || [],
+          PUBLIC_DIR
+        );
+        if (modified) {
+          this.data.products = cleanProducts;
+          this.save();
+          if (removedCount > 0) {
+            console.log(`[Database] Deduplicated products on startup: removed ${removedCount} duplicate entries (${cleanProducts.length} remaining)`);
+          }
+        }
+        console.log(`[Database] Loaded successfully from ${this.dbFile}`);
         return;
       } catch (err) {
         console.error('[Database] Read error, re-initializing:', err);
@@ -124,9 +221,10 @@ class PersistentDatabase {
 
   save() {
     try {
-      const tempFile = `${DB_FILE}.tmp`;
+      const targetFile = this.dbFile || resolveDbFilePath();
+      const tempFile = `${targetFile}.tmp`;
       fs.writeFileSync(tempFile, JSON.stringify(this.data, null, 2), 'utf-8');
-      fs.renameSync(tempFile, DB_FILE);
+      fs.renameSync(tempFile, targetFile);
     } catch (err) {
       console.error('[Database] Save failed:', err);
     }
@@ -134,7 +232,7 @@ class PersistentDatabase {
 
   // Generic DB Operations
   get(collection) {
-    return this.data[collection] || [];
+    return [...(this.data[collection] || [])];
   }
 
   find(collection, filterFn) {
@@ -181,6 +279,27 @@ class PersistentDatabase {
     return updatedItem;
   }
 
+  updateMany(collection, filterFn, updateDataOrFn) {
+    const list = this.get(collection);
+    const updatedItems = [];
+
+    this.data[collection] = list.map(item => {
+      if (filterFn(item)) {
+        const nextItem = typeof updateDataOrFn === 'function'
+          ? updateDataOrFn(item)
+          : { ...item, ...updateDataOrFn, updatedAt: new Date().toISOString() };
+        updatedItems.push(nextItem);
+        return nextItem;
+      }
+      return item;
+    });
+
+    if (updatedItems.length > 0) {
+      this.save();
+    }
+    return { updatedCount: updatedItems.length, updatedItems };
+  }
+
   delete(collection, filterFn) {
     const initialLen = this.data[collection]?.length || 0;
     this.data[collection] = (this.data[collection] || []).filter(item => !filterFn(item));
@@ -213,4 +332,5 @@ class PersistentDatabase {
   }
 }
 
+export { PersistentDatabase };
 export const db = new PersistentDatabase();

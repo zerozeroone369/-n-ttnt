@@ -9,7 +9,12 @@ export const formatCurrency = (amount) => {
   return new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount);
 };
 
-export const isProductInStock = (product) => product && Number(product.stock) > 0;
+export const isProductInStock = (product) => (
+  Boolean(product) &&
+  product.status !== 'draft' &&
+  product.isDraft !== true &&
+  Number(product.stock) > 0
+);
 
 export const getInStockProducts = (products = []) => products.filter(isProductInStock);
 

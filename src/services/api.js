@@ -260,6 +260,10 @@ export const ApiClient = {
     getAll: () => request('/products'),
     create: (data) => request('/products', { method: 'POST', body: JSON.stringify(data) }),
     update: (id, data) => request(`/products/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+    publishDrafts: (payload = {}) => request('/products/publish-drafts', {
+      method: 'POST',
+      body: JSON.stringify(payload)
+    }),
     delete: (id) => request(`/products/${id}`, { method: 'DELETE' }),
     addReview: (id, review) => request(`/products/${id}/reviews`, { method: 'POST', body: JSON.stringify(review) })
   },
@@ -314,9 +318,9 @@ export const ApiClient = {
       body: JSON.stringify(payload)
     }),
     getExtensionDownloadUrl: () => `${API_BASE}/shopee/extension.zip`,
-    importProducts: (products) => request('/shopee/import', {
+    importProducts: (products, options = {}) => request('/shopee/import', {
       method: 'POST',
-      body: JSON.stringify({ products })
+      body: JSON.stringify({ products, ...options })
     }),
     getStatus: (sessionId = '') => {
       const qs = sessionId ? `?sessionId=${encodeURIComponent(sessionId)}` : '';
