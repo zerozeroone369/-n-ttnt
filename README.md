@@ -13,11 +13,24 @@ TIEM_NHA_NHO_ECOMMERCE_AI/
 ├── 📄 vite.config.js                  # Cấu hình Vite build tool
 ├── 📄 tailwind.config.js              # Cấu hình giao diện Tailwind CSS
 ├── 📄 postcss.config.js               # Cấu hình PostCSS
-├── 📄 so-do-dac-ta-he-thong.html      # Tệp sơ đồ đặc tả hệ thống trực quan (Mở bằng trình duyệt)
-├── 📄 SO_DO_DAC_TA_HE_THONG.md        # Tệp sơ đồ đặc tả hệ thống chuẩn Mermaid
+├── 📄 Dockerfile                      # Cấu hình đóng gói container cho backend
+├── 📄 render.yaml                     # Cấu hình deploy backend lên Render
+├── 📄 vercel.json                     # Cấu hình rewrite/cache frontend trên Vercel
+├── 📄 .env.example                    # Mẫu biến môi trường (.env)
+├── 📄 shopee_scraper.py               # Engine Python hỗ trợ cào dữ liệu (tùy chọn)
 ├── 📄 README.md                       # Hướng dẫn cài đặt & vận hành chi tiết
 │
-└── 📁 src/                            # Toàn bộ mã nguồn ứng dụng
+├── 📁 chrome-extension/               # Chrome Extension Bridge cào Shopee bằng IP & phiên Chrome thật
+├── 📁 public/                         # PWA manifest, Service Worker, icons & ảnh sản phẩm
+├── 📁 server/                         # Backend REST API (Express, Auth, DB sync, Shopee Scraper)
+│   ├── 📄 index.js                    # API Server & Static serving
+│   ├── 📄 db.js                       # Database JSON + hỗ trợ đồng bộ Upstash Redis / Supabase
+│   ├── 📄 auth.js                     # Xác thực người dùng & phân quyền RBAC
+│   ├── 📄 shopeeScraper.js            # Scraper Engine Node.js
+│   ├── 📄 shopeeImporter.js           # Nhập & kiểm duyệt sản phẩm hàng loạt
+│   └── 📁 data/                       # Dữ liệu mặc định ban đầu (ecommerce_db.json)
+│
+└── 📁 src/                            # Toàn bộ mã nguồn giao diện React
     ├── 📄 App.jsx                     # Component gốc điều phối toàn bộ State & UI
     ├── 📄 main.jsx                    # Điểm khởi động React 18
     ├── 📄 index.css                   # Định nghĩa style toàn cục & animation
@@ -33,12 +46,15 @@ TIEM_NHA_NHO_ECOMMERCE_AI/
     │   ├── CustomerOrdersModal.jsx    # Lịch sử đơn của tôi & Bản đồ 5 bước tiến trình Stepper
     │   ├── WishlistDrawer.jsx         # Ngăn kéo xem & chuyển danh sách yêu thích vào giỏ
     │   ├── InvoicePrintModal.jsx      # In phiếu đóng gói & giao hàng (Packing Slip chuẩn A5)
-    │   ├── Chatbot.jsx                # Trợ lý AI Chatbot GPT-3.0 (Quick chips, thẻ tương tác)
-    │   └── AdminDashboard.jsx         # Bảng quản trị: Báo cáo, sửa hàng, đổi trạng thái đơn, voucher
+    │   ├── Chatbot.jsx                # Trợ lý AI Chatbot (Quick chips, thẻ tương tác)
+    │   └── AdminDashboard.jsx         # Bảng quản trị: Báo cáo, sửa hàng, cào Shopee, đổi trạng thái đơn, voucher
     │
     ├── 📁 services/                   # Tầng xử lý nghiệp vụ & dữ liệu
-    │   ├── storage.js                 # Quản lý bền vững LocalStorage Engine (7 collections)
-    │   └── aiChatEngine.js            # Bộ máy AI GPT-3.0 (B2B, Sizing, Care Guide, Strict Guardrail)
+    │   ├── api.js                     # Client gọi REST API Backend
+    │   ├── storage.js                 # Quản lý LocalStorage Engine
+    │   └── aiChatEngine.js            # Bộ máy AI (B2B, Sizing, Care Guide, Strict Guardrail)
+    │
+    ├── 📁 utils/                      # Tiện ích lọc dữ liệu, chuẩn hóa cookie Shopee
     │
     └── 📁 data/                       # Dữ liệu mẫu khởi tạo
         └── initialData.js             # Dữ liệu ban đầu: Sản phẩm, đơn hàng, voucher, cửa hàng

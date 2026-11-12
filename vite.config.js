@@ -9,7 +9,7 @@ export default defineConfig({
     host: true,
     allowedHosts: true,
     watch: {
-      ignored: ['**/shopee_profile/**', '**/edge_profile/**', '**/tools/**', '**/shopee_scraped.json', '**/.user_uploaded/**']
+      ignored: ['**/shopee_profile/**', '**/shopee_scraped.json', '**/.user_uploaded/**']
     },
     proxy: {
       '/api': {
