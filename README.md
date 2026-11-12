@@ -1,6 +1,6 @@
-# 🛍️ TIỆM NHÀ NHỎ - E-COMMERCE MINI SHOP AI (Boutique & Living)
+# 🛍️ TIỆM NHÀ NHỎ - E-COMMERCE MINI SHOP AI 
 
-> Nền tảng thương mại điện tử chuyên biệt cho mô hình kinh doanh nhỏ (boutique/thủ công), tích hợp **Trợ Lý AI Chatbot chuẩn GPT-3.0** chuyên trách tư vấn kinh doanh, bán sỉ B2B, cẩm nang bảo quản đồ thủ công và thực thi cơ chế **Strict Guardrail** (tuyệt đối từ chối các câu hỏi ngoại lai).
+> Nền tảng thương mại điện tử chuyên biệt cho mô hình kinh doanh nhỏ (tự động/thủ công), tích hợp **Trợ Lý AI Chatbot chuẩn GPT-3.0** chuyên trách tư vấn kinh doanh, bán sỉ B2B, cẩm nang bảo quản đồ thủ công và thực thi cơ chế **Strict Guardrail** (tuyệt đối từ chối các câu hỏi ngoại lai).
 
 ---
 
