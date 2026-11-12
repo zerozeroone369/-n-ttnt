@@ -45,15 +45,15 @@
       "category": "fashion",
       "price": 420000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 401,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-m1ftjhq0sukfa1"
       ],
@@ -72,14 +72,16 @@
         "Mã Shopee": "25137140592",
         "URL gốc": "https://shopee.vn/product/1077450991/25137140592",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.526Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149771-9",
@@ -88,15 +90,15 @@
       "category": "fashion",
       "price": 95000,
       "originalPrice": 120000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.5,
       "reviewsCount": 50,
       "soldCount": 44,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mun89bhayy9t94"
       ],
@@ -115,14 +117,16 @@
         "Mã Shopee": "53519775931",
         "URL gốc": "https://shopee.vn/product/1857144183/53519775931",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.516Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149767-8",
@@ -131,15 +135,15 @@
       "category": "fashion",
       "price": 135000,
       "originalPrice": 150000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 169,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrig1tdx5gjmc5"
       ],
@@ -158,14 +162,16 @@
         "Mã Shopee": "27492421573",
         "URL gốc": "https://shopee.vn/product/1519684229/27492421573",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.506Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149673-6",
@@ -174,15 +180,15 @@
       "category": "fashion",
       "price": 101421,
       "originalPrice": 128000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 600,
       "soldCount": 5000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-mdqvjntts59o94"
       ],
@@ -201,14 +207,16 @@
         "Mã Shopee": "55519390038",
         "URL gốc": "https://shopee.vn/product/1506174776/55519390038",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.496Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149669-5",
@@ -217,15 +225,15 @@
       "category": "fashion",
       "price": 164894,
       "originalPrice": 299000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 9600,
       "soldCount": 80000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mmimp7lz5g5rfc"
       ],
@@ -244,14 +252,16 @@
         "Mã Shopee": "28760944851",
         "URL gốc": "https://shopee.vn/product/562119848/28760944851",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.486Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149664-4",
@@ -260,15 +270,15 @@
       "category": "fashion",
       "price": 174786,
       "originalPrice": 220000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 840,
       "soldCount": 7000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-82591-mt8xttpn6ayt70"
       ],
@@ -287,14 +297,16 @@
         "Mã Shopee": "46418067108",
         "URL gốc": "https://shopee.vn/product/1506174776/46418067108",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.476Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149576-3",
@@ -303,15 +315,15 @@
       "category": "fashion",
       "price": 280000,
       "originalPrice": 379000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 2,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mu0k7w2tvz0n99"
       ],
@@ -330,14 +342,16 @@
         "Mã Shopee": "45468391248",
         "URL gốc": "https://shopee.vn/product/1542819347/45468391248",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.466Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149572-2",
@@ -346,15 +360,15 @@
       "category": "fashion",
       "price": 138600,
       "originalPrice": 180000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 63,
       "soldCount": 531,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-22110-yk3xt4b15fkv50"
       ],
@@ -373,14 +387,16 @@
         "Mã Shopee": "27475730717",
         "URL gốc": "https://shopee.vn/product/1472094765/27475730717",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.456Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149568-1",
@@ -389,15 +405,15 @@
       "category": "fashion",
       "price": 239000,
       "originalPrice": 339000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 3600,
       "soldCount": 30000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mlwufr2hyl1h68"
       ],
@@ -416,14 +432,16 @@
         "Mã Shopee": "43334854133",
         "URL gốc": "https://shopee.vn/product/1506174776/43334854133",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.446Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434149562-0",
@@ -432,15 +450,15 @@
       "category": "fashion",
       "price": 766860,
       "originalPrice": 942000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mqy6hn4t6c5ic7"
       ],
@@ -459,14 +477,16 @@
         "Mã Shopee": "25778076458",
         "URL gốc": "https://shopee.vn/product/395466446/25778076458",
         "Từ khóa": "áo khoác nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "khoác"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.436Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434005208-19",
@@ -475,15 +495,15 @@
       "category": "fashion",
       "price": 502550,
       "originalPrice": 650000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mf4guzid2arw66"
       ],
@@ -502,13 +522,15 @@
         "Mã Shopee": "42350432003",
         "URL gốc": "https://shopee.vn/product/311177287/42350432003",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.426Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434005160-18",
@@ -517,15 +539,15 @@
       "category": "fashion",
       "price": 56908,
       "originalPrice": 64000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.5,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrbilvt85wjk68"
       ],
@@ -544,13 +566,15 @@
         "Mã Shopee": "49617862189",
         "URL gốc": "https://shopee.vn/product/1506174776/49617862189",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.416Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434005096-17",
@@ -559,15 +583,15 @@
       "category": "fashion",
       "price": 100000,
       "originalPrice": 190000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 2400,
       "soldCount": 20000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-825b1-mrl0ufns4kcl8a"
       ],
@@ -586,13 +610,15 @@
         "Mã Shopee": "57417051932",
         "URL gốc": "https://shopee.vn/product/1506174776/57417051932",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.406Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434005079-16",
@@ -601,15 +627,15 @@
       "category": "fashion",
       "price": 95000,
       "originalPrice": 150000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 12000,
       "soldCount": 100000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mn5yc075zojq3d"
       ],
@@ -628,13 +654,15 @@
         "Mã Shopee": "53368443985",
         "URL gốc": "https://shopee.vn/product/1506174776/53368443985",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.396Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434005066-15",
@@ -643,15 +671,15 @@
       "category": "fashion",
       "price": 39000,
       "originalPrice": 69000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mqm09qhkdkaq3c"
       ],
@@ -670,13 +698,15 @@
         "Mã Shopee": "46668613016",
         "URL gốc": "https://shopee.vn/product/1506174776/46668613016",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.386Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004994-14",
@@ -685,15 +715,15 @@
       "category": "fashion",
       "price": 29250,
       "originalPrice": 49000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 9600,
       "soldCount": 80000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m99jntq5dk0723"
       ],
@@ -712,13 +742,15 @@
         "Mã Shopee": "51419390135",
         "URL gốc": "https://shopee.vn/product/1506174776/51419390135",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.376Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004977-13",
@@ -727,15 +759,15 @@
       "category": "fashion",
       "price": 2365000,
       "originalPrice": 3379000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 276,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrpn8wnn86wx22"
       ],
@@ -754,13 +786,15 @@
         "Mã Shopee": "40950902367",
         "URL gốc": "https://shopee.vn/product/1362431986/40950902367",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.366Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004965-12",
@@ -769,15 +803,15 @@
       "category": "fashion",
       "price": 45000,
       "originalPrice": 170000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mqvd6yquf8qp9b"
       ],
@@ -796,13 +830,15 @@
         "Mã Shopee": "41334391929",
         "URL gốc": "https://shopee.vn/product/1506174776/41334391929",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.356Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004913-11",
@@ -811,15 +847,15 @@
       "category": "fashion",
       "price": 203840,
       "originalPrice": 290000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 12000,
       "soldCount": 100000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-msp23gf2d81x34"
       ],
@@ -838,13 +874,15 @@
         "Mã Shopee": "44568388735",
         "URL gốc": "https://shopee.vn/product/1506174776/44568388735",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.346Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004892-10",
@@ -853,15 +891,15 @@
       "category": "fashion",
       "price": 105000,
       "originalPrice": 145000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mh2t5uh09t6xa3"
       ],
@@ -880,13 +918,15 @@
         "Mã Shopee": "50318471037",
         "URL gốc": "https://shopee.vn/product/1506174776/50318471037",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.336Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004871-9",
@@ -895,15 +935,15 @@
       "category": "fashion",
       "price": 494000,
       "originalPrice": 625000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 53,
       "soldCount": 446,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m9guzh3bverred"
       ],
@@ -922,13 +962,15 @@
         "Mã Shopee": "26882385786",
         "URL gốc": "https://shopee.vn/product/311177287/26882385786",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.326Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004774-8",
@@ -937,15 +979,15 @@
       "category": "fashion",
       "price": 86260,
       "originalPrice": 119000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 6000,
       "soldCount": 50000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrmqiokeiubp6f"
       ],
@@ -964,13 +1006,15 @@
         "Mã Shopee": "47619026849",
         "URL gốc": "https://shopee.vn/product/1506174776/47619026849",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.316Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004766-7",
@@ -979,15 +1023,15 @@
       "category": "fashion",
       "price": 56513,
       "originalPrice": 62000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 1080,
       "soldCount": 9000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134211-820l4-mgq717ds7le6b1"
       ],
@@ -1006,13 +1050,15 @@
         "Mã Shopee": "56817957223",
         "URL gốc": "https://shopee.vn/product/1506174776/56817957223",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.306Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004761-6",
@@ -1021,15 +1067,15 @@
       "category": "fashion",
       "price": 101762,
       "originalPrice": 134000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mimkjl3uo4qqa3"
       ],
@@ -1048,13 +1094,15 @@
         "Mã Shopee": "50561964709",
         "URL gốc": "https://shopee.vn/product/1506174776/50561964709",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.296Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004672-5",
@@ -1063,15 +1111,15 @@
       "category": "fashion",
       "price": 152000,
       "originalPrice": 280000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 720,
       "soldCount": 6000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-825b3-mul09ev4hk3pb1"
       ],
@@ -1090,13 +1138,15 @@
         "Mã Shopee": "54320041826",
         "URL gốc": "https://shopee.vn/product/1506174776/54320041826",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.286Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004668-4",
@@ -1105,15 +1155,15 @@
       "category": "fashion",
       "price": 2499000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 52,
       "soldCount": 440,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-mbopo7ibmnaib9"
       ],
@@ -1132,13 +1182,15 @@
         "Mã Shopee": "41256968982",
         "URL gốc": "https://shopee.vn/product/1362431986/41256968982",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.276Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004662-3",
@@ -1147,15 +1199,15 @@
       "category": "fashion",
       "price": 134000,
       "originalPrice": 249000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-muugzpgmc2yu70"
       ],
@@ -1174,13 +1226,15 @@
         "Mã Shopee": "43985565467",
         "URL gốc": "https://shopee.vn/product/1542819347/43985565467",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.266Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004591-2",
@@ -1189,15 +1243,15 @@
       "category": "fashion",
       "price": 147007,
       "originalPrice": 320000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 4800,
       "soldCount": 40000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-m246gr8e4rrv0c"
       ],
@@ -1216,13 +1270,15 @@
         "Mã Shopee": "22387282306",
         "URL gốc": "https://shopee.vn/product/1077450991/22387282306",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.256Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004585-1",
@@ -1231,15 +1287,15 @@
       "category": "fashion",
       "price": 160720,
       "originalPrice": 250000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 480,
       "soldCount": 4000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mpdjnk46t2izd0"
       ],
@@ -1258,13 +1314,15 @@
         "Mã Shopee": "52467767641",
         "URL gốc": "https://shopee.vn/product/1506174776/52467767641",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.246Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794434004579-0",
@@ -1273,15 +1331,15 @@
       "category": "fashion",
       "price": 147000,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mr67e3xpwxs2f0"
       ],
@@ -1300,13 +1358,15 @@
         "Mã Shopee": "56017983341",
         "URL gốc": "https://shopee.vn/product/1506174776/56017983341",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.236Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952171-19",
@@ -1315,15 +1375,15 @@
       "category": "fashion",
       "price": 4100000,
       "originalPrice": 5550000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mmmgssw2pz4507"
       ],
@@ -1342,14 +1402,16 @@
         "Mã Shopee": "46808228367",
         "URL gốc": "https://shopee.vn/product/716285017/46808228367",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.226Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952168-18",
@@ -1358,15 +1420,15 @@
       "category": "fashion",
       "price": 361000,
       "originalPrice": 750000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-823om-mp125hjvl53i67"
       ],
@@ -1385,14 +1447,16 @@
         "Mã Shopee": "51909475098",
         "URL gốc": "https://shopee.vn/product/1710564016/51909475098",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.216Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952163-17",
@@ -1401,15 +1465,15 @@
       "category": "fashion",
       "price": 4091124,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-muhjwiqy9n9eae"
       ],
@@ -1428,14 +1492,16 @@
         "Mã Shopee": "27546083343",
         "URL gốc": "https://shopee.vn/product/1718887701/27546083343",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.206Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952074-16",
@@ -1444,15 +1510,15 @@
       "category": "fashion",
       "price": 349000,
       "originalPrice": 608000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 63,
       "soldCount": 529,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-824jb-mpru8mc9hafh3b"
       ],
@@ -1471,14 +1537,16 @@
         "Mã Shopee": "48712619235",
         "URL gốc": "https://shopee.vn/product/1021016386/48712619235",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.196Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952070-15",
@@ -1487,15 +1555,15 @@
       "category": "fashion",
       "price": 1680000,
       "originalPrice": 2100000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 110,
       "soldCount": 917,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrtq67n0slj67c"
       ],
@@ -1514,14 +1582,16 @@
         "Mã Shopee": "23125036645",
         "URL gốc": "https://shopee.vn/product/876062885/23125036645",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.186Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952066-14",
@@ -1530,15 +1600,15 @@
       "category": "fashion",
       "price": 169150,
       "originalPrice": 358000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-m7ujzvyjkjht89"
       ],
@@ -1557,14 +1627,16 @@
         "Mã Shopee": "29011019063",
         "URL gốc": "https://shopee.vn/product/1356437574/29011019063",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.176Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433952062-13",
@@ -1573,15 +1645,15 @@
       "category": "fashion",
       "price": 278000,
       "originalPrice": 370000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 840,
       "soldCount": 7000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-824il-me84tg6ecttyb5"
       ],
@@ -1600,14 +1672,16 @@
         "Mã Shopee": "17036193606",
         "URL gốc": "https://shopee.vn/product/372084945/17036193606",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.166Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951973-12",
@@ -1616,15 +1690,15 @@
       "category": "fashion",
       "price": 279000,
       "originalPrice": 350000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 50,
       "soldCount": 39,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mpz0ufha0ky722"
       ],
@@ -1643,14 +1717,16 @@
         "Mã Shopee": "51910987086",
         "URL gốc": "https://shopee.vn/product/1504874168/51910987086",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.156Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951969-11",
@@ -1659,15 +1735,15 @@
       "category": "fashion",
       "price": 2587960,
       "originalPrice": 3800000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 50,
       "soldCount": 58,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-ma9c6k54264ja1"
       ],
@@ -1686,14 +1762,16 @@
         "Mã Shopee": "28631475561",
         "URL gốc": "https://shopee.vn/product/68459598/28631475561",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.146Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951965-10",
@@ -1702,15 +1780,15 @@
       "category": "decor",
       "price": 55000,
       "originalPrice": 115000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.4,
       "reviewsCount": 108,
       "soldCount": 902,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mug3lv3f4weda8"
       ],
@@ -1729,14 +1807,16 @@
         "Mã Shopee": "27864593375",
         "URL gốc": "https://shopee.vn/product/1161750510/27864593375",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "decor",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.136Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951961-9",
@@ -1745,15 +1825,15 @@
       "category": "fashion",
       "price": 1235780,
       "originalPrice": 1700000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.3,
       "reviewsCount": 50,
       "soldCount": 88,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mnwpk28i0nb5f5"
       ],
@@ -1772,14 +1852,16 @@
         "Mã Shopee": "29909428139",
         "URL gốc": "https://shopee.vn/product/68459598/29909428139",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.126Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951873-8",
@@ -1788,15 +1870,15 @@
       "category": "fashion",
       "price": 184769,
       "originalPrice": 217374,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 60,
       "soldCount": 502,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-8259y-mgeu9ky0nhfxe0"
       ],
@@ -1815,14 +1897,16 @@
         "Mã Shopee": "49254280974",
         "URL gốc": "https://shopee.vn/product/1506174776/49254280974",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.116Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951870-7",
@@ -1831,15 +1915,15 @@
       "category": "fashion",
       "price": 1350000,
       "originalPrice": 1660000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mqpki3g1ahhc2c"
       ],
@@ -1858,14 +1942,16 @@
         "Mã Shopee": "47214088924",
         "URL gốc": "https://shopee.vn/product/349454366/47214088924",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.106Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951867-6",
@@ -1874,15 +1960,15 @@
       "category": "fashion",
       "price": 60399,
       "originalPrice": 100000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 720,
       "soldCount": 6000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-820n6-mnl65qa0aublf1"
       ],
@@ -1901,14 +1987,16 @@
         "Mã Shopee": "53409545561",
         "URL gốc": "https://shopee.vn/product/1604461326/53409545561",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.096Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951864-5",
@@ -1917,15 +2005,15 @@
       "category": "coffee",
       "price": 5500000,
       "originalPrice": 8950000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 3,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mliy04y70u88d3"
       ],
@@ -1944,14 +2032,16 @@
         "Mã Shopee": "53756887657",
         "URL gốc": "https://shopee.vn/product/716285017/53756887657",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "coffee",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.086Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951861-4",
@@ -1960,15 +2050,15 @@
       "category": "tech",
       "price": 355000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-8261k-mj8psy9ocphi9e"
       ],
@@ -1987,14 +2077,16 @@
         "Mã Shopee": "26743992928",
         "URL gốc": "https://shopee.vn/product/1506174776/26743992928",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "tech",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.077Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951804-3",
@@ -2003,15 +2095,15 @@
       "category": "coffee",
       "price": 1425000,
       "originalPrice": 2550000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 50,
       "soldCount": 186,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrpn8wkf5bev3a"
       ],
@@ -2030,14 +2122,16 @@
         "Mã Shopee": "41756082090",
         "URL gốc": "https://shopee.vn/product/920326408/41756082090",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "coffee",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.067Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951800-2",
@@ -2046,15 +2140,15 @@
       "category": "fashion",
       "price": 1235780,
       "originalPrice": 1900000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-mbxs6r7eq16244"
       ],
@@ -2073,14 +2167,16 @@
         "Mã Shopee": "24632517392",
         "URL gốc": "https://shopee.vn/product/68459598/24632517392",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.057Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951796-1",
@@ -2089,15 +2185,15 @@
       "category": "fashion",
       "price": 2531700,
       "originalPrice": 3800000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 116,
       "soldCount": 974,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-ma9cqhyhmhgy50"
       ],
@@ -2116,14 +2212,16 @@
         "Mã Shopee": "27780806044",
         "URL gốc": "https://shopee.vn/product/68459598/27780806044",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.047Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433951792-0",
@@ -2132,15 +2230,15 @@
       "category": "fashion",
       "price": 1990000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 175,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-mee5fegy83yc16"
       ],
@@ -2159,14 +2257,16 @@
         "Mã Shopee": "41868042452",
         "URL gốc": "https://shopee.vn/product/752342657/41868042452",
         "Từ khóa": "quạt",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "quạt"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.037Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908879-9",
@@ -2175,15 +2275,15 @@
       "category": "fashion",
       "price": 3000000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 1,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrttuxpxj8qt93"
       ],
@@ -2202,7 +2302,7 @@
         "Mã Shopee": "55815935752",
         "URL gốc": "https://shopee.vn/product/888148116/55815935752",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2210,7 +2310,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.027Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908867-8",
@@ -2219,15 +2321,15 @@
       "category": "fashion",
       "price": 6273000,
       "originalPrice": 6700000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 170,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mrsuyizlavpg1a"
       ],
@@ -2246,7 +2348,7 @@
         "Mã Shopee": "27160244548",
         "URL gốc": "https://shopee.vn/product/1311495732/27160244548",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2254,7 +2356,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.017Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908860-7",
@@ -2263,15 +2367,15 @@
       "category": "fashion",
       "price": 5913400,
       "originalPrice": 6460000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 326,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-824go-mpjnb5lttvyl3b"
       ],
@@ -2290,7 +2394,7 @@
         "Mã Shopee": "28010232403",
         "URL gốc": "https://shopee.vn/product/1311495732/28010232403",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2298,7 +2402,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:26.007Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908794-6",
@@ -2307,15 +2413,15 @@
       "category": "fashion",
       "price": 4009200,
       "originalPrice": 6682000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 720,
       "soldCount": 6000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-82289-mhu830t2oi6879"
       ],
@@ -2334,7 +2440,7 @@
         "Mã Shopee": "17996143304",
         "URL gốc": "https://shopee.vn/product/524935380/17996143304",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2342,7 +2448,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.997Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908787-5",
@@ -2351,15 +2459,15 @@
       "category": "fashion",
       "price": 4150000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 291,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mpucd6fr6rke09"
       ],
@@ -2378,7 +2486,7 @@
         "Mã Shopee": "25026404556",
         "URL gốc": "https://shopee.vn/product/66784871/25026404556",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2386,7 +2494,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.987Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908780-4",
@@ -2395,15 +2505,15 @@
       "category": "fashion",
       "price": 4100000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 96,
       "soldCount": 801,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mp86f1idreo244"
       ],
@@ -2422,7 +2532,7 @@
         "Mã Shopee": "24407323756",
         "URL gốc": "https://shopee.vn/product/94113624/24407323756",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2430,7 +2540,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.977Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908775-3",
@@ -2439,15 +2551,15 @@
       "category": "fashion",
       "price": 4950000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 75,
       "soldCount": 625,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-muk4fokhv8xv6e"
       ],
@@ -2466,7 +2578,7 @@
         "Mã Shopee": "9175160999",
         "URL gốc": "https://shopee.vn/product/440838973/9175160999",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2474,7 +2586,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.967Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908769-2",
@@ -2483,15 +2597,15 @@
       "category": "fashion",
       "price": 2975000,
       "originalPrice": 3500000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mr7410z0mz9e27"
       ],
@@ -2510,7 +2624,7 @@
         "Mã Shopee": "23556689756",
         "URL gốc": "https://shopee.vn/product/524935380/23556689756",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2518,7 +2632,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.957Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908753-1",
@@ -2527,15 +2643,15 @@
       "category": "fashion",
       "price": 16990000,
       "originalPrice": 31390000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mp3ci9rylh5854"
       ],
@@ -2554,7 +2670,7 @@
         "Mã Shopee": "51461711438",
         "URL gốc": "https://shopee.vn/product/1128623948/51461711438",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2562,7 +2678,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.947Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433908750-0",
@@ -2571,15 +2689,15 @@
       "category": "tech",
       "price": 6785000,
       "originalPrice": 6800000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 120,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mu4r8asu0ufbd2"
       ],
@@ -2598,7 +2716,7 @@
         "Mã Shopee": "11462628808",
         "URL gốc": "https://shopee.vn/product/190753408/11462628808",
         "Từ khóa": "máy tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "tech",
@@ -2606,7 +2724,9 @@
         "máy",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.937Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591471-9",
@@ -2615,15 +2735,15 @@
       "category": "fashion",
       "price": 109000,
       "originalPrice": 298000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 3600,
       "soldCount": 30000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-mazecolxskbcf4"
       ],
@@ -2642,7 +2762,7 @@
         "Mã Shopee": "52015864573",
         "URL gốc": "https://shopee.vn/product/1506174776/52015864573",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2650,7 +2770,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.927Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591467-8",
@@ -2659,15 +2781,15 @@
       "category": "fashion",
       "price": 575100,
       "originalPrice": 639000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 42,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134201-81ztc-mtj1w0birksg4d"
       ],
@@ -2686,7 +2808,7 @@
         "Mã Shopee": "42084776731",
         "URL gốc": "https://shopee.vn/product/752610501/42084776731",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2694,7 +2816,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.917Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591462-7",
@@ -2703,15 +2827,15 @@
       "category": "fashion",
       "price": 92000,
       "originalPrice": 100000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.5,
       "reviewsCount": 24000,
       "soldCount": 200000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134201-7ras8-maxm5q6wqymv48"
       ],
@@ -2730,7 +2854,7 @@
         "Mã Shopee": "54315877526",
         "URL gốc": "https://shopee.vn/product/1506174776/54315877526",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2738,7 +2862,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.907Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591390-6",
@@ -2747,15 +2873,15 @@
       "category": "fashion",
       "price": 102900,
       "originalPrice": 150000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 2400,
       "soldCount": 20000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ra0g-maasevvxdze06b"
       ],
@@ -2774,7 +2900,7 @@
         "Mã Shopee": "57062031935",
         "URL gốc": "https://shopee.vn/product/1506174776/57062031935",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2782,7 +2908,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.897Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591386-5",
@@ -2791,15 +2919,15 @@
       "category": "fashion",
       "price": 119000,
       "originalPrice": 180000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 3600,
       "soldCount": 30000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7r98o-lv0m8u9en9ui24"
       ],
@@ -2818,7 +2946,7 @@
         "Mã Shopee": "41985093535",
         "URL gốc": "https://shopee.vn/product/1506174776/41985093535",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2826,7 +2954,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.887Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591365-4",
@@ -2835,15 +2965,15 @@
       "category": "fashion",
       "price": 289000,
       "originalPrice": 389000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mu60e22xpszm70"
       ],
@@ -2862,7 +2992,7 @@
         "Mã Shopee": "50371388506",
         "URL gốc": "https://shopee.vn/product/17623596/50371388506",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2870,7 +3000,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.877Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591334-3",
@@ -2879,15 +3011,15 @@
       "category": "fashion",
       "price": 96245,
       "originalPrice": 122000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 24000,
       "soldCount": 200000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-7ras8-mbezpz476gtv26"
       ],
@@ -2906,7 +3038,7 @@
         "Mã Shopee": "50665980858",
         "URL gốc": "https://shopee.vn/product/1506174776/50665980858",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2914,7 +3046,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.867Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591329-2",
@@ -2923,15 +3057,15 @@
       "category": "fashion",
       "price": 79999,
       "originalPrice": 139000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mmwp53bfbe9ud3"
       ],
@@ -2950,7 +3084,7 @@
         "Mã Shopee": "50008594779",
         "URL gốc": "https://shopee.vn/product/716491277/50008594779",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -2958,7 +3092,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.857Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591324-1",
@@ -2967,15 +3103,15 @@
       "category": "fashion",
       "price": 164999,
       "originalPrice": 210000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-moe09x0aohe583"
       ],
@@ -2994,7 +3130,7 @@
         "Mã Shopee": "43433074188",
         "URL gốc": "https://shopee.vn/product/1506174776/43433074188",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3002,7 +3138,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.847Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433591318-0",
@@ -3011,15 +3149,15 @@
       "category": "fashion",
       "price": 78152,
       "originalPrice": 100000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 3600,
       "soldCount": 30000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-81zto-mmvifdqy680397"
       ],
@@ -3038,7 +3176,7 @@
         "Mã Shopee": "45415656399",
         "URL gốc": "https://shopee.vn/product/1506174776/45415656399",
         "Từ khóa": "áo quần nam",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3046,7 +3184,9 @@
         "quần",
         "nam"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.837Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030273-19",
@@ -3055,15 +3195,15 @@
       "category": "fashion",
       "price": 1375000,
       "originalPrice": 2000000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 96,
       "soldCount": 808,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-7rdyt-mdjdeh5ii5oq3e"
       ],
@@ -3082,7 +3222,7 @@
         "Mã Shopee": "27187030676",
         "URL gốc": "https://shopee.vn/product/190753408/27187030676",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3091,7 +3231,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.827Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030270-18",
@@ -3100,15 +3242,15 @@
       "category": "fashion",
       "price": 6890000,
       "originalPrice": 6990000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 350,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mq8mo78fz4e97a"
       ],
@@ -3127,7 +3269,7 @@
         "Mã Shopee": "29227319538",
         "URL gốc": "https://shopee.vn/product/2777173/29227319538",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3136,7 +3278,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.817Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030268-17",
@@ -3145,15 +3289,15 @@
       "category": "fashion",
       "price": 2690000,
       "originalPrice": 3690000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 840,
       "soldCount": 7000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mvbwg3rywhs4cd"
       ],
@@ -3172,7 +3316,7 @@
         "Mã Shopee": "20291473767",
         "URL gốc": "https://shopee.vn/product/1036648426/20291473767",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3181,7 +3325,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.807Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030265-16",
@@ -3190,15 +3336,15 @@
       "category": "fashion",
       "price": 4160000,
       "originalPrice": 4320000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 31,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-7rfi2-m3q8prk6vmhpde"
       ],
@@ -3217,7 +3363,7 @@
         "Mã Shopee": "29520562149",
         "URL gốc": "https://shopee.vn/product/958778013/29520562149",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3226,7 +3372,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.797Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030262-15",
@@ -3235,15 +3383,15 @@
       "category": "fashion",
       "price": 1650000,
       "originalPrice": null,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 180,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-8261p-mm6he4sljuv840"
       ],
@@ -3262,7 +3410,7 @@
         "Mã Shopee": "57857603116",
         "URL gốc": "https://shopee.vn/product/1506174776/57857603116",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3271,7 +3419,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.787Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030177-14",
@@ -3280,15 +3430,15 @@
       "category": "fashion",
       "price": 2490000,
       "originalPrice": 3980000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 68,
       "soldCount": 570,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-820l4-meie1laqdn28d7"
       ],
@@ -3307,7 +3457,7 @@
         "Mã Shopee": "27610912507",
         "URL gốc": "https://shopee.vn/product/1356437574/27610912507",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3316,7 +3466,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.777Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030173-13",
@@ -3325,15 +3477,15 @@
       "category": "fashion",
       "price": 2410000,
       "originalPrice": 2990000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 94,
       "soldCount": 791,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mtg3w8byo0sl41"
       ],
@@ -3352,7 +3504,7 @@
         "Mã Shopee": "51709995853",
         "URL gốc": "https://shopee.vn/product/799171984/51709995853",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3361,7 +3513,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.767Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030169-12",
@@ -3370,15 +3524,15 @@
       "category": "fashion",
       "price": 2890000,
       "originalPrice": 4390000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 20,
       "soldCount": 0,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mo6j24ksqg3p6f"
       ],
@@ -3397,7 +3551,7 @@
         "Mã Shopee": "51610430413",
         "URL gốc": "https://shopee.vn/product/1128623948/51610430413",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3406,7 +3560,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.757Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030162-11",
@@ -3415,15 +3571,15 @@
       "category": "fashion",
       "price": 3790000,
       "originalPrice": 4190000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 17,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mubxybdw7klm34"
       ],
@@ -3442,7 +3598,7 @@
         "Mã Shopee": "50506721578",
         "URL gốc": "https://shopee.vn/product/1731160049/50506721578",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3451,7 +3607,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.747Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030074-10",
@@ -3460,15 +3618,15 @@
       "category": "fashion",
       "price": 2790000,
       "originalPrice": 2990000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 366,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-820l8-mncheblj7n5ue8"
       ],
@@ -3487,7 +3645,7 @@
         "Mã Shopee": "56609295468",
         "URL gốc": "https://shopee.vn/product/1506174776/56609295468",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3496,7 +3654,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.737Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030071-9",
@@ -3505,15 +3665,15 @@
       "category": "fashion",
       "price": 2243434,
       "originalPrice": 3000000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/cn-11134207-820l4-mhjvg5hu6xag71"
       ],
@@ -3532,7 +3692,7 @@
         "Mã Shopee": "23054479378",
         "URL gốc": "https://shopee.vn/product/1053077389/23054479378",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3541,7 +3701,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.727Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030069-8",
@@ -3550,15 +3712,15 @@
       "category": "fashion",
       "price": 2890000,
       "originalPrice": 3300000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mpne4j6x1r0se9"
       ],
@@ -3577,7 +3739,7 @@
         "Mã Shopee": "27520819114",
         "URL gốc": "https://shopee.vn/product/1396654883/27520819114",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3586,7 +3748,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.717Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030066-7",
@@ -3595,15 +3759,15 @@
       "category": "fashion",
       "price": 2390000,
       "originalPrice": 4320000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 198,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134201-7rffc-m3q9hjxyxs2323"
       ],
@@ -3622,7 +3786,7 @@
         "Mã Shopee": "29820558917",
         "URL gốc": "https://shopee.vn/product/1356437574/29820558917",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3631,7 +3795,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.707Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030064-6",
@@ -3640,15 +3806,15 @@
       "category": "fashion",
       "price": 2200000,
       "originalPrice": 2990000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mtag6pzg232i8c"
       ],
@@ -3667,7 +3833,7 @@
         "Mã Shopee": "29580300069",
         "URL gốc": "https://shopee.vn/product/1500038395/29580300069",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3676,7 +3842,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.697Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030060-5",
@@ -3685,15 +3853,15 @@
       "category": "fashion",
       "price": 915000,
       "originalPrice": 1660000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 240,
       "soldCount": 2000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-ml8ommoa3gg527"
       ],
@@ -3712,7 +3880,7 @@
         "Mã Shopee": "14317051713",
         "URL gốc": "https://shopee.vn/product/190753408/14317051713",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3721,7 +3889,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.687Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030035-4",
@@ -3730,15 +3900,15 @@
       "category": "fashion",
       "price": 6760000,
       "originalPrice": 8450000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mpnejbgr632jed"
       ],
@@ -3757,7 +3927,7 @@
         "Mã Shopee": "41152976516",
         "URL gốc": "https://shopee.vn/product/1396654883/41152976516",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3766,7 +3936,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.677Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030033-3",
@@ -3775,15 +3947,15 @@
       "category": "fashion",
       "price": 1659000,
       "originalPrice": 2200000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/sg-11134253-7rdvx-md796zle2wo6e0"
       ],
@@ -3802,7 +3974,7 @@
         "Mã Shopee": "27416075249",
         "URL gốc": "https://shopee.vn/product/1131061889/27416075249",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3811,7 +3983,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.667Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030030-2",
@@ -3820,15 +3994,15 @@
       "category": "fashion",
       "price": 3309000,
       "originalPrice": 4815025,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 50,
       "soldCount": 64,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/cn-11134207-820l4-mogpj8smjocsa5"
       ],
@@ -3847,7 +4021,7 @@
         "Mã Shopee": "29389520965",
         "URL gốc": "https://shopee.vn/product/1417573924/29389520965",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3856,7 +4030,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.657Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030026-1",
@@ -3865,15 +4041,15 @@
       "category": "fashion",
       "price": 1930000,
       "originalPrice": 3000000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mut36cfos5qie8"
       ],
@@ -3892,7 +4068,7 @@
         "Mã Shopee": "26569274876",
         "URL gốc": "https://shopee.vn/product/1386254259/26569274876",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3901,7 +4077,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.647Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1794433030023-0",
@@ -3910,15 +4088,15 @@
       "category": "fashion",
       "price": 2610000,
       "originalPrice": 2990000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 240,
       "soldCount": 2000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "https://down-vn.img.susercontent.com/file/vn-11134207-81ztc-mtg3w8byo0sl41"
       ],
@@ -3937,7 +4115,7 @@
         "Mã Shopee": "29657133408",
         "URL gốc": "https://shopee.vn/product/799171984/29657133408",
         "Từ khóa": "màn hình vi tính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -3946,7 +4124,9 @@
         "hình",
         "tính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.637Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371865-19",
@@ -3955,15 +4135,15 @@
       "category": "fashion",
       "price": 52920,
       "originalPrice": 95040,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 600,
       "soldCount": 5000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/40332720316.jpg"
       ],
@@ -3982,14 +4162,16 @@
         "Mã Shopee": "40332720316",
         "URL gốc": "https://shopee.vn/product/196261835/40332720316",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.627Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371844-18",
@@ -3998,15 +4180,15 @@
       "category": "fashion",
       "price": 22840,
       "originalPrice": 23000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1080,
       "soldCount": 9000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/28158187572.jpg"
       ],
@@ -4025,14 +4207,16 @@
         "Mã Shopee": "28158187572",
         "URL gốc": "https://shopee.vn/product/118645835/28158187572",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.617Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371830-17",
@@ -4041,15 +4225,15 @@
       "category": "fashion",
       "price": 98000,
       "originalPrice": 130000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/25589817384.jpg"
       ],
@@ -4068,14 +4252,16 @@
         "Mã Shopee": "25589817384",
         "URL gốc": "https://shopee.vn/product/431745854/25589817384",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.607Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371821-16",
@@ -4084,15 +4270,15 @@
       "category": "fashion",
       "price": 42140,
       "originalPrice": 60000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/29701524765.jpg"
       ],
@@ -4111,14 +4297,16 @@
         "Mã Shopee": "29701524765",
         "URL gốc": "https://shopee.vn/product/68362839/29701524765",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.597Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371809-15",
@@ -4127,15 +4315,15 @@
       "category": "fashion",
       "price": 23030,
       "originalPrice": 32000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 2400,
       "soldCount": 20000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/16655117249.jpg"
       ],
@@ -4154,14 +4342,16 @@
         "Mã Shopee": "16655117249",
         "URL gốc": "https://shopee.vn/product/111519175/16655117249",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.587Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371791-14",
@@ -4170,15 +4360,15 @@
       "category": "fashion",
       "price": 85071,
       "originalPrice": 92000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 3600,
       "soldCount": 30000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/26551242939.jpg"
       ],
@@ -4197,14 +4387,16 @@
         "Mã Shopee": "26551242939",
         "URL gốc": "https://shopee.vn/product/949804684/26551242939",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.577Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371765-13",
@@ -4213,15 +4405,15 @@
       "category": "fashion",
       "price": 27075,
       "originalPrice": 75000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 960,
       "soldCount": 8000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/19491707191.jpg"
       ],
@@ -4240,14 +4432,16 @@
         "Mã Shopee": "19491707191",
         "URL gốc": "https://shopee.vn/product/111519175/19491707191",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.567Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371752-12",
@@ -4256,15 +4450,15 @@
       "category": "fashion",
       "price": 20000,
       "originalPrice": 35000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/27961442338.jpg"
       ],
@@ -4283,14 +4477,16 @@
         "Mã Shopee": "27961442338",
         "URL gốc": "https://shopee.vn/product/68362839/27961442338",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.557Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371739-11",
@@ -4299,15 +4495,15 @@
       "category": "fashion",
       "price": 82080,
       "originalPrice": 118800,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/18666916512.jpg"
       ],
@@ -4326,14 +4522,16 @@
         "Mã Shopee": "18666916512",
         "URL gốc": "https://shopee.vn/product/111715780/18666916512",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.547Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371725-10",
@@ -4342,15 +4540,15 @@
       "category": "fashion",
       "price": 54900,
       "originalPrice": 69000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/23657710174.jpg"
       ],
@@ -4369,14 +4567,16 @@
         "Mã Shopee": "23657710174",
         "URL gốc": "https://shopee.vn/product/183595172/23657710174",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.537Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371708-9",
@@ -4385,15 +4585,15 @@
       "category": "fashion",
       "price": 62370,
       "originalPrice": 105840,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.2,
       "reviewsCount": 81,
       "soldCount": 681,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/29557806468.jpg"
       ],
@@ -4412,14 +4612,16 @@
         "Mã Shopee": "29557806468",
         "URL gốc": "https://shopee.vn/product/1324864525/29557806468",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.527Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371692-8",
@@ -4428,15 +4630,15 @@
       "category": "fashion",
       "price": 62442,
       "originalPrice": 100000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 480,
       "soldCount": 4000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/29193711372.jpg"
       ],
@@ -4455,14 +4657,16 @@
         "Mã Shopee": "29193711372",
         "URL gốc": "https://shopee.vn/product/1649869410/29193711372",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.517Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371678-7",
@@ -4471,15 +4675,15 @@
       "category": "fashion",
       "price": 24010,
       "originalPrice": 32000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 6000,
       "soldCount": 50000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/18887958068.jpg"
       ],
@@ -4498,14 +4702,16 @@
         "Mã Shopee": "18887958068",
         "URL gốc": "https://shopee.vn/product/111519175/18887958068",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.507Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371656-6",
@@ -4514,15 +4720,15 @@
       "category": "fashion",
       "price": 68000,
       "originalPrice": 109000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/25330662526.jpg"
       ],
@@ -4541,14 +4747,16 @@
         "Mã Shopee": "25330662526",
         "URL gốc": "https://shopee.vn/product/10323148/25330662526",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.497Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371638-5",
@@ -4557,15 +4765,15 @@
       "category": "fashion",
       "price": 37000,
       "originalPrice": 75000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/19996588913.jpg"
       ],
@@ -4584,14 +4792,16 @@
         "Mã Shopee": "19996588913",
         "URL gốc": "https://shopee.vn/product/68362839/19996588913",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.487Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371625-4",
@@ -4600,15 +4810,15 @@
       "category": "fashion",
       "price": 96000,
       "originalPrice": 200000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 3600,
       "soldCount": 30000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/22978427690.jpg"
       ],
@@ -4627,14 +4837,16 @@
         "Mã Shopee": "22978427690",
         "URL gốc": "https://shopee.vn/product/998924637/22978427690",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.477Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371615-3",
@@ -4643,15 +4855,15 @@
       "category": "fashion",
       "price": 96000,
       "originalPrice": 180000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 240,
       "soldCount": 2000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/28153611624.jpg"
       ],
@@ -4670,14 +4882,16 @@
         "Mã Shopee": "28153611624",
         "URL gốc": "https://shopee.vn/product/998924637/28153611624",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.467Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371601-2",
@@ -4686,15 +4900,15 @@
       "category": "fashion",
       "price": 114480,
       "originalPrice": 177433,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 600,
       "soldCount": 5000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/47770065516.jpg"
       ],
@@ -4713,14 +4927,16 @@
         "Mã Shopee": "47770065516",
         "URL gốc": "https://shopee.vn/product/196261835/47770065516",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.457Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371582-1",
@@ -4729,15 +4945,15 @@
       "category": "fashion",
       "price": 90000,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 12000,
       "soldCount": 100000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/19863212321.jpg"
       ],
@@ -4756,14 +4972,16 @@
         "Mã Shopee": "19863212321",
         "URL gốc": "https://shopee.vn/product/257024829/19863212321",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.447Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947371560-0",
@@ -4772,15 +4990,15 @@
       "category": "fashion",
       "price": 41250,
       "originalPrice": 150000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 2400,
       "soldCount": 20000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/25826776002.jpg"
       ],
@@ -4799,14 +5017,16 @@
         "Mã Shopee": "25826776002",
         "URL gốc": "https://shopee.vn/product/1234282309/25826776002",
         "Từ khóa": "kính",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee",
         "kính"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.437Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235547-19",
@@ -4815,15 +5035,15 @@
       "category": "fashion",
       "price": 154000,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 10000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/25375137228.jpg"
       ],
@@ -4842,13 +5062,15 @@
         "Mã Shopee": "25375137228",
         "URL gốc": "https://shopee.vn/product/27035917/25375137228",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.427Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235530-18",
@@ -4857,15 +5079,15 @@
       "category": "fashion",
       "price": 165599,
       "originalPrice": 230000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 113,
       "soldCount": 947,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/40262321589.jpg"
       ],
@@ -4884,13 +5106,15 @@
         "Mã Shopee": "40262321589",
         "URL gốc": "https://shopee.vn/product/659260508/40262321589",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.417Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235509-17",
@@ -4899,15 +5123,15 @@
       "category": "fashion",
       "price": 134850,
       "originalPrice": 200000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 109,
       "soldCount": 912,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/42683129618.jpg"
       ],
@@ -4926,13 +5150,15 @@
         "Mã Shopee": "42683129618",
         "URL gốc": "https://shopee.vn/product/1904253191/42683129618",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.407Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235496-16",
@@ -4941,15 +5167,15 @@
       "category": "fashion",
       "price": 167200,
       "originalPrice": 190000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1080,
       "soldCount": 9000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/22472351227.jpg"
       ],
@@ -4968,13 +5194,15 @@
         "Mã Shopee": "22472351227",
         "URL gốc": "https://shopee.vn/product/933190367/22472351227",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.397Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235487-15",
@@ -4983,15 +5211,15 @@
       "category": "fashion",
       "price": 135000,
       "originalPrice": 170000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/41460639013.jpg"
       ],
@@ -5010,13 +5238,15 @@
         "Mã Shopee": "41460639013",
         "URL gốc": "https://shopee.vn/product/10995214/41460639013",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.387Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235475-14",
@@ -5025,15 +5255,15 @@
       "category": "fashion",
       "price": 123840,
       "originalPrice": 210000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.7,
       "reviewsCount": 111,
       "soldCount": 933,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/49909705875.jpg"
       ],
@@ -5052,13 +5282,15 @@
         "Mã Shopee": "49909705875",
         "URL gốc": "https://shopee.vn/product/791050707/49909705875",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.377Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235455-13",
@@ -5067,15 +5299,15 @@
       "category": "fashion",
       "price": 227920,
       "originalPrice": 498000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 480,
       "soldCount": 4000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/42980126512.jpg"
       ],
@@ -5094,13 +5326,15 @@
         "Mã Shopee": "42980126512",
         "URL gốc": "https://shopee.vn/product/27228264/42980126512",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.367Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235439-12",
@@ -5109,15 +5343,15 @@
       "category": "fashion",
       "price": 110000,
       "originalPrice": 118000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/26735061172.jpg"
       ],
@@ -5136,13 +5370,15 @@
         "Mã Shopee": "26735061172",
         "URL gốc": "https://shopee.vn/product/716489778/26735061172",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.357Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235419-11",
@@ -5151,15 +5387,15 @@
       "category": "fashion",
       "price": 148720,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 720,
       "soldCount": 6000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/25025166313.jpg"
       ],
@@ -5178,13 +5414,15 @@
         "Mã Shopee": "25025166313",
         "URL gốc": "https://shopee.vn/product/27035917/25025166313",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.347Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235404-10",
@@ -5193,15 +5431,15 @@
       "category": "fashion",
       "price": 148720,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 120,
       "soldCount": 1000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/26504281493.jpg"
       ],
@@ -5220,13 +5458,15 @@
         "Mã Shopee": "26504281493",
         "URL gốc": "https://shopee.vn/product/27035917/26504281493",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.337Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235371-9",
@@ -5235,15 +5475,15 @@
       "category": "fashion",
       "price": 148720,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 840,
       "soldCount": 7000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/28250634487.jpg"
       ],
@@ -5262,13 +5502,15 @@
         "Mã Shopee": "28250634487",
         "URL gốc": "https://shopee.vn/product/27035917/28250634487",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.327Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235334-8",
@@ -5277,15 +5519,15 @@
       "category": "fashion",
       "price": 148253,
       "originalPrice": 298000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 105,
       "soldCount": 877,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/56162279986.jpg"
       ],
@@ -5304,13 +5546,15 @@
         "Mã Shopee": "56162279986",
         "URL gốc": "https://shopee.vn/product/624393230/56162279986",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.317Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235306-7",
@@ -5319,15 +5563,15 @@
       "category": "fashion",
       "price": 175573,
       "originalPrice": 258000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 72,
       "soldCount": 608,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/42103171008.jpg"
       ],
@@ -5346,13 +5590,15 @@
         "Mã Shopee": "42103171008",
         "URL gốc": "https://shopee.vn/product/1323582887/42103171008",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.307Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235285-6",
@@ -5361,15 +5607,15 @@
       "category": "fashion",
       "price": 210390,
       "originalPrice": 330000,
-      "stock": 0,
+      "stock": 10,
       "rating": 5,
       "reviewsCount": 50,
       "soldCount": 181,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/52910045693.jpg"
       ],
@@ -5388,13 +5634,15 @@
         "Mã Shopee": "52910045693",
         "URL gốc": "https://shopee.vn/product/68302424/52910045693",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.297Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235272-5",
@@ -5403,15 +5651,15 @@
       "category": "fashion",
       "price": 179379,
       "originalPrice": 260000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/55856413412.jpg"
       ],
@@ -5430,13 +5678,15 @@
         "Mã Shopee": "55856413412",
         "URL gốc": "https://shopee.vn/product/1273480603/55856413412",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.287Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235252-4",
@@ -5445,15 +5695,15 @@
       "category": "fashion",
       "price": 150000,
       "originalPrice": 190000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.5,
       "reviewsCount": 50,
       "soldCount": 357,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/46259562316.jpg"
       ],
@@ -5472,13 +5722,15 @@
         "Mã Shopee": "46259562316",
         "URL gốc": "https://shopee.vn/product/1664076571/46259562316",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.277Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235234-3",
@@ -5487,15 +5739,15 @@
       "category": "fashion",
       "price": 116000,
       "originalPrice": 260000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/55408266345.jpg"
       ],
@@ -5514,13 +5766,15 @@
         "Mã Shopee": "55408266345",
         "URL gốc": "https://shopee.vn/product/1599187206/55408266345",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.267Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235214-2",
@@ -5529,15 +5783,15 @@
       "category": "fashion",
       "price": 157520,
       "originalPrice": 199000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 360,
       "soldCount": 3000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/23487746543.jpg"
       ],
@@ -5556,13 +5810,15 @@
         "Mã Shopee": "23487746543",
         "URL gốc": "https://shopee.vn/product/27035917/23487746543",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.257Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235199-1",
@@ -5571,15 +5827,15 @@
       "category": "fashion",
       "price": 154387,
       "originalPrice": 229000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 600,
       "soldCount": 5000,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/45210361235.jpg"
       ],
@@ -5598,13 +5854,15 @@
         "Mã Shopee": "45210361235",
         "URL gốc": "https://shopee.vn/product/68302424/45210361235",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.247Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793947235178-0",
@@ -5613,15 +5871,15 @@
       "category": "fashion",
       "price": 149000,
       "originalPrice": 298000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.6,
       "reviewsCount": 50,
       "soldCount": 107,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_live/51868043018.jpg"
       ],
@@ -5640,13 +5898,15 @@
         "Mã Shopee": "51868043018",
         "URL gốc": "https://shopee.vn/product/1188600728/51868043018",
         "Từ khóa": "áo nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
         "shopee"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.237Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793940578180-2",
@@ -5655,15 +5915,15 @@
       "category": "fashion",
       "price": 159000,
       "originalPrice": 300000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 670,
       "soldCount": 2100,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_real/vn-11134207-7r98o-lwdcz4q80gd5ce.jpg"
       ],
@@ -5682,7 +5942,7 @@
         "Mã Shopee": "19178426955",
         "URL gốc": "https://shopee.vn/B%E1%BB%99-th%E1%BB%83-thao-nam-n%E1%BB%AF-JULIDO-i.33435563.19178426955",
         "Từ khóa": "thời trang nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -5690,7 +5950,9 @@
         "thời",
         "trang"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.227Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793940578171-1",
@@ -5699,15 +5961,15 @@
       "category": "fashion",
       "price": 179000,
       "originalPrice": 298000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.8,
       "reviewsCount": 890,
       "soldCount": 1900,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_real/vn-11134207-7ras8-md0wnoy1fz2759.jpg"
       ],
@@ -5726,7 +5988,7 @@
         "Mã Shopee": "5337914837",
         "URL gốc": "https://shopee.vn/%C3%81o-kho%C3%A1c-sswwater-nam-n%E1%BB%AF-d%C3%A0y-d%E1%BA%B7n-cao-c%E1%BA%A5p-i.33435563.5337914837",
         "Từ khóa": "thời trang nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -5734,7 +5996,9 @@
         "thời",
         "trang"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.217Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-1793940578152-0",
@@ -5743,15 +6007,15 @@
       "category": "fashion",
       "price": 166002,
       "originalPrice": 259000,
-      "stock": 0,
+      "stock": 10,
       "rating": 4.9,
       "reviewsCount": 1200,
       "soldCount": 2500,
       "isFeatured": false,
       "isNew": true,
       "isFlashSale": false,
-      "isDraft": true,
-      "status": "draft",
+      "isDraft": false,
+      "status": "active",
       "images": [
         "/products/shopee_real/vn-11134207-7ras8-m3bufh4u6qw894.jpg"
       ],
@@ -5770,7 +6034,7 @@
         "Mã Shopee": "22077902946",
         "URL gốc": "https://shopee.vn/A%C3%B3-kho%C3%A1c-bomber-d%C3%B9-hai-l%E1%BB%9Bp-nam-n%E1%BB%AF-JULIDO-tr%C6%B0%E1%BB%A3t-n%C6%B0%E1%BB%9Bc-i.33435563.22077902946",
         "Từ khóa": "thời trang nữ",
-        "Trạng thái kiểm duyệt": "Bản nháp - Cần nhập số lượng kho thực tế trước khi mở bán"
+        "Trạng thái kiểm duyệt": "Đã duyệt — Đang mở bán trên trang chủ"
       },
       "tags": [
         "fashion",
@@ -5778,7 +6042,9 @@
         "thời",
         "trang"
       ],
-      "reviews": []
+      "reviews": [],
+      "publishedAt": "2026-11-12T10:08:25.207Z",
+      "updatedAt": "2026-11-12T10:08:26.524Z"
     },
     {
       "id": "sp-001",
@@ -5820,7 +6086,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-002",
@@ -5862,7 +6130,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-003",
@@ -5904,7 +6174,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-004",
@@ -5946,7 +6218,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-005",
@@ -5988,7 +6262,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-006",
@@ -6030,7 +6306,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-007",
@@ -6072,7 +6350,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-008",
@@ -6114,7 +6394,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-009",
@@ -6156,7 +6438,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-010",
@@ -6198,7 +6482,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-011",
@@ -6240,7 +6526,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-012",
@@ -6282,7 +6570,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-013",
@@ -6324,7 +6614,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-014",
@@ -6366,7 +6658,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-015",
@@ -6408,7 +6702,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-016",
@@ -6449,7 +6745,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-017",
@@ -6491,7 +6789,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-018",
@@ -6533,7 +6833,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-019",
@@ -6575,7 +6877,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-020",
@@ -6617,7 +6921,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-021",
@@ -6658,7 +6964,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-022",
@@ -6699,7 +7007,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-023",
@@ -6741,7 +7051,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-024",
@@ -6783,7 +7095,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-025",
@@ -6825,7 +7139,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-026",
@@ -6867,7 +7183,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-027",
@@ -6908,7 +7226,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-028",
@@ -6950,7 +7270,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-029",
@@ -6992,7 +7314,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-030",
@@ -7034,7 +7358,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-031",
@@ -7075,7 +7401,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-032",
@@ -7117,7 +7445,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-033",
@@ -7159,7 +7489,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-034",
@@ -7201,7 +7533,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-035",
@@ -7243,7 +7577,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-036",
@@ -7285,7 +7621,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-037",
@@ -7327,7 +7665,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-038",
@@ -7369,7 +7709,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-039",
@@ -7411,7 +7753,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-040",
@@ -7453,7 +7797,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-041",
@@ -7495,7 +7841,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-042",
@@ -7537,7 +7885,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-043",
@@ -7579,7 +7929,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-044",
@@ -7621,7 +7973,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-045",
@@ -7663,7 +8017,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-046",
@@ -7705,7 +8061,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-047",
@@ -7747,7 +8105,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-048",
@@ -7789,7 +8149,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-049",
@@ -7831,7 +8193,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-050",
@@ -7873,7 +8237,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-051",
@@ -7915,7 +8281,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-052",
@@ -7957,7 +8325,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-053",
@@ -7999,7 +8369,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-054",
@@ -8041,7 +8413,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-055",
@@ -8083,7 +8457,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-056",
@@ -8125,7 +8501,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-057",
@@ -8167,7 +8545,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-058",
@@ -8208,7 +8588,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-059",
@@ -8250,7 +8632,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-060",
@@ -8291,7 +8675,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-061",
@@ -8332,7 +8718,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-062",
@@ -8373,7 +8761,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-063",
@@ -8415,7 +8805,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-064",
@@ -8456,7 +8848,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-065",
@@ -8497,7 +8891,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-066",
@@ -8539,7 +8935,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-067",
@@ -8581,7 +8979,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-068",
@@ -8622,7 +9022,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-069",
@@ -8664,7 +9066,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-070",
@@ -8706,7 +9110,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-071",
@@ -8748,7 +9154,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-072",
@@ -8790,7 +9198,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-073",
@@ -8832,7 +9242,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-074",
@@ -8873,7 +9285,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-075",
@@ -8915,7 +9329,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-076",
@@ -8956,7 +9372,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-077",
@@ -8998,7 +9416,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-078",
@@ -9040,7 +9460,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-079",
@@ -9081,7 +9503,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-080",
@@ -9123,7 +9547,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-081",
@@ -9164,7 +9590,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-082",
@@ -9206,7 +9634,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-083",
@@ -9248,7 +9678,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-084",
@@ -9290,7 +9722,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-085",
@@ -9332,7 +9766,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-086",
@@ -9374,7 +9810,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-087",
@@ -9416,7 +9854,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-088",
@@ -9458,7 +9898,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-089",
@@ -9500,7 +9942,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-090",
@@ -9542,7 +9986,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-091",
@@ -9584,7 +10030,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-092",
@@ -9626,7 +10074,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-093",
@@ -9667,7 +10117,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-094",
@@ -9709,7 +10161,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-095",
@@ -9751,7 +10205,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-096",
@@ -9793,7 +10249,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-097",
@@ -9835,7 +10293,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-098",
@@ -9877,7 +10337,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-099",
@@ -9919,7 +10381,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-100",
@@ -9961,7 +10425,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-101",
@@ -10003,7 +10469,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-102",
@@ -10045,7 +10513,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-103",
@@ -10087,7 +10557,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-104",
@@ -10129,7 +10601,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-105",
@@ -10171,7 +10645,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-106",
@@ -10212,7 +10688,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-107",
@@ -10254,7 +10732,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-108",
@@ -10296,7 +10776,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-109",
@@ -10338,7 +10820,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-110",
@@ -10380,7 +10864,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-111",
@@ -10421,7 +10907,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-112",
@@ -10463,7 +10951,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-113",
@@ -10505,7 +10995,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-114",
@@ -10547,7 +11039,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-115",
@@ -10589,7 +11083,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-116",
@@ -10631,7 +11127,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-117",
@@ -10673,7 +11171,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-118",
@@ -10715,7 +11215,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-119",
@@ -10757,7 +11259,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     },
     {
       "id": "sp-120",
@@ -10798,7 +11302,9 @@
         "shopee",
         "chính hãng"
       ],
-      "reviews": []
+      "reviews": [],
+      "status": "active",
+      "isDraft": false
     }
   ],
   "orders": [

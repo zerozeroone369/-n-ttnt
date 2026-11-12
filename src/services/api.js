@@ -120,13 +120,17 @@ async function request(endpoint, options = {}) {
 }
 
 export const ApiClient = {
-  // Health check (tự động thử lại tối đa 2 lần nếu Render Free đang khởi động lại)
-  async isServerOnline(retries = 2) {
+  // Health check & Server Persistence metadata (tự động thử lại nếu Render Free đang thức dậy)
+  async getHealth() {
+    return request('/health', { cache: 'no-store' });
+  },
+
+  async isServerOnline(retries = 2, delayMs = 3000) {
     for (let attempt = 0; attempt <= retries; attempt++) {
       try {
         const res = await fetch(`${API_BASE}/health`, {
           method: 'GET',
-          cache: 'no-cache',
+          cache: 'no-store',
           ...(typeof AbortSignal !== 'undefined' && typeof AbortSignal.timeout === 'function'
             ? { signal: AbortSignal.timeout(15000) }
             : {})
@@ -146,7 +150,7 @@ export const ApiClient = {
         // retry on cold start/network blip
       }
       if (attempt < retries) {
-        await new Promise((r) => setTimeout(r, 2500));
+        await new Promise((r) => setTimeout(r, delayMs));
       }
     }
     return false;

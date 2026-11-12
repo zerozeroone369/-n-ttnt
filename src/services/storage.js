@@ -1,7 +1,7 @@
 import { INITIAL_PRODUCTS, INITIAL_ORDERS, INITIAL_COUPONS, STORE_INFO, INITIAL_CHAT_MESSAGES } from '../data/initialData.js';
 
 const KEYS = {
-  PRODUCTS: 'boutique_products_v2',
+  PRODUCTS: 'boutique_products_v3',
   ORDERS: 'boutique_orders_v2',
   COUPONS: 'boutique_coupons_v2',
   CART: 'boutique_cart_v2',

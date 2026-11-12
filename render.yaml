@@ -25,3 +25,13 @@ services:
         sync: false
       - key: CRAWLBASE_TOKEN
         sync: false
+      - key: UPSTASH_REDIS_REST_URL
+        sync: false
+      - key: UPSTASH_REDIS_REST_TOKEN
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_SERVICE_ROLE_KEY
+        sync: false
+      - key: DB_FILE
+        sync: false

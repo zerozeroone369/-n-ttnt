@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import Header from './components/Header';
 import Banner from './components/Banner';
 import ProductList from './components/ProductList';
@@ -159,11 +159,14 @@ export default function App() {
     return () => { active = false; };
   }, []);
 
-  // Sync from Backend Database Server (on startup, role switch, registration, and returning to storefront)
+  // Sync from Backend Database Server (on startup, role switch, registration, tab/app resume, and Render cold-start recovery)
+  const lastSyncAtRef = useRef(0);
   useEffect(() => {
     let active = true;
-    const syncDataWithServer = async () => {
-      if (!(await ApiClient.isServerOnline(2)) || !active) return;
+    let retryTimer = null;
+
+    const syncDataWithServer = async (attempt = 0) => {
+      if (!active) return;
 
       const hasServerToken = Boolean(ApiClient.auth.getToken());
       const [productsResult, ordersResult] = await Promise.allSettled([
@@ -174,10 +177,19 @@ export default function App() {
       if (!active) return;
 
       if (productsResult.status === 'fulfilled' && Array.isArray(productsResult.value)) {
+        lastSyncAtRef.current = Date.now();
         setProducts(productsResult.value);
         StorageService.saveProducts(productsResult.value);
       } else if (productsResult.status === 'rejected') {
-        console.warn('Product sync error (using local storage):', productsResult.reason);
+        const err = productsResult.reason;
+        const isColdStartOrBlip = Boolean(err?.isNetworkError || [502, 503, 504].includes(err?.status));
+        if (isColdStartOrBlip && attempt < 5) {
+          const delayMs = [4000, 6000, 8000, 10000, 12000][attempt] || 10000;
+          retryTimer = setTimeout(() => {
+            syncDataWithServer(attempt + 1);
+          }, delayMs);
+        }
+        console.warn('Product sync error (using local cache, retrying if cold start):', err);
       }
 
       if (ordersResult.status === 'fulfilled') {
@@ -192,8 +204,25 @@ export default function App() {
         console.warn('Order sync error:', ordersResult.reason);
       }
     };
-    syncDataWithServer();
-    return () => { active = false; };
+
+    const handleResumeSync = () => {
+      if (typeof document !== 'undefined' && document.visibilityState === 'hidden') return;
+      if (Date.now() - lastSyncAtRef.current < 4000) return;
+      syncDataWithServer(0);
+    };
+
+    syncDataWithServer(0);
+    window.addEventListener('focus', handleResumeSync);
+    window.addEventListener('online', handleResumeSync);
+    document.addEventListener('visibilitychange', handleResumeSync);
+
+    return () => {
+      active = false;
+      if (retryTimer) clearTimeout(retryTimer);
+      window.removeEventListener('focus', handleResumeSync);
+      window.removeEventListener('online', handleResumeSync);
+      document.removeEventListener('visibilitychange', handleResumeSync);
+    };
   }, [currentUser?.id, currentUser?.role, isAdminView]);
 
   // Persist cart

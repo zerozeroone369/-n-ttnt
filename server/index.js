@@ -171,7 +171,7 @@ app.use(authenticateUser);
 // ============================================================================
 
 // Register new customer account
-app.post('/api/auth/register', (req, res) => {
+app.post('/api/auth/register', async (req, res) => {
   const { email, password, name, phone, address, city } = req.body || {};
 
   if (!email || !password || !name) {
@@ -211,6 +211,7 @@ app.post('/api/auth/register', (req, res) => {
   });
 
   db.logAudit(newUser.id, newUser.name, 'customer', 'REGISTER', newUser.id, `Khách hàng mới tạo tài khoản: ${newUser.email}`);
+  await db.flushRemote();
   const session = createSession(newUser);
   res.status(201).json(session);
 });
@@ -259,7 +260,7 @@ app.get('/api/products', (req, res) => {
 });
 
 // Create product (Admin only)
-app.post('/api/products', requireRole(['admin']), (req, res) => {
+app.post('/api/products', requireRole(['admin']), async (req, res) => {
   const isDraft = req.body?.status === 'draft' || req.body?.isDraft === true;
   const newProduct = db.insert('products', {
     ...req.body,
@@ -268,11 +269,12 @@ app.post('/api/products', requireRole(['admin']), (req, res) => {
     ...(isDraft ? {} : { publishedAt: req.body?.publishedAt || new Date().toISOString() })
   });
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_CREATE', newProduct.id, `Thêm sản phẩm mới: ${newProduct.name}`);
+  await db.flushRemote();
   res.status(201).json(newProduct);
 });
 
 // Publish draft products (e.g. scraped Shopee drafts) onto public storefront (Admin only)
-app.post('/api/products/publish-drafts', requireRole(['admin']), (req, res) => {
+app.post('/api/products/publish-drafts', requireRole(['admin']), async (req, res) => {
   const result = publishDraftProductsBatch(db, req.body || {});
   db.logAudit(
     req.user.id,
@@ -282,11 +284,12 @@ app.post('/api/products/publish-drafts', requireRole(['admin']), (req, res) => {
     'batch',
     `Mở bán lên trang chủ ${result.publishedCount} sản phẩm bản nháp (tồn kho mặc định ${result.stockAssigned})`
   );
+  await db.flushRemote();
   res.json(result);
 });
 
 // Update product (Admin only)
-app.put('/api/products/:id', requireRole(['admin']), (req, res) => {
+app.put('/api/products/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const updated = db.update('products', p => p.id === id, (prev) => {
     const incoming = req.body || {};
@@ -320,11 +323,12 @@ app.put('/api/products/:id', requireRole(['admin']), (req, res) => {
     return res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
   }
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_UPDATE', id, `Chỉnh sửa sản phẩm: ${updated.name}`);
+  await db.flushRemote();
   res.json(updated);
 });
 
 // Delete product (Admin only)
-app.delete('/api/products/:id', requireRole(['admin']), (req, res) => {
+app.delete('/api/products/:id', requireRole(['admin']), async (req, res) => {
   const { id } = req.params;
   const target = db.findOne('products', p => p.id === id);
   const isDeleted = db.delete('products', p => p.id === id);
@@ -332,6 +336,7 @@ app.delete('/api/products/:id', requireRole(['admin']), (req, res) => {
     return res.status(404).json({ error: 'Không tìm thấy sản phẩm.' });
   }
   db.logAudit(req.user.id, req.user.name, req.user.role, 'PRODUCT_DELETE', id, `Xóa sản phẩm: ${target?.name || id}`);
+  await db.flushRemote();
   res.json({ message: 'Đã xóa sản phẩm thành công.' });
 });
 
@@ -1384,7 +1389,7 @@ app.post('/api/shopee/scrape', requireRole('admin'), (req, res) => {
 });
 
 // Import scraped products - Chống trùng lặp, hỗ trợ giữ Bản Nháp hoặc mở bán ngay theo lệnh Admin
-app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
+app.post('/api/shopee/import', requireRole('admin'), async (req, res) => {
   const { products, publish = false, defaultStock = 0 } = req.body || {};
   if (!Array.isArray(products) || products.length === 0) {
     return res.status(400).json({ error: 'Không có danh sách sản phẩm hợp lệ để nhập.' });
@@ -1401,6 +1406,7 @@ app.post('/api/shopee/import', requireRole('admin'), (req, res) => {
     `Nhập ${result.imported} sản phẩm từ Shopee (${result.publish ? 'Mở bán ngay' : 'Bản nháp'}, duyệt nháp cũ: ${result.publishedExisting}, bỏ qua trùng: ${result.skippedDuplicates})`
   );
 
+  await db.flushRemote();
   res.json(result);
 });
 
@@ -1711,6 +1717,7 @@ app.get('/api/health', (req, res) => {
   res.json({
     status: 'online',
     timestamp: new Date().toISOString(),
+    persistence: db.getPersistenceInfo(),
     scrapingOptionB: {
       configured: getEffectiveScraperConfig().configured,
       activeProvider: getEffectiveScraperConfig().activeProvider,
@@ -1744,9 +1751,26 @@ if (existsSync(DIST_PATH)) {
   });
 }
 
-// Start Server
-app.listen(PORT, () => {
-  console.log(`🚀 [Backend Server] Database REST API running at http://localhost:${PORT}`);
+// Start Server (sau khi đồng bộ dữ liệu Cloud nếu có cấu hình Upstash / Supabase)
+await db.hydrateFromRemote();
+
+const server = app.listen(PORT, () => {
+  const persist = db.getPersistenceInfo();
+  console.log(`🚀 [Backend Server] Database REST API running at http://localhost:${PORT} · Persistence: ${persist.mode} (durable=${persist.durable})`);
 });
+
+const gracefulFlushExit = async (signal) => {
+  console.log(`[Backend Server] Received ${signal}, flushing remote DB...`);
+  try {
+    await db.flushRemote();
+  } catch {
+    // ignore flush error on shutdown
+  }
+  server.close(() => process.exit(0));
+  setTimeout(() => process.exit(0), 3000).unref();
+};
+
+process.on('SIGTERM', () => gracefulFlushExit('SIGTERM'));
+process.on('SIGINT', () => gracefulFlushExit('SIGINT'));
 
 

@@ -102,6 +102,7 @@ export default function AdminDashboard({
   const [cookieSaving, setCookieSaving] = useState(false);
   const [cookieFeedback, setCookieFeedback] = useState(null);
   const [retryingBackend, setRetryingBackend] = useState(false);
+  const [dbPersistence, setDbPersistence] = useState(null);
   const [bridgeStatus, setBridgeStatus] = useState({ installed: false, version: null, shopeeTabs: 0 });
   const [bridgeGuideOpen, setBridgeGuideOpen] = useState(false);
   const [scrapeMode, setScrapeMode] = useState('server'); // 'server' | 'bridge'
@@ -346,6 +347,13 @@ export default function AdminDashboard({
 
   useEffect(() => {
     isMountedRef.current = true;
+    ApiClient.getHealth()
+      .then((health) => {
+        if (isMountedRef.current && health?.persistence) {
+          setDbPersistence(health.persistence);
+        }
+      })
+      .catch(() => {});
     return () => {
       isMountedRef.current = false;
       activeBridgeCleanupRef.current?.();
@@ -575,7 +583,7 @@ export default function AdminDashboard({
       });
       return { ok: false };
     }
-    const online = await ApiClient.isServerOnline(2);
+    const online = await ApiClient.isServerOnline(4);
     if (!online) {
       setProductActionFeedback({
         type: 'error',
@@ -953,7 +961,7 @@ export default function AdminDashboard({
   const handleRetryBackendConnection = async () => {
     setRetryingBackend(true);
     setShopeeError(null);
-    const online = await ApiClient.isServerOnline(2);
+    const online = await ApiClient.isServerOnline(4);
     if (!isMountedRef.current) return;
     setShopeeServerOnline(online);
     setRetryingBackend(false);
@@ -1075,7 +1083,7 @@ export default function AdminDashboard({
         return;
       }
 
-      const online = await ApiClient.isServerOnline(2);
+      const online = await ApiClient.isServerOnline(4);
       setShopeeServerOnline(online);
 
       if (!online) {
@@ -1155,7 +1163,7 @@ export default function AdminDashboard({
         return;
       }
 
-      const online = await ApiClient.isServerOnline(2);
+      const online = await ApiClient.isServerOnline(4);
       setShopeeServerOnline(online);
       if (!online) {
         setShopeeError(
@@ -1335,7 +1343,7 @@ export default function AdminDashboard({
 
     try {
       const selectedProducts = shopeeResults.filter((_, i) => shopeeSelected.has(i));
-      const online = await ApiClient.isServerOnline(2);
+      const online = await ApiClient.isServerOnline(4);
       setShopeeServerOnline(online);
 
       if (!online) {
@@ -1705,6 +1713,27 @@ export default function AdminDashboard({
         {/* Tab Content: PRODUCTS */}
         {activeTab === 'products' && (
           <div className="space-y-4">
+            {dbPersistence && (
+              <div className={`rounded-xl px-3.5 py-2.5 border text-[11px] flex flex-wrap items-center justify-between gap-2 ${
+                dbPersistence.durable
+                  ? 'bg-emerald-50/70 border-emerald-200 text-emerald-900'
+                  : 'bg-stone-50 border-stone-200 text-stone-700'
+              }`}>
+                <div className="flex items-center gap-2">
+                  <span className={`w-2 h-2 rounded-full flex-shrink-0 ${dbPersistence.durable ? 'bg-emerald-500' : 'bg-amber-500'}`} />
+                  {dbPersistence.durable ? (
+                    <span>
+                      <strong>Lưu trữ vĩnh viễn ({dbPersistence.label}):</strong> Mọi thao tác thêm, xóa, sửa hoặc đăng bán đều tự động giữ nguyên khi khởi động lại máy chủ và đồng bộ cho tất cả vai trò.
+                    </span>
+                  ) : (
+                    <span>
+                      <strong>Chế độ đĩa mặc định ({activeProductsCount} sản phẩm sẵn có):</strong> Thêm/xóa đang lưu ngay cho mọi vai trò trên phiên chạy hiện tại. Để các sản phẩm <em>thêm/xóa mới về sau</em> không bị Render Free reset sau 15 phút ngủ đông, hãy gắn biến <code className="bg-stone-200/80 px-1 rounded">UPSTASH_REDIS_REST_URL</code> + <code className="bg-stone-200/80 px-1 rounded">UPSTASH_REDIS_REST_TOKEN</code> (miễn phí) trên Render.
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
             {productActionFeedback && (
               <div className={`rounded-xl p-3.5 border flex flex-wrap items-center justify-between gap-3 text-xs ${
                 productActionFeedback.type === 'error'
